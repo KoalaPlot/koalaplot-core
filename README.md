@@ -12,7 +12,7 @@ the Compose-web Canvas support currently in alpha.
 
 This project is in a pre-release experimental/alpha state. We encourage you to give it a try,
 make suggestions for improvement, and
-even [contribute](https://github.com/KoalaPlot/koalaplot-core/tree/main/CONTRIBUTING.md)! It is expected that
+even [contribute](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTIBUTING.md)! It is expected that
 the
 API surface and functionality will change as we gain experience using the library in applications.
 
@@ -100,6 +100,6 @@ Also see the [sample repository](https://github.com/koalaplot/koalaplot-core-sam
 # Contributing
 
 Contributions are welcome. Further details can be found in the
-[Contributing Guidelines](https://github.com/KoalaPlot/core/tree/main/CONTRIBUTING.md)
+[Contributing Guidelines](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTIBUTING.md)
 
 
