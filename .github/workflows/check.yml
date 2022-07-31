@@ -1,8 +1,9 @@
-name: Build and publish API documentation
+name: Check pull requests
 
 on:
-    push:
+    pull_request:
         branches: [ "main" ]
+    workflow_call:
     workflow_dispatch:
 
 permissions:
@@ -26,18 +27,4 @@ jobs:
             -   name: Build with Gradle
                 uses: gradle/gradle-build-action@v2
                 with:
-                    arguments: build
-
-            -   name: Publish api docs
-                if: success()
-                uses: ./.github/workflows/api-docs
-
-            -   name: Deploy to GitHub Pages
-                if: success()
-                uses: crazy-max/ghaction-github-pages@v3
-                with:
-                    target_branch: gh-pages
-                    build_dir: build/dokka
-                    keep_history: true
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                    arguments: check

@@ -37,10 +37,6 @@ kotlin {
     }
 
     sourceSets {
-        all {
-            languageSettings.optIn("useExperimentalAnnotation")
-        }
-
         named("commonMain") {
             dependencies {
                 implementation(compose.runtime)
@@ -96,7 +92,7 @@ android {
  */
 tasks.register<org.jetbrains.dokka.gradle.DokkaTask>("dokkaCustomFormat") {
     moduleName.set("Koala Plot Core")
-    outputDirectory.set(buildDir.resolve("dokka/${project.version}"))
+    outputDirectory.set(buildDir.resolve("docs/api/${project.version}"))
 
     pluginConfiguration<org.jetbrains.dokka.base.DokkaBase, org.jetbrains.dokka.base.DokkaBaseConfiguration> {
         customStyleSheets = listOf(file("src/docs/dokka/logo-styles.css"))
