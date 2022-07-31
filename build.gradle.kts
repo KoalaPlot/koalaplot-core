@@ -102,14 +102,7 @@ tasks.register<org.jetbrains.dokka.gradle.DokkaTask>("dokkaCustomFormat") {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = freeCompilerArgs + listOf(
-            "-opt-in=kotlin.RequiresOptIn"
-        )
-        jvmTarget = "11"
-    }
-}
+tasks["build"].dependsOn.add("dokkaCustomFormat")
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
