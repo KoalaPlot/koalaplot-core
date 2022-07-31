@@ -35,7 +35,7 @@ this document in a pull request.
 We have an official message board with a detailed FAQ and where the community chimes in with helpful
 advice if you have questions.
 
-* [Github Discussions](https://github.com/KoalaPlot/core/discussions)
+* [Github Discussions](https://github.com/KoalaPlot/koalaplot-core/discussions)
 
 ## What should I know before I get started?
 
@@ -72,9 +72,9 @@ please [include as many details as possible](#how-do-i-submit-a-good-bug-report)
 
 #### Before Submitting A Bug Report
 
-* **Check the [faq]() and the [discussions](https://github.com/KoalaPlot/core/discussions)**
+* **Check the [discussions](https://github.com/KoalaPlot/koalaplot-core/discussions)**
   for a list of common questions and problems.
-* **Perform a [cursory search](https://github.com/search?q=+is%3Aissue+user%3AKoalaPlot)** to see
+* **Perform a [cursory search](https://github.com/KoalaPlot/koalaplot-core/issues)** to see
   if the
   problem has already been reported. If it has **and the issue is still open**, add a comment to the
   existing issue instead of opening a new one.
@@ -137,7 +137,7 @@ please [include as many details as possible](#how-do-i-submit-a-good-enhancement
 
 #### Before Submitting An Enhancement Suggestion
 
-* **Perform a [cursory search](https://github.com/search?q=+is%3Aissue+user%3AKoalaPlot)** to
+* **Perform a [cursory search](https://github.com/KoalaPlot/koalaplot-core/issues)** to
   see if the
   enhancement has already been suggested. If it has, add a comment to the existing issue instead of
   opening a new one.
@@ -277,4 +277,4 @@ command:
 
 `./gradlew dokkaCustomFormat`
 
-The generated documentation is placed in `./core/build/dokka/customFormat`.
+The generated documentation is placed in `./build/docs/api`.

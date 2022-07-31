@@ -89,17 +89,17 @@ dependencies {
 ```
 
 You can also see a complete example of a build.gradle.kts in
-the [samples](https://koalaplot.github.io/koalaplot-core-samples).
+the [samples](https://koalaplot.github.io/koalaplot-samples).
 
 # Documentation
 
 [Latest build API documentation](https://koalaplot.github.io/koalaplot-core/api/0.1.0-SNAPSHOT).
 
-Also see the [sample repository](https://github.com/koalaplot/koalaplot-core-samples) for code examples.
+Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples) for code examples.
 
 # Contributing
 
 Contributions are welcome. Further details can be found in the
-[Contributing Guidelines](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTIBUTING.md)
+[Contributing Guidelines](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTRIBUTING.md)
 
 
