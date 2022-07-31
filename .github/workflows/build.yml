@@ -28,10 +28,6 @@ jobs:
                 with:
                     arguments: build
 
-            -   name: Publish api docs
-                if: success()
-                uses: ./.github/workflows/api-docs
-
             -   name: Deploy to GitHub Pages
                 if: success()
                 uses: crazy-max/ghaction-github-pages@v3
