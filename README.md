@@ -4,28 +4,23 @@
 
 # Koala Plot
 
-Koala Plot is a [Compose Multiplatform](https://www.jetbrains.com/lp/compose-mpp/) based charting
-and plotting library allowing you to build great looking interactive charts for
-[Android](https://developer.android.com/jetpack/compose), desktop, and web using a single API and
-code base. Most elements are Composables, allowing for an infinite degree of customization. Web support is provided by
-the Compose-web Canvas support currently in alpha.
+Koala Plot is a [Compose Multiplatform](https://www.jetbrains.com/lp/compose-mpp/) based charting and plotting library
+allowing you to build great looking interactive charts for
+[Android](https://developer.android.com/jetpack/compose), desktop, and web using a single API and code base.
 
-This project is in a pre-release experimental/alpha state. We encourage you to give it a try,
-make suggestions for improvement, and
-even [contribute](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTIBUTING.md)! It is expected that
-the
-API surface and functionality will change as we gain experience using the library in applications.
+Try out the [web version of the samples](https://koalaplot.github.io/koalaplot-samples/index.html) for a quick look at
+the possibilities when using Koala Plot. Note that this uses the alpha Compose web-canvas capability, so there may be
+bugs in the underlying Compose framework, and it is fixed at a resolution of 1024 x 768.
 
-For a quick look at the possibilities when using Koala Plot, you can try out
-the [web version of the samples](https://koalaplot.github.io/koalaplot-samples/index.html). Note that this uses the
-alpha Compose web-canvas capability, so there may be bugs in the underlying Compose framework, and it is fixed at
-a resolution of 1024 x 768.
+This project is in a pre-release experimental/alpha state. We encourage you to give it a try, make suggestions for
+improvement, and even [contribute](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTIBUTING.md)! It is expected
+that the API surface and functionality will change as we gain experience using the library in applications.
 
 # Current Features
 
-Most elements of a plot are Composables and can therefore be easily customized. This
-includes things like colors, fonts, borders, shapes, user interaction, etc.
-
+Most elements of a plot are Composables and can therefore be easily customized. This includes things like colors, fonts,
+borders, shapes, user interaction, etc. Web support is provided by the Compose-web Canvas support currently in alpha.
+ 
 * Pie and donut chart
     * Composable slices, with default implementation that can react to hovering
     * Optional Composable labels and Composable connectors with provided linear and bezier implementations
@@ -54,8 +49,7 @@ includes things like colors, fonts, borders, shapes, user interaction, etc.
 # Getting Started
 
 To build locally and integrate with your own code, follow these steps (when more mature, we'll publish to
-the [Central Maven
-repository](https://search.maven.org/)):
+the [Central Maven repository](https://search.maven.org/)):
 
 1. Clone the repository to your local machine
 
