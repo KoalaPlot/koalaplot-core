@@ -16,7 +16,9 @@ import io.github.koalaplot.core.xychart.XYChartScope
 
 /**
  * An XY Chart that draws series as points and lines.
- *
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ * @param P The type of the line plot data points
  * @param data Data series to plot.
  * @param lineStyle Style to use for the line that connects the data points. If null, no line is
  * drawn.
@@ -105,6 +107,8 @@ private fun <X, Y> XYChartScope<X, Y>.scale(
 
 /**
  * Represents a point on a LineChart.
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
  */
 public interface Point<X, Y> {
     public val x: X
@@ -113,11 +117,18 @@ public interface Point<X, Y> {
 
 // preferred naming per API Guidelines for Jetpack Compose
 // See https://github.com/androidx/androidx/blob/androidx-main/compose/docs/compose-api-guidelines.md
+/**
+ * Creates a new DefaultPoint at the specified coordinates.
+ * @param X The type of the x-axis value
+ * @param Y The type of the y-axis value
+ */
 @Suppress("FunctionNaming")
 public fun <X, Y> Point(x: X, y: Y): Point<X, Y> = DefaultPoint(x, y)
 
 /**
  * Default implementation of the Point interface.
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
  */
 public data class DefaultPoint<X, Y>(override val x: X, override val y: Y) :
     Point<X, Y>

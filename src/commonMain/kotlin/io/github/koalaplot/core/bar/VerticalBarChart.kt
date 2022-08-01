@@ -32,6 +32,8 @@ import kotlin.math.roundToInt
 
 /**
  * Default implementation of a BarChartEntry.
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
  */
 public data class DefaultBarChartEntry<X, Y>(
     public override val xValue: X,
@@ -41,6 +43,8 @@ public data class DefaultBarChartEntry<X, Y>(
 
 /**
  * An interface that defines a data element to be plotted on a Bar chart.
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
  */
 public interface BarChartEntry<X, Y> {
     /**
@@ -76,6 +80,9 @@ public typealias VerticalBarComposable<E> = @Composable BarScope.(series: Int, i
  * A VerticalBarChart to be used in an XYChart and that can plot multiple series either side-by-side
  * or stacked as a stacked bar chart.
  *
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ * @param E The type of the data element holding the values for each bar
  * @param series Bar elements where the outer list contains each series of multiple items.
  * The BarChartEntry's xValues should be equal for entries at the same index within each series.
  * @param stacked If false, bars from the same index position in each series will be laid out

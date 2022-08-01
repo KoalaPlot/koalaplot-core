@@ -10,11 +10,18 @@ public interface AxisState {
     public val minorTickOffsets: List<Float>
 }
 
+/**
+ * The major and minor tick values for an axis.
+ * @param T The type of the axis values.
+ */
 public data class TickValues<T>(
     val majorTickValues: List<T>,
     val minorTickValues: List<T>
 )
 
+/**
+ * An interface for classes representing a plot axis.
+ */
 public interface AxisModel<T> {
     /**
      * Specifies the minimum spacing for major ticks, in Dp units. Must be greater than 0.

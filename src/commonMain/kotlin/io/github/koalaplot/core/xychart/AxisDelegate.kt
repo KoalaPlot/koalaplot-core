@@ -18,6 +18,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import io.github.koalaplot.core.theme.KoalaPlotTheme
 
+/**
+ * Specifies the position of axis ticks.
+ */
 public enum class TickPosition {
     Outside, Inside, None
 }

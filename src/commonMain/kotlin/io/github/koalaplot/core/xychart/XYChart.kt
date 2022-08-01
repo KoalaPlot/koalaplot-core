@@ -57,6 +57,8 @@ public data class LineStyle(
 /**
  * Provides a set of X-Y chart axes and grid for displaying an X-Y Chart.
  *
+ * @param X The data type for the x-axis
+ * @param Y The data type for the y-axis
  * @param xAxisModel x-axis state controlling the display of the axis and coordinate transformation
  * @param yAxisModel y-axis state controlling the display of the axis and coordinate transformation
  * @param xAxisStyle Style for the x-axis
@@ -375,6 +377,9 @@ private class XYAxisMeasurePolicy(
     }
 }
 
+/**
+ * A scope for XY plots providing axis and state context.
+ */
 public interface XYChartScope<X, Y> : HoverableElementAreaScope {
     public val xAxisModel: AxisModel<X>
     public val yAxisModel: AxisModel<Y>

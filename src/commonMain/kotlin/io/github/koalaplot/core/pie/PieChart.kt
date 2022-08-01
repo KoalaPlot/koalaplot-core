@@ -97,7 +97,7 @@ public interface PieSliceScope : HoverableElementAreaScope {
     public val outerRadius: Float
 }
 
-public data class PieSliceScopeImpl(
+private data class PieSliceScopeImpl(
     override val startAngle: Float,
     override val angle: Float,
     override val innerRadius: Float,

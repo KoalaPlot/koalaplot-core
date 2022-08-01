@@ -9,6 +9,8 @@ private const val Base = 10.0
 private val MinorTickScale = 2..9
 
 /**
+ * A logarithmic axis.
+ *
  * @param range  The minimum to maximum values allowed to be represented on this Axis expressed as
  * exponents with a base of 10. For example a range of -1..3 represents an axis range of 0.1 to 1000
  * (10^-1..10^3).

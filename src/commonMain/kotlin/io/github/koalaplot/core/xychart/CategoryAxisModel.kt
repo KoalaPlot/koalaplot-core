@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 /**
  * An axis that uses arbitrary category objects instead of numbers as its values. It is a discrete
  * axis.
+ * @param T The data type of the axis values.
  * @param categories The objects that represent values on this axis. If objects are duplicated
  * as defined by their equals method, the behavior is undefined.
  */
