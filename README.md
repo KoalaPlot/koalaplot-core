@@ -60,7 +60,7 @@ git clone https://github.com/koalaplot/koalaplot-core.git
 2. Build and publish it to your local maven repository
 
 ```shell
-./gradlew :library:publishToMavenLocal
+./gradlew publishToMavenLocal
 ```
 
 3. Add the MavenLocal repository to your project and include Koala Plot core as a dependency in your project's
