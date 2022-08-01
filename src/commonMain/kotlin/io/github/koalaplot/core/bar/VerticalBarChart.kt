@@ -70,9 +70,9 @@ private class BarScopeImpl(val hoverableElementAreaScope: HoverableElementAreaSc
 
 /**
  * Defines a Composable function used to emit a vertical bar.
- * The parameter series is the chart data series index
- * The parameter index is the element index within the series
- * The parameter value is the value of the element
+ * The parameter series is the chart data series index.
+ * The parameter index is the element index within the series.
+ * The parameter value is the value of the element.
  */
 public typealias VerticalBarComposable<E> = @Composable BarScope.(series: Int, index: Int, value: E) -> Unit
 
@@ -85,6 +85,7 @@ public typealias VerticalBarComposable<E> = @Composable BarScope.(series: Int, i
  * @param E The type of the data element holding the values for each bar
  * @param series Bar elements where the outer list contains each series of multiple items.
  * The BarChartEntry's xValues should be equal for entries at the same index within each series.
+ * @param bar Composable function to emit a bar for each data element, see [VerticalBarComposable].
  * @param stacked If false, bars from the same index position in each series will be laid out
  * side-by-side occupying the space available between adjacent x-axis values. If true, bars from
  * the same index position in each series will be laid out centered on the x-axis value. The yMin

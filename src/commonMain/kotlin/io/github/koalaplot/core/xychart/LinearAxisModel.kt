@@ -18,6 +18,8 @@ private const val ZoomRangeLimitDefault = 0.2f
 private const val MinimumMajorTickIncrementDefault = 0.1f
 
 /**
+ * An [AxisModel] that uses Float values and is linear.
+ *
  * @param range  The minimum to maximum values allowed to be represented on this Axis. Zoom and
  * scroll modifications may not exceed this range.
  * @param zoomRangeLimit Specifies the minimum allowed range after zooming. Must

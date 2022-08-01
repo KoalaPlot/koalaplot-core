@@ -21,6 +21,8 @@ public data class TickValues<T>(
 
 /**
  * An interface for classes representing a plot axis.
+ *
+ * @param T The data type for the axis values.
  */
 public interface AxisModel<T> {
     /**

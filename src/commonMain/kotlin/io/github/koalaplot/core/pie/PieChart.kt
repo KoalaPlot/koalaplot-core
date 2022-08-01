@@ -410,6 +410,12 @@ private class Slice(
     }
 }
 
+/**
+ * A label connector that uses a Bezier curve.
+ *
+ * @param connectorColor The color of the connector line.
+ * @param connectorStroke The stroke used to draw the connector line.
+ */
 @Composable
 public fun LabelConnectorScope.BezierLabelConnector(
     modifier: Modifier = Modifier,
@@ -448,6 +454,12 @@ public fun LabelConnectorScope.BezierLabelConnector(
     ) {}
 }
 
+/**
+ * A label connector that uses a straight line.
+ *
+ * @param connectorColor The color of the connector line.
+ * @param connectorStroke The stroke used to draw the connector line.
+ */
 @Composable
 public fun LabelConnectorScope.StraightLineConnector(
     modifier: Modifier = Modifier,

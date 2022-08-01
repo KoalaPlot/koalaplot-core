@@ -55,7 +55,7 @@ public data class LineStyle(
 )
 
 /**
- * Provides a set of X-Y chart axes and grid for displaying an X-Y Chart.
+ * Provides a set of X-Y axes and grid for displaying an X-Y plot.
  *
  * @param X The data type for the x-axis
  * @param Y The data type for the y-axis

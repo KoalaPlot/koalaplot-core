@@ -111,7 +111,14 @@ private fun <X, Y> XYChartScope<X, Y>.scale(
  * @param Y The type of the y-axis values
  */
 public interface Point<X, Y> {
+    /**
+     * The x-axis value of this Point.
+     */
     public val x: X
+
+    /**
+     * The y-axis value of this Point.
+     */
     public val y: Y
 }
 
