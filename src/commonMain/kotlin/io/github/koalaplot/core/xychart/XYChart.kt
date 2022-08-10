@@ -4,6 +4,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,9 +30,12 @@ import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.theme.KoalaPlotTheme
+import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.HoverableElementArea
 import io.github.koalaplot.core.util.HoverableElementAreaScope
+import io.github.koalaplot.core.util.VerticalRotation
 import io.github.koalaplot.core.util.length
+import io.github.koalaplot.core.util.rotateVertically
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -68,7 +74,7 @@ public data class LineStyle(
  * @param yAxisLabels Composable to display labels for specific y-axis values
  * @param yAxisTitle Title for the y-axis
  * @param content The XY Chart content to be displayed, which should include one chart for each
- * series to be displayed and an optional Grid.
+ * series type to be displayed.
  */
 @Composable
 public fun <X, Y> XYChart(
@@ -478,4 +484,87 @@ private fun DrawScope.drawGridLine(gridLineStyle: LineStyle?, start: Offset, end
             )
         }
     }
+}
+
+/**
+ * An XYChart overload that takes Strings for axis labels and titles instead of Composables for use cases where
+ * custom styling is not required.
+ *
+ * Provides a set of X-Y axes and grid for displaying an X-Y plot.
+ *
+ * @param X The data type for the x-axis
+ * @param Y The data type for the y-axis
+ * @param xAxisModel x-axis state controlling the display of the axis and coordinate transformation
+ * @param yAxisModel y-axis state controlling the display of the axis and coordinate transformation
+ * @param xAxisStyle Style for the x-axis
+ * @param xAxisLabels String factory of x-axis label Strings
+ * @param xAxisTitle Title for the X-axis
+ * @param yAxisStyle Style for the y-axis
+ * @param yAxisLabels String factory of y-axis label Strings
+ * @param yAxisTitle Title for the y-axis
+ * @param content The XY Chart content to be displayed, which should include one chart for each
+ * series type to be displayed.
+ */
+@ExperimentalKoalaPlotApi
+@Composable
+public fun <X, Y> XYChart(
+    xAxisModel: AxisModel<X>,
+    yAxisModel: AxisModel<Y>,
+    modifier: Modifier = Modifier,
+    xAxisStyle: AxisStyle = rememberAxisStyle(),
+    xAxisLabels: (X) -> String = { it.toString() },
+    xAxisTitle: String = "",
+    yAxisStyle: AxisStyle = rememberAxisStyle(),
+    yAxisLabels: (Y) -> String = { it.toString() },
+    yAxisTitle: String = "",
+    horizontalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
+    horizontalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
+    verticalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
+    verticalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
+    content: @Composable XYChartScope<X, Y>.() -> Unit
+) {
+    XYChart(
+        xAxisModel,
+        yAxisModel,
+        modifier,
+        xAxisStyle,
+        xAxisLabels = {
+            Text(
+                xAxisLabels(it),
+                color = MaterialTheme.colors.onBackground,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        },
+        xAxisTitle = {
+            Text(
+                xAxisTitle,
+                color = MaterialTheme.colors.onBackground,
+                style = MaterialTheme.typography.subtitle1
+            )
+        },
+        yAxisStyle,
+        yAxisLabels = {
+            Text(
+                yAxisLabels(it),
+                color = MaterialTheme.colors.onBackground,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        },
+        yAxisTitle = {
+            Text(
+                yAxisTitle,
+                color = MaterialTheme.colors.onBackground,
+                style = MaterialTheme.typography.subtitle1,
+                modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
+                    .padding(bottom = KoalaPlotTheme.sizes.gap),
+            )
+        },
+        horizontalMajorGridLineStyle,
+        horizontalMinorGridLineStyle,
+        verticalMajorGridLineStyle,
+        verticalMinorGridLineStyle,
+        content
+    )
 }

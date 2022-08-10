@@ -1,16 +1,22 @@
 package io.github.koalaplot.core.xychart
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.util.times
+import kotlin.jvm.JvmName
+import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.sign
 
 private val TickRatios = listOf(0.1f, 0.2f, 0.5f, 1f, 2f)
 
@@ -196,4 +202,67 @@ public class LinearAxisModel constructor(
 
         currentRange = newLow..newHi
     }
+}
+
+/**
+ * Create and remember a LinearAxisModel.
+ */
+@Composable
+public fun rememberLinearAxisModel(
+    range: ClosedFloatingPointRange<Float>,
+    zoomRangeLimit: Float = (range.endInclusive - range.start) * ZoomRangeLimitDefault,
+    minimumMajorTickIncrement: Float = (range.endInclusive - range.start) * MinimumMajorTickIncrementDefault,
+    minimumMajorTickSpacing: Dp = 50.dp,
+    minorTickCount: Int = 4,
+    allowZooming: Boolean = true,
+    allowPanning: Boolean = true,
+): LinearAxisModel = remember {
+    LinearAxisModel(
+        range, zoomRangeLimit, minimumMajorTickIncrement, minimumMajorTickSpacing,
+        minorTickCount, allowZooming, allowPanning
+    )
+}
+
+@JvmName("autoScaleFloatRange")
+public fun List<Float>.autoScaleRange(): ClosedFloatingPointRange<Float> {
+    val max = this.max()
+    val min = this.min()
+    val range = max - min
+    val scale = 10f.pow(floor(log10(range)))
+
+    val scaleMin = if (min < 0) {
+        ceil(abs(min / scale))
+    } else {
+        floor(abs(min / scale))
+    } * scale * sign(min)
+
+    val scaleMax = if (max > 0) {
+        ceil(abs(max / scale))
+    } else {
+        floor(abs(max / scale))
+    } * scale * sign(max)
+
+    return scaleMin..scaleMax
+}
+
+@JvmName("autoScaleIntRange")
+public fun List<Int>.autoScaleRange(): ClosedFloatingPointRange<Float> {
+    val max = this.max()
+    val min = this.min()
+    val range = max - min
+    val scale = 10f.pow(floor(log10(range.toFloat())))
+
+    val scaleMin = if (min < 0) {
+        ceil(abs(min / scale))
+    } else {
+        floor(abs(min / scale))
+    } * scale * sign(min.toFloat())
+
+    val scaleMax = if (max > 0) {
+        ceil(abs(max / scale))
+    } else {
+        floor(abs(max / scale))
+    } * scale * sign(max.toFloat())
+
+    return scaleMin..scaleMax
 }
