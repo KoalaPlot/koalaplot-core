@@ -14,10 +14,10 @@ public interface AxisState {
  * The major and minor tick values for an axis.
  * @param T The type of the axis values.
  */
-public data class TickValues<T>(
-    val majorTickValues: List<T>,
-    val minorTickValues: List<T>
-)
+public interface TickValues<T> {
+    public val majorTickValues: List<T>
+    public val minorTickValues: List<T>
+}
 
 /**
  * An interface for classes representing a plot axis.

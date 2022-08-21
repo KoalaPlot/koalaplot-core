@@ -1,6 +1,7 @@
 package io.github.koalaplot.core
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.AbsoluteCutCornerShape
 import androidx.compose.runtime.Composable
@@ -57,6 +58,31 @@ public fun Symbol(
             }
         }.clip(shape)
     )
+}
+
+/**
+ * Draws a [Symbol] where [size] is specified as a fraction of the maximum incoming constraint dimension.
+ */
+@ExperimentalKoalaPlotApi
+@Composable
+public fun Symbol(
+    modifier: Modifier = Modifier,
+    shape: Shape = RectangleShape,
+    sizeFraction: Float,
+    fillBrush: Brush? = null,
+    outlineBrush: Brush? = null,
+    outlineStroke: Stroke = Stroke(),
+    alpha: Float = 1.0f
+) {
+    BoxWithConstraints {
+        val size = if (maxHeight > maxWidth) {
+            maxHeight
+        } else {
+            maxWidth
+        } * sizeFraction
+
+        Symbol(modifier, shape, size, fillBrush, outlineBrush, outlineStroke, alpha)
+    }
 }
 
 // Equilateral triangle angle

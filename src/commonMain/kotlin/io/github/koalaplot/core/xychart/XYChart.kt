@@ -108,39 +108,24 @@ public fun <X, Y> XYChart(
             // how many tick labels there should be. So we leave them out of the calculation for
             // the axis length constraints, meaning the actual min distance of the axis tick labels
             // may be closer than specified because the actual axis lengths computed later, which
-            // take into account the axis label sizes, will be smaller than those computed here.
-            val yAxisTickValues =
-                yAxisModel.computeTickValues(
-                    (constraints.maxHeight - -xAxisTitleMeasurable.maxIntrinsicHeight(constraints.maxWidth)).toDp()
-                )
+            // take into account the axis label sizes, will be smaller than the lengths computed here.
+            val xAxis = AxisDelegate.createHorizontalAxis(
+                xAxisModel,
+                xAxisStyle,
+                (constraints.maxWidth - -yAxisTitleMeasurable.maxIntrinsicWidth(constraints.maxHeight)).toDp()
+            )
 
-            val xAxisTickValues =
-                xAxisModel.computeTickValues(
-                    (constraints.maxWidth - -yAxisTitleMeasurable.maxIntrinsicWidth(constraints.maxHeight)).toDp()
-                )
+            val yAxis = AxisDelegate.createVerticalAxis(
+                yAxisModel,
+                yAxisStyle,
+                (constraints.maxHeight - -xAxisTitleMeasurable.maxIntrinsicHeight(constraints.maxWidth)).toDp()
+            )
 
-            val xAxisState = object : AxisState {
-                override val majorTickOffsets: List<Float> =
-                    xAxisTickValues.majorTickValues.map { xAxisModel.computeOffset(it) }
-                override val minorTickOffsets: List<Float> =
-                    xAxisTickValues.minorTickValues.map { xAxisModel.computeOffset(it) }
-            }
-
-            val yAxisState = object : AxisState {
-                override val majorTickOffsets =
-                    yAxisTickValues.majorTickValues.map { yAxisModel.computeOffset(it) }
-                override val minorTickOffsets: List<Float> =
-                    yAxisTickValues.minorTickValues.map { yAxisModel.computeOffset(it) }
-            }
-
-            val xAxis = AxisDelegate.createHorizontalAxis(xAxisState, xAxisStyle)
             val xAxisMeasurable = subcompose("xaxis") { Axis(xAxis) }[0]
-
-            val yAxis = AxisDelegate.createVerticalAxis(yAxisState, yAxisStyle)
             val yAxisMeasurable = subcompose("yaxis") { Axis(yAxis) }[0]
 
             val chartScope = XYChartScopeImpl(
-                xAxisModel, yAxisModel, xAxisState, yAxisState, this@HoverableElementArea
+                xAxisModel, yAxisModel, xAxis, yAxis, this@HoverableElementArea
             )
 
             val chartMeasurable = subcompose("chart") {
@@ -157,33 +142,33 @@ public fun <X, Y> XYChart(
 
             val measurables = subcompose(Unit) {
                 Grid(
-                    xAxisState,
-                    yAxisState,
+                    xAxis,
+                    yAxis,
                     horizontalMajorGridLineStyle,
                     horizontalMinorGridLineStyle,
                     verticalMajorGridLineStyle,
                     verticalMinorGridLineStyle
                 )
 
-                xAxisTickValues.majorTickValues.forEach { Box { xAxisLabels(it) } }
-                yAxisTickValues.majorTickValues.forEach { Box { yAxisLabels(it) } }
+                xAxis.majorTickValues.forEach { Box { xAxisLabels(it) } }
+                yAxis.majorTickValues.forEach { Box { yAxisLabels(it) } }
             }
 
             val measurablesMap = Measurables(
                 measurables[0],
                 chartMeasurable,
                 xAxisMeasurable,
-                measurables.subList(1, xAxisTickValues.majorTickValues.size + 1),
+                measurables.subList(1, xAxis.majorTickValues.size + 1),
                 xAxisTitleMeasurable,
                 yAxisMeasurable,
                 measurables.subList(
-                    xAxisTickValues.majorTickValues.size + 1,
-                    xAxisTickValues.majorTickValues.size + 1 + yAxisTickValues.majorTickValues.size
+                    xAxis.majorTickValues.size + 1,
+                    xAxis.majorTickValues.size + 1 + yAxis.majorTickValues.size
                 ),
                 yAxisTitleMeasurable
             )
 
-            with(XYAxisMeasurePolicy(xAxisState, yAxisState, xAxis, yAxis)) {
+            with(XYAxisMeasurePolicy(xAxis, yAxis)) {
                 measure(measurablesMap, constraints)
             }
         }
@@ -216,11 +201,11 @@ private data class Measurables(
 private const val IterationLimit = 10
 private const val ChangeThreshold = 0.05
 
-private fun Density.optimizeGraphSize(
+private fun <X, Y> Density.optimizeGraphSize(
     constraints: Constraints,
     m: Measurables,
-    xAxis: AxisDelegate,
-    yAxis: AxisDelegate
+    xAxis: AxisDelegate<X>,
+    yAxis: AxisDelegate<Y>
 ): IntSize {
     var graphSize = IntSize(constraints.maxWidth, constraints.maxHeight)
     var iterations = 0
@@ -293,11 +278,9 @@ private fun Density.optimizeGraphSize(
     return graphSize
 }
 
-private class XYAxisMeasurePolicy(
-    val xAxisState: AxisState,
-    val yAxisState: AxisState,
-    val xAxis: AxisDelegate,
-    val yAxis: AxisDelegate
+private class XYAxisMeasurePolicy<X, Y>(
+    val xAxis: AxisDelegate<X>,
+    val yAxis: AxisDelegate<Y>
 ) {
     fun MeasureScope.measure(
         m: Measurables,
@@ -346,7 +329,7 @@ private class XYAxisMeasurePolicy(
                 placeable.place(
                     (
                         plotArea.left +
-                            xAxisState.majorTickOffsets[index] * plotArea.width -
+                            xAxis.majorTickOffsets[index] * plotArea.width -
                             placeable.width / 2.0
                         ).roundToInt(),
                     plotArea.bottom + xAxisPlaceable.height - xAxis.axisOffset.roundToPx()
@@ -363,7 +346,7 @@ private class XYAxisMeasurePolicy(
                     plotArea.left - yAxis.axisOffset.roundToPx() - placeable.width,
                     (
                         plotArea.bottom -
-                            yAxisState.majorTickOffsets[index] * plotArea.height -
+                            yAxis.majorTickOffsets[index] * plotArea.height -
                             placeable.height / 2
                         ).toInt()
                 )

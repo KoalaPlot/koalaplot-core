@@ -29,7 +29,10 @@ public class CategoryAxisModel<T>(
         }
     }
 
-    override fun computeTickValues(axisLength: Dp): TickValues<T> {
+    override fun computeTickValues(axisLength: Dp): io.github.koalaplot.core.xychart.TickValues<T> {
         return TickValues(categories, listOf())
     }
+
+    private data class TickValues<T>(override val majorTickValues: List<T>, override val minorTickValues: List<T>) :
+        io.github.koalaplot.core.xychart.TickValues<T>
 }

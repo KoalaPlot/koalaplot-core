@@ -94,7 +94,10 @@ public class LinearAxisModel constructor(
         val minorTickValues = computeMinorTickValues(
             majorTickValues, computeMajorTickSpacing(minTickSpacing)
         )
-        return TickValues(majorTickValues, minorTickValues)
+        return object : TickValues<Float> {
+            override val majorTickValues = majorTickValues
+            override val minorTickValues = minorTickValues
+        }
     }
 
     private fun computeMajorTickSpacing(minTickSpacing: Float): Float {

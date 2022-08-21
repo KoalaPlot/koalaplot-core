@@ -160,3 +160,19 @@ public fun Modifier.rotateVertically(rotation: VerticalRotation): Modifier = the
 public enum class VerticalRotation(internal val value: Float) {
     CLOCKWISE(90f), COUNTER_CLOCKWISE(270f)
 }
+
+internal fun min(vararg values: Float): Float {
+    var m = Float.POSITIVE_INFINITY
+    values.forEach {
+        m = kotlin.math.min(m, it)
+    }
+    return m
+}
+
+internal fun max(vararg values: Float): Float {
+    var m = Float.NEGATIVE_INFINITY
+    values.forEach {
+        m = kotlin.math.max(m, it)
+    }
+    return m
+}

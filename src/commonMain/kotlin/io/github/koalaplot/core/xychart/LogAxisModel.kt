@@ -46,6 +46,9 @@ public class LogAxisModel constructor(
             }
         }
 
-        return TickValues(majorTickValues, computeMinorTickValues(majorTickValues))
+        return object : TickValues<Float> {
+            override val majorTickValues = majorTickValues
+            override val minorTickValues = computeMinorTickValues(majorTickValues)
+        }
     }
 }

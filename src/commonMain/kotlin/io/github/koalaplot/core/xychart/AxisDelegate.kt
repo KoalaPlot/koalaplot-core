@@ -60,18 +60,36 @@ public fun rememberAxisStyle(
     )
 }
 
-internal class AxisDelegate private constructor(
+internal class AxisDelegate<T> private constructor(
+    private val axisState: AxisState,
+    private val tickValues: TickValues<T>,
     val orientation: AxisOrientation,
-    val axisState: AxisState,
-    val style: AxisStyle,
-) {
+    private val style: AxisStyle,
+) : AxisState by axisState, TickValues<T> by tickValues {
     companion object {
-        fun createVerticalAxis(axisState: AxisState, style: AxisStyle): AxisDelegate {
-            return AxisDelegate(AxisOrientation.Vertical, axisState, style)
+        fun <T> createVerticalAxis(axisModel: AxisModel<T>, style: AxisStyle, length: Dp): AxisDelegate<T> {
+            return createAxis(AxisOrientation.Vertical, axisModel, style, length)
         }
 
-        fun createHorizontalAxis(axisState: AxisState, style: AxisStyle): AxisDelegate {
-            return AxisDelegate(AxisOrientation.Horizontal, axisState, style)
+        fun <T> createHorizontalAxis(axisModel: AxisModel<T>, style: AxisStyle, length: Dp): AxisDelegate<T> {
+            return createAxis(AxisOrientation.Horizontal, axisModel, style, length)
+        }
+
+        private fun <T> createAxis(
+            orientation: AxisOrientation,
+            axisModel: AxisModel<T>,
+            style: AxisStyle,
+            length: Dp
+        ): AxisDelegate<T> {
+            val tickValues = axisModel.computeTickValues(length)
+
+            val axisState = object : AxisState {
+                override val majorTickOffsets: List<Float> =
+                    tickValues.majorTickValues.map { axisModel.computeOffset(it) }
+                override val minorTickOffsets: List<Float> =
+                    tickValues.minorTickValues.map { axisModel.computeOffset(it) }
+            }
+            return AxisDelegate(axisState, tickValues, orientation, style)
         }
     }
 
@@ -165,7 +183,7 @@ internal class AxisDelegate private constructor(
 }
 
 @Composable
-internal fun Axis(delegate: AxisDelegate) {
+internal fun <T> Axis(delegate: AxisDelegate<T>) {
     Canvas(
         modifier = if (delegate.orientation == AxisOrientation.Vertical)
             Modifier.fillMaxHeight().width(delegate.thicknessDp)
