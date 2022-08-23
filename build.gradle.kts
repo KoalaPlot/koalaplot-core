@@ -10,7 +10,7 @@ plugins {
     id("org.jetbrains.compose")
     id("org.jetbrains.dokka")
     id("io.gitlab.arturbosch.detekt")
-    `maven-publish`
+    id("convention.publication")
 }
 
 repositories {
@@ -24,7 +24,7 @@ dependencies {
 }
 
 group = "io.github.koalaplot"
-version = "0.1.0-SNAPSHOT"
+version = "0.1.0"
 
 kotlin {
     explicitApi()
