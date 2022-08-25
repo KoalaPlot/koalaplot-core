@@ -64,7 +64,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("io.github.koalaplot:core:0.1.0")
+    implementation("io.github.koalaplot:koalaplot-core:0.1.0")
 }
 ```
 
