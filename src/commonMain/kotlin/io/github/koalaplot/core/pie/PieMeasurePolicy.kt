@@ -258,19 +258,19 @@ internal class PieMeasurePolicy constructor(
     ): Size {
         // Compute height/width required for the pie plus all labels
         // calculate min/max label extents used for computing overall component width/height
-        var minX = 0F // minimum x-coordinate of all labels
-        var maxX = 0F // max x-coordinate of all labels
-        var minY = Float.MAX_VALUE // minimum y-coordinate of all labels
-        var maxY = 0F // max y-coordinate of all labels
+        var minX = -pieDiameter / 2f // minimum x-coordinate of all objects
+        var maxX = pieDiameter / 2f // max x-coordinate of all objects
+        var minY = -pieDiameter / 2f // minimum y-coordinate of all objects
+        var maxY = pieDiameter / 2f // max y-coordinate of all objects
         placeables.forEachIndexed { index, placeable ->
             minX = min(minX, labelOffsets[index].x)
             maxX = max(maxX, labelOffsets[index].x + placeable.width)
-            minY = min(minY, labelOffsets[index].y - placeable.height / 2f)
-            maxY = max(maxY, labelOffsets[index].y + placeable.height / 2f)
+            minY = min(minY, labelOffsets[index].y)
+            maxY = max(maxY, labelOffsets[index].y + placeable.height)
         }
 
-        val width = max(maxX - minX, pieDiameter)
-        val height = max(maxY - minY, pieDiameter)
+        val width = maxX - minX
+        val height = maxY - minY
 
         return Size(width, height)
     }

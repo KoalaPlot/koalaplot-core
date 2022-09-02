@@ -87,6 +87,7 @@ nexusPublishing {
 }
 
 signing {
+    setRequired({gradle.taskGraph.hasTask("publishToSonatype")})
     useInMemoryPgpKeys(getExtraString("signing.key"), getExtraString("signing.password"))
     sign(publishing.publications)
 }

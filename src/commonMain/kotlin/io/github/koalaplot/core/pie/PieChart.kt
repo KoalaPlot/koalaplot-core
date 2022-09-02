@@ -373,37 +373,57 @@ private class Slice(
 
         return Outline.Generic(
             Path().apply {
-                // First line segment from start point to first outer corner
-                moveTo(center + pol2Cart(holeRadius, startAngle))
-                lineTo(center + pol2Cart(radius, startAngle))
-
-                // Outer arc
-                arcTo(
-                    Rect(
-                        size.width / 2f - radius, size.width / 2f - radius,
-                        size.width / 2f + radius, size.width / 2f + radius
-                    ),
-                    startAngle,
-                    angle,
-                    false
-                )
-
-                // Line from second outer corner to inner corner or center
-                lineTo(center + pol2Cart(holeRadius, startAngle + angle))
-
-                if (holeRadius != 0f) {
-                    // Inner arc
-                    arcTo(
+                if (angle == DegreesFullCircle && holeRadius != 0f) {
+                    // Outer circle
+                    addArc(
                         Rect(
-                            size.width / 2f - holeRadius,
-                            size.height / 2f - holeRadius,
-                            size.width / 2f + holeRadius,
-                            size.height / 2f + holeRadius
+                            size.width / 2f - radius, size.width / 2f - radius,
+                            size.width / 2f + radius, size.width / 2f + radius
                         ),
-                        startAngle + angle,
-                        -angle,
-                        false,
+                        startAngle,
+                        angle
                     )
+                    // Inner circle
+                    addArc(
+                        Rect(
+                            size.width / 2f - holeRadius, size.width / 2f - holeRadius,
+                            size.width / 2f + holeRadius, size.width / 2f + holeRadius
+                        ),
+                        startAngle,
+                        -angle
+                    )
+                } else {
+                    // First line segment from start point to first outer corner
+                    moveTo(center + pol2Cart(holeRadius, startAngle))
+                    lineTo(center + pol2Cart(radius, startAngle))
+
+                    // Outer arc
+                    addArc(
+                        Rect(
+                            size.width / 2f - radius, size.width / 2f - radius,
+                            size.width / 2f + radius, size.width / 2f + radius
+                        ),
+                        startAngle,
+                        angle
+                    )
+
+                    // Line from second outer corner to inner corner or center
+                    lineTo(center + pol2Cart(holeRadius, startAngle + angle))
+
+                    if (holeRadius != 0f) {
+                        // Inner arc
+                        arcTo(
+                            Rect(
+                                size.width / 2f - holeRadius,
+                                size.height / 2f - holeRadius,
+                                size.width / 2f + holeRadius,
+                                size.height / 2f + holeRadius
+                            ),
+                            startAngle + angle,
+                            -angle,
+                            false,
+                        )
+                    }
                 }
             }
         )
