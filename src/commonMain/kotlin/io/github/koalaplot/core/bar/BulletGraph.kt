@@ -1,16 +1,11 @@
 package io.github.koalaplot.core.bar
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -315,9 +310,8 @@ public fun BulletGraphs(
 
     SubcomposeLayout(modifier = modifier) { constraints ->
         val bulletHeight =
-            ((constraints.maxHeight - gap.roundToPx() * graphScope.scopes.size - 1) / graphScope.scopes.size).coerceAtLeast(
-                0
-            )
+            ((constraints.maxHeight - gap.roundToPx() * graphScope.scopes.size - 1) / graphScope.scopes.size)
+                .coerceAtLeast(0)
 
         val builders = graphScope.scopes.mapIndexed { index, bulletScope ->
             BulletGraphBuilder(index, this, bulletScope, bulletHeight, axisSettings[index])

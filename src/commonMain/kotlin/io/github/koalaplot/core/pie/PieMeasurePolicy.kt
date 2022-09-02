@@ -3,14 +3,10 @@ package io.github.koalaplot.core.pie
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.Measurable
-import androidx.compose.ui.layout.MeasurePolicy
-import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Dp
 import io.github.koalaplot.core.util.DEG2RAD
-import io.github.koalaplot.core.util.circumscribedSquareSize
 import io.github.koalaplot.core.util.maximize
 import io.github.koalaplot.core.util.pol2Cart
 import io.github.koalaplot.core.util.y2theta
@@ -20,51 +16,14 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 
-private data class LabelOffsets(val position: Offset, val anchorPoint: Offset)
+internal data class LabelOffsets(val position: Offset, val anchorPoint: Offset)
 
 internal class PieMeasurePolicy constructor(
     private val pieSliceData: List<PieSliceData>,
-    private val holeSize: Float,
     private val labelSpacing: Float,
-    private val minPieDiameter: Dp,
-    private val initOuterRadius: Float,
-    private val labelConnectorScopes: List<LabelConnectorScope>
-) : MeasurePolicy {
-    override fun MeasureScope.measure(
-        measurables: List<Measurable>,
-        constraints: Constraints
-    ): MeasureResult {
-        val pieMeasurables = PieMeasurables(
-            pie = measurables[0],
-            hole = measurables[1],
-            labels = measurables.subList(2, 2 + pieSliceData.size),
-            labelConnectors = measurables.subList(2 + pieSliceData.size, 2 + pieSliceData.size * 2)
-        )
-
-        val (pieDiameter, piePlaceables) = measure(
-            pieMeasurables,
-            constraints,
-            minPieDiameter.toPx()
-        )
-
-        val labelOffsets =
-            computeLabelOffsets(pieDiameter, piePlaceables.labels)
-
-        val size = computeSize(piePlaceables.labels, labelOffsets.map { it.position }, pieDiameter)
-            .run {
-                // add one due to later float to int conversion dropping the fraction part
-                copy(
-                    (width + 1).coerceAtMost(constraints.maxWidth.toFloat()),
-                    (height + 1).coerceAtMost(constraints.maxHeight.toFloat())
-                )
-            }
-
-        val labelConnectorTranslations = computeLabelConnectorScopes(labelOffsets, pieDiameter)
-
-        return layoutPie(size, labelOffsets, labelConnectorTranslations, pieDiameter, piePlaceables)
-    }
-
-    private fun MeasureScope.layoutPie(
+    private val initOuterRadius: Float
+) {
+    internal fun MeasureScope.layoutPie(
         size: Size,
         labelOffsets: List<LabelOffsets>,
         labelConnectorTranslations: List<Offset>,
@@ -98,87 +57,29 @@ internal class PieMeasurePolicy constructor(
         piePlaceables.hole.place(position.x.toInt(), position.y.toInt())
     }
 
-    private fun measureLabel(
-        label: Measurable,
-        constraints: Constraints,
-        minPieDiameterPx: Float
-    ): Placeable {
-        return label.measure(
-            constraints.copy(
-                maxWidth = ((constraints.maxWidth - minPieDiameterPx) / 2).toInt()
-                    .coerceAtLeast(constraints.minWidth)
-            )
-        )
-    }
-
-    private fun measure(
-        pieMeasurables: PieMeasurables,
-        constraints: Constraints,
-        minPieDiameterPx: Float
-    ): Pair<Float, PiePlaceables> {
-        val labelPlaceables =
-            pieMeasurables.labels.map { measureLabel(it, constraints, minPieDiameterPx) }
-
-        val labelConnectorPlaceables =
-            pieMeasurables.labelConnectors.map { it.measure(constraints) }
-
-        // use floor for PieDiameter because below the size is set via constraints
-        // which is an integer
-        val pieDiameter =
-            floor(
-                max(
-                    findMaxDiameter(constraints, labelPlaceables, minPieDiameterPx),
-                    minPieDiameterPx
-                )
-            )
-
-        val holeEdgeLength =
-            circumscribedSquareSize(pieDiameter * holeSize.toDouble()).toInt()
-
-        val piePlaceable =
-            pieMeasurables.pie.measure(Constraints.fixed(pieDiameter.toInt(), pieDiameter.toInt()))
-
-        val holeContentPlaceable =
-            pieMeasurables.hole.measure(Constraints.fixed(holeEdgeLength, holeEdgeLength))
-
-        val piePlaceables = PiePlaceables(
-            pie = piePlaceable,
-            hole = holeContentPlaceable,
-            labels = labelPlaceables,
-            labelConnectorPlaceables
-        )
-        return Pair(pieDiameter, piePlaceables)
-    }
-
-    private data class PiePlaceables(
+    internal data class PiePlaceables(
         val pie: Placeable,
         val hole: Placeable,
         val labels: List<Placeable>,
         val labelConnectors: List<Placeable>,
     )
 
-    private data class PieMeasurables(
-        val pie: Measurable,
-        val hole: Measurable,
-        val labels: List<Measurable>,
-        val labelConnectors: List<Measurable>,
-    )
-
     /**
-     * Calculates and sets the values for the [labelConnectorScopes].
+     * Calculates offsets and LabelConnectorScopes for label connectors.
      *
      * @param labelOffsets The label positions
      * @param pieDiameter The pie chart diameter
      * @return The translation required to be applied to each label connector so the computed
      * labelConnectorScope values result in the connector being correctly positioned.
      */
-    private fun computeLabelConnectorScopes(
+    internal fun computeLabelConnectorScopes(
         labelOffsets: List<LabelOffsets>,
         pieDiameter: Float
-    ): List<Offset> {
+    ): List<Pair<Offset, LabelConnectorScope>> {
         return buildList {
             for (i in labelOffsets.indices) {
-                with(this@PieMeasurePolicy.labelConnectorScopes[i]) {
+                val labelConnectorScope = LabelConnectorScopeImpl()
+                with(labelConnectorScope) {
                     startPosition.value = pol2Cart(
                         pieDiameter / 2f * initOuterRadius,
                         pieSliceData[i].startAngle + pieSliceData[i].angleExtent / 2f
@@ -207,10 +108,40 @@ internal class PieMeasurePolicy constructor(
                     startPosition.value += translate
                     endPosition.value += translate
 
-                    add(translate)
+                    add(Pair(translate, labelConnectorScope))
                 }
             }
         }
+    }
+
+    internal fun measure(
+        pie: Measurable,
+        labels: List<Measurable>,
+        constraints: Constraints,
+        minPieDiameterPx: Float
+    ): Triple<Float, Placeable, List<Placeable>> {
+        val labelPlaceables = labels.map {
+            it.measure(
+                constraints.copy(
+                    maxWidth = ((constraints.maxWidth - minPieDiameterPx) / 2).toInt()
+                        .coerceAtLeast(constraints.minWidth)
+                )
+            )
+        }
+
+        // use floor for PieDiameter because below the size is set via constraints
+        // which is an integer
+        val pieDiameter = floor(
+            max(
+                findMaxDiameter(constraints, labelPlaceables, minPieDiameterPx),
+                minPieDiameterPx
+            )
+        )
+
+        val piePlaceable =
+            pie.measure(Constraints.fixed(pieDiameter.toInt(), pieDiameter.toInt()))
+
+        return Triple(pieDiameter, piePlaceable, labelPlaceables)
     }
 
     /**
@@ -251,7 +182,7 @@ internal class PieMeasurePolicy constructor(
      * Computes the size required to contain the pie + its surrounding labels based on the
      * labels as represented by the placeables, their labelOffsets, and the pieDiameter.
      */
-    private fun computeSize(
+    internal fun computeSize(
         placeables: List<Placeable>,
         labelOffsets: List<Offset>,
         pieDiameter: Float
@@ -281,7 +212,7 @@ internal class PieMeasurePolicy constructor(
      * slice angles. Returns a list of Offsets representing the x, y coordinate
      * for each label where the center of the pie is at the origin (0, 0).
      */
-    private fun computeLabelOffsets(
+    internal fun computeLabelOffsets(
         pieDiameter: Float,
         placeables: List<Placeable>
     ): List<LabelOffsets> {

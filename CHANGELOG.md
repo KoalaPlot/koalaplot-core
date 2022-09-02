@@ -11,6 +11,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   constraint
 - Fix pie chart size calculation that caused clipping of pie or labels in some circumstances
 - Fix pie slice not showing when slice is a full circle
+- Fix pie chart infinite measuring loop
 
 ## [0.1.0] - 2022-08-23
 
