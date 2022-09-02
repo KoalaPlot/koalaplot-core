@@ -28,3 +28,13 @@ jobs:
                     SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
                     OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
                     OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+
+            -   name: Deploy to GitHub Pages
+                if: success()
+                uses: crazy-max/ghaction-github-pages@v3
+                with:
+                    target_branch: gh-pages
+                    build_dir: build/docs
+                    keep_history: true
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
