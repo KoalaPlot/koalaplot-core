@@ -36,8 +36,10 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -47,6 +49,7 @@ import io.github.koalaplot.core.util.DegreesFullCircle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.HoverableElementArea
 import io.github.koalaplot.core.util.HoverableElementAreaScope
+import io.github.koalaplot.core.util.circumscribedSquareSize
 import io.github.koalaplot.core.util.generateHueColorPalette
 import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
@@ -205,47 +208,77 @@ public fun PieChart(
     // pieSliceData when the animation is complete - used for sizing & label layout/positioning
     val finalPieSliceData = remember(values) { makePieSliceData(values, 1f) }
 
-    val labelConnectorScopes: List<LabelConnectorScope> =
-        remember(finalPieSliceData, labelSpacing, minPieDiameter) {
-            buildList {
-                pieSliceData.indices.forEach { _ -> add(LabelConnectorScopeImpl()) }
-            }
-        }
-
     val pieMeasurePolicy = remember(
         finalPieSliceData, holeSize, labelSpacing, minPieDiameter,
     ) {
         PieMeasurePolicy(
             finalPieSliceData,
-            holeSize,
             labelSpacing,
-            minPieDiameter,
-            InitOuterRadius,
-            labelConnectorScopes
+            InitOuterRadius
         )
     }
 
     HoverableElementArea(modifier = modifier) {
-        Layout(modifier = Modifier.clipToBounds(), content = {
-            Pie(pieSliceData, slice, holeSize)
-            Box { holeContent() } // wrap in box to ensure 1 and only 1 element emitted
+        SubcomposeLayout(modifier = Modifier.clipToBounds()) { constraints ->
+            val pieMeasurable = subcompose("pie") { Pie(pieSliceData, slice, holeSize) }[0]
 
-            pieSliceData.indices.forEach {
-                // Wrapping in box ensures there is 1 measurable element
-                // emitted per label & applies fade animation
-                Box(modifier = Modifier.alpha(labelAlpha.value)) {
-                    label(it)
-                }
-            }
-
-            pieSliceData.indices.forEach {
-                Box(modifier = Modifier.fillMaxSize().alpha(labelAlpha.value)) {
-                    with(labelConnectorScopes[it]) {
-                        labelConnector(it)
+            val labelMeasurables = subcompose("labels") {
+                pieSliceData.indices.forEach {
+                    // Wrapping in box ensures there is 1 measurable element
+                    // emitted per label & applies fade animation
+                    Box(modifier = Modifier.alpha(labelAlpha.value)) {
+                        label(it)
                     }
                 }
             }
-        }, measurePolicy = pieMeasurePolicy)
+
+            val (pieDiameter, piePlaceable, labelPlaceables) = pieMeasurePolicy.measure(
+                pieMeasurable,
+                labelMeasurables,
+                constraints,
+                minPieDiameter.toPx()
+            )
+
+            val labelOffsets = pieMeasurePolicy.computeLabelOffsets(pieDiameter, labelPlaceables)
+
+            val size = pieMeasurePolicy.computeSize(labelPlaceables, labelOffsets.map { it.position }, pieDiameter)
+                .run {
+                    // add one due to later float to int conversion dropping the fraction part
+                    copy(
+                        (width + 1).coerceAtMost(constraints.maxWidth.toFloat()),
+                        (height + 1).coerceAtMost(constraints.maxHeight.toFloat())
+                    )
+                }
+
+            val labelConnectorTranslations = pieMeasurePolicy.computeLabelConnectorScopes(labelOffsets, pieDiameter)
+
+            val holeEdgeLength =
+                circumscribedSquareSize(pieDiameter * holeSize.toDouble()).toInt()
+            val holePlaceable = subcompose("hole") {
+                Box { holeContent() } // wrap in box to ensure 1 and only 1 element emitted
+            }[0].measure(Constraints.fixed(holeEdgeLength, holeEdgeLength))
+
+            val connectorPlaceables = subcompose("connectors") {
+                pieSliceData.indices.forEach {
+                    Box(modifier = Modifier.fillMaxSize().alpha(labelAlpha.value)) {
+                        with(labelConnectorTranslations[it].second) {
+                            labelConnector(it)
+                        }
+                    }
+                }
+            }.map { it.measure(constraints) }
+
+            with(pieMeasurePolicy) {
+                layoutPie(
+                    size, labelOffsets, labelConnectorTranslations.map { it.first }, pieDiameter,
+                    PieMeasurePolicy.PiePlaceables(
+                        piePlaceable, holePlaceable,
+                        labelPlaceables,
+                        connectorPlaceables
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -373,37 +406,57 @@ private class Slice(
 
         return Outline.Generic(
             Path().apply {
-                // First line segment from start point to first outer corner
-                moveTo(center + pol2Cart(holeRadius, startAngle))
-                lineTo(center + pol2Cart(radius, startAngle))
-
-                // Outer arc
-                arcTo(
-                    Rect(
-                        size.width / 2f - radius, size.width / 2f - radius,
-                        size.width / 2f + radius, size.width / 2f + radius
-                    ),
-                    startAngle,
-                    angle,
-                    false
-                )
-
-                // Line from second outer corner to inner corner or center
-                lineTo(center + pol2Cart(holeRadius, startAngle + angle))
-
-                if (holeRadius != 0f) {
-                    // Inner arc
-                    arcTo(
+                if (angle == DegreesFullCircle && holeRadius != 0f) {
+                    // Outer circle
+                    addArc(
                         Rect(
-                            size.width / 2f - holeRadius,
-                            size.height / 2f - holeRadius,
-                            size.width / 2f + holeRadius,
-                            size.height / 2f + holeRadius
+                            size.width / 2f - radius, size.width / 2f - radius,
+                            size.width / 2f + radius, size.width / 2f + radius
                         ),
-                        startAngle + angle,
-                        -angle,
-                        false,
+                        startAngle,
+                        angle
                     )
+                    // Inner circle
+                    addArc(
+                        Rect(
+                            size.width / 2f - holeRadius, size.width / 2f - holeRadius,
+                            size.width / 2f + holeRadius, size.width / 2f + holeRadius
+                        ),
+                        startAngle,
+                        -angle
+                    )
+                } else {
+                    // First line segment from start point to first outer corner
+                    moveTo(center + pol2Cart(holeRadius, startAngle))
+                    lineTo(center + pol2Cart(radius, startAngle))
+
+                    // Outer arc
+                    addArc(
+                        Rect(
+                            size.width / 2f - radius, size.width / 2f - radius,
+                            size.width / 2f + radius, size.width / 2f + radius
+                        ),
+                        startAngle,
+                        angle
+                    )
+
+                    // Line from second outer corner to inner corner or center
+                    lineTo(center + pol2Cart(holeRadius, startAngle + angle))
+
+                    if (holeRadius != 0f) {
+                        // Inner arc
+                        arcTo(
+                            Rect(
+                                size.width / 2f - holeRadius,
+                                size.height / 2f - holeRadius,
+                                size.width / 2f + holeRadius,
+                                size.height / 2f + holeRadius
+                            ),
+                            startAngle + angle,
+                            -angle,
+                            false,
+                        )
+                    }
                 }
             }
         )
