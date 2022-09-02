@@ -1,5 +1,6 @@
-![Kotlin Version](https://img.shields.io/badge/Kotlin-1.7.0-orange)
-[![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](http://KoalaPlot.github.io/koalaplot-core)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.koalaplot/koalaplot-core?color=278ec7)](https://repo1.maven.org/maven2/io/github/koalaplot/koalaplot-core/)
+[![Kotlin](https://img.shields.io/badge/kotlin-1.7.0-278ec7.svg?logo=kotlin)](http://kotlinlang.org)
+[![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](https://koalaplot.github.io/koalaplot-core/api/0.1.0/)
 [![License MIT](https://img.shields.io/badge/license-MIT-278ec7.svg)](https://github.com/KoalaPlot/koalaplot-core/tree/main/LICENSE.txt)
 
 # Koala Plot
@@ -20,7 +21,7 @@ that the API surface and functionality will change as we gain experience using t
 
 Most elements of a plot are Composables and can therefore be easily customized. This includes things like colors, fonts,
 borders, shapes, user interaction, etc. Web support is provided by the Compose-web Canvas support currently in alpha.
- 
+
 * Pie and donut chart
     * Composable slices, with default implementation that can react to hovering
     * Optional Composable labels and Composable connectors with provided linear and bezier implementations
@@ -40,6 +41,8 @@ borders, shapes, user interaction, etc. Web support is provided by the Compose-w
     * Support for negative values and bars that don't start at 0
     * Customizable first-draw animation
     * Zoom and pan one or both axes (Android only, for now)
+* Bullet Graph
+    * Individual or multiple vertically aligned bullet graphs
 * Chart layout
     * Combines an optional Composable title, plot, and legend with any of 4 positions
 * Legends
@@ -48,46 +51,55 @@ borders, shapes, user interaction, etc. Web support is provided by the Compose-w
 
 # Getting Started
 
-To build locally and integrate with your own code, follow these steps (when more mature, we'll publish to
-the [Central Maven repository](https://search.maven.org/)):
-
-1. Clone the repository to your local machine
-
-```shell
-git clone https://github.com/koalaplot/koalaplot-core.git
-```
-
-2. Build and publish it to your local maven repository
-
-```shell
-./gradlew publishToMavenLocal
-```
-
-3. Add the MavenLocal repository to your project and include Koala Plot core as a dependency in your project's
-   build.gradle.kts
+1. Add the mavenCentral and compose repositories to your project's build.gradle.kts
 
 ```kotlin
 repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    ...
-    mavenLocal()
 }
 ```
 
+2. Include Koala Plot core as a dependency in your project's build.gradle.kts
+
 ```kotlin
 dependencies {
-    ...
-    implementation("io.github.koalaplot:core:0.1.0-SNAPSHOT")
+    implementation("io.github.koalaplot:koalaplot-core:0.1.0")
 }
 ```
 
 You can also see a complete example of a build.gradle.kts in
 the [samples](https://koalaplot.github.io/koalaplot-samples).
 
+3. Start coding
+
+```kotlin
+    BulletGraph {
+        label {
+            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier.padding(end = KoalaPlotTheme.sizes.gap)
+            ) {
+                Text(
+                    "Revenue 2005 YTD",
+                    textAlign = TextAlign.End
+                )
+                Text(
+                    "(US $ in thousands)",
+                    textAlign = TextAlign.End
+                )
+            }
+        }
+        axis { labels { "${it.toInt()}" } }
+        comparativeMeasure(260f)
+        featuredMeasureBar(275f)
+        ranges(0f, 200f, 250f, 300f)
+    }
+```
+
 # Documentation
 
-- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.1.0)
+- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.2.0-SNAPSHOT)
 - [Release 0.1.0](https://koalaplot.github.io/koalaplot-core/api/0.1.0)
 
 Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples) for code examples.
@@ -96,5 +108,3 @@ Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples)
 
 Contributions are welcome. Further details can be found in the
 [Contributing Guidelines](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTRIBUTING.md)
-
-
