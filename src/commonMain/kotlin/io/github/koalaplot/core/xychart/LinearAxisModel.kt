@@ -38,7 +38,7 @@ private const val MinimumMajorTickIncrementDefault = 0.1f
  * @param allowPanning If the axis should allow panning.
  */
 public class LinearAxisModel constructor(
-    private val range: ClosedFloatingPointRange<Float>,
+    public val range: ClosedFloatingPointRange<Float>,
     private val zoomRangeLimit: Float =
         (range.endInclusive - range.start) * ZoomRangeLimitDefault,
     private val minimumMajorTickIncrement: Float =
