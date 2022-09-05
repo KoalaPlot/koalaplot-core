@@ -25,6 +25,7 @@ import io.github.koalaplot.core.xychart.AxisDelegate
 import kotlin.math.abs
 import kotlin.math.absoluteValue
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 private val DefaultRangeShades = listOf(
@@ -150,14 +151,16 @@ private class BulletGraphBuilder @OptIn(ExperimentalKoalaPlotApi::class) constru
         val axisModel = axisSettings.model!!
 
         featurePlaceable = if (bulletScope.featuredMeasure.type == BulletBuilderScope.FeaturedMeasureType.BAR) {
+            val origin = computeFeatureBarOrigin(bulletScope.featuredMeasure.value, axisModel.range)
+
             measurable.measure(
                 Constraints.fixed(
                     (
                         rangeWidth *
                             abs(
-                                axisModel.computeOffset(0f) -
-                                    axisModel.computeOffset(bulletScope.featuredMeasure.value * beta)
-                            )
+                                axisModel.computeOffset(bulletScope.featuredMeasure.value) -
+                                    axisModel.computeOffset(origin)
+                            ) * beta
                         ).roundToInt(),
                     rangeHeight
                 )
@@ -182,7 +185,12 @@ private class BulletGraphBuilder @OptIn(ExperimentalKoalaPlotApi::class) constru
     }
 
     @OptIn(ExperimentalKoalaPlotApi::class)
-    fun Placeable.PlacementScope.layout(yPos: Int, labelWidth: Int, firstAxisLabelWidth: Int, rangeWidth: Int) {
+    fun Placeable.PlacementScope.layout(
+        yPos: Int,
+        labelWidth: Int,
+        firstAxisLabelWidth: Int,
+        rangeWidth: Int
+    ) {
         requireNotNull(axis) { "axis must not be null during layout" }
         requireNotNull(axisLabelPlaceables) { "axis label placeables must not be null during layout" }
         requireNotNull(labelPlaceable) { "labelPlacesable must not be null during layout" }
@@ -240,10 +248,11 @@ private class BulletGraphBuilder @OptIn(ExperimentalKoalaPlotApi::class) constru
         val xPos =
             rangeStart + if (bulletScope.featuredMeasure.type == BulletBuilderScope.FeaturedMeasureType.BAR) {
                 val value = bulletScope.featuredMeasure.value
+                val origin = computeFeatureBarOrigin(bulletScope.featuredMeasure.value, axisSettings.model!!.range)
                 if (value < 0) {
-                    rangeWidth * axisSettings.model!!.computeOffset(0f) - featurePlaceable.width
+                    rangeWidth * axisSettings.model!!.computeOffset(origin) - featurePlaceable.width
                 } else {
-                    rangeWidth * axisSettings.model!!.computeOffset(0f)
+                    rangeWidth * axisSettings.model!!.computeOffset(origin)
                 }
             } else {
                 rangeWidth * axisSettings.model!!.computeOffset(bulletScope.featuredMeasure.value) -
@@ -253,6 +262,21 @@ private class BulletGraphBuilder @OptIn(ExperimentalKoalaPlotApi::class) constru
             xPos.roundToInt(),
             yPos + rangeHeight / 2 - featurePlaceable.height / 2
         )
+    }
+}
+
+/**
+ * Technically per the BulletGraph spec a bar is not to be used if the origin of the axis does not include
+ * 0, but this will force the feature bar to have an origin of 0 or a bound of the axis in order to display
+ * in a reasonable way.
+ * @param featuredMeasureValue The value of the featured measure
+ * @param axisRange the range of the axis
+ */
+private fun computeFeatureBarOrigin(featuredMeasureValue: Float, axisRange: ClosedFloatingPointRange<Float>): Float {
+    return if (featuredMeasureValue >= 0) {
+        max(0f, axisRange.start)
+    } else {
+        min(0f, axisRange.endInclusive)
     }
 }
 

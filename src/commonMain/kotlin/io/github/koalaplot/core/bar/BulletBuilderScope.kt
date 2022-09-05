@@ -378,7 +378,17 @@ public class AxisSettings {
                 builtScope.comparativeMeasures.maxOfOrNull { it.value } ?: Float.NEGATIVE_INFINITY
             )
 
-            val axisModel = LinearAxisModel(minRange..maxRange, allowZooming = false, allowPanning = false)
+            val range = if (minRange == maxRange) {
+                if (minRange != 0f) {
+                    (minRange / 2f)..(maxRange * 2f)
+                } else {
+                    minRange..minRange + 1f
+                }
+            } else {
+                minRange..maxRange
+            }
+
+            val axisModel = LinearAxisModel(range, allowZooming = false, allowPanning = false)
             return axisModel
         }
     }
