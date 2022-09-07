@@ -36,6 +36,7 @@ import io.github.koalaplot.core.util.max
 import io.github.koalaplot.core.util.min
 import io.github.koalaplot.core.xychart.AxisStyle
 import io.github.koalaplot.core.xychart.LinearAxisModel
+import io.github.koalaplot.core.xychart.autoScaleRange
 import io.github.koalaplot.core.xychart.rememberAxisStyle
 
 private const val DefaultSizeFraction = 0.75f
@@ -366,30 +367,13 @@ public class AxisSettings {
         }
 
         private fun createLinearAxisModel(builtScope: BulletBuilderScope): LinearAxisModel {
-            // Determine min/max range for axis
-            val minRange = min(
-                builtScope.rangesScope.ranges.minOfOrNull { it.value } ?: Float.POSITIVE_INFINITY,
-                builtScope.featuredMeasure.value,
-                builtScope.comparativeMeasures.minOfOrNull { it.value } ?: Float.POSITIVE_INFINITY
-            )
-            val maxRange = max(
-                builtScope.rangesScope.ranges.maxOfOrNull { it.value } ?: Float.NEGATIVE_INFINITY,
-                builtScope.featuredMeasure.value,
-                builtScope.comparativeMeasures.maxOfOrNull { it.value } ?: Float.NEGATIVE_INFINITY
-            )
+            val range = (
+                builtScope.rangesScope.ranges.map { it.value }
+                    + builtScope.featuredMeasure.value
+                    + builtScope.comparativeMeasures.map { it.value }
+                ).autoScaleRange()
 
-            val range = if (minRange == maxRange) {
-                if (minRange != 0f) {
-                    (minRange / 2f)..(maxRange * 2f)
-                } else {
-                    minRange..minRange + 1f
-                }
-            } else {
-                minRange..maxRange
-            }
-
-            val axisModel = LinearAxisModel(range, allowZooming = false, allowPanning = false)
-            return axisModel
+            return LinearAxisModel(range, allowZooming = false, allowPanning = false)
         }
     }
 }

@@ -16,6 +16,7 @@ import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.round
 import kotlin.math.sign
 
 private val TickRatios = listOf(0.1f, 0.2f, 0.5f, 1f, 2f)
@@ -49,7 +50,8 @@ public class LinearAxisModel constructor(
     private val allowPanning: Boolean = true,
 ) : AxisModel<Float> {
     init {
-        require(range.endInclusive > range.start) { "Axis end must be greater than start" }
+        require(range.endInclusive > range.start)
+        { "Axis range end (${range.endInclusive}) must be greater than start (${range.start})" }
         require(minimumMajorTickSpacing > 0.dp) { "Minimum major tick spacing must be greater than 0 dp" }
         require(zoomRangeLimit > 0f) {
             "Zoom range limit must be greater than 0"
@@ -74,15 +76,13 @@ public class LinearAxisModel constructor(
 
         return buildList {
             if (tickSpacing > 0) {
-                var i = 0
+                var tickCount = floor(currentRange.start/tickSpacing)
                 do {
-                    val lastTick =
-                        floor((currentRange.start + i * tickSpacing) / tickSpacing) * tickSpacing
-
+                    val lastTick = tickCount * tickSpacing
                     if (lastTick in currentRange) {
                         add(lastTick)
                     }
-                    i++
+                    tickCount++
                 } while (lastTick < currentRange.endInclusive)
             }
         }
@@ -230,7 +230,16 @@ public fun rememberLinearAxisModel(
 public fun List<Float>.autoScaleRange(): ClosedFloatingPointRange<Float> {
     val max = this.max()
     val min = this.min()
-    val range = max - min
+    val range = if (max - min == 0f) {
+        if (min != 0f) {
+            (max * 2f) - (min / 2f)
+        } else {
+            1f
+        }
+    } else {
+        max - min
+    }
+
     val scale = 10f.pow(floor(log10(range)))
 
     val scaleMin = if (min < 0) {
@@ -245,14 +254,30 @@ public fun List<Float>.autoScaleRange(): ClosedFloatingPointRange<Float> {
         floor(abs(max / scale))
     } * scale * sign(max)
 
-    return scaleMin..scaleMax
+    return if (scaleMax - scaleMin == 0f) {
+        if (scaleMin != 0f) {
+            scaleMin / 2f..scaleMax * 2f
+        } else {
+            scaleMin..1f
+        }
+    } else {
+        scaleMin..scaleMax
+    }
 }
 
 @JvmName("autoScaleIntRange")
 public fun List<Int>.autoScaleRange(): ClosedFloatingPointRange<Float> {
     val max = this.max()
     val min = this.min()
-    val range = max - min
+    val range = if (max - min == 0) {
+        if (min != 0) {
+            (max * 2f) - (min / 2f)
+        } else {
+            1f
+        }
+    } else {
+        max - min
+    }
     val scale = 10f.pow(floor(log10(range.toFloat())))
 
     val scaleMin = if (min < 0) {
@@ -267,5 +292,13 @@ public fun List<Int>.autoScaleRange(): ClosedFloatingPointRange<Float> {
         floor(abs(max / scale))
     } * scale * sign(max.toFloat())
 
-    return scaleMin..scaleMax
+    return if (scaleMax - scaleMin == 0f) {
+        if (scaleMin != 0f) {
+            scaleMin / 2f..scaleMax * 2f
+        } else {
+            scaleMin..1f
+        }
+    } else {
+        scaleMin..scaleMax
+    }
 }
