@@ -118,7 +118,8 @@ internal class PieMeasurePolicy constructor(
         pie: Measurable,
         labels: List<Measurable>,
         constraints: Constraints,
-        minPieDiameterPx: Float
+        minPieDiameterPx: Float,
+        maxPieDiameterPx: Float
     ): Triple<Float, Placeable, List<Placeable>> {
         val labelPlaceables = labels.map {
             it.measure(
@@ -132,10 +133,7 @@ internal class PieMeasurePolicy constructor(
         // use floor for PieDiameter because below the size is set via constraints
         // which is an integer
         val pieDiameter = floor(
-            max(
-                findMaxDiameter(constraints, labelPlaceables, minPieDiameterPx),
-                minPieDiameterPx
-            )
+            findMaxDiameter(constraints, labelPlaceables, minPieDiameterPx).coerceIn(minPieDiameterPx, maxPieDiameterPx)
         )
 
         val piePlaceable =

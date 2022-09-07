@@ -166,7 +166,8 @@ private const val LabelFadeInDuration = 1000
  * @param holeSize A relative size for an inner hole of the pie, creating a donut chart, with a
  * value between 0 and 1.
  * @param holeContent Optional content that may be placed in the space of the donut hole.
- * @param minPieDiameter Minimum diameter allowed for the pie itself.
+ * @param minPieDiameter Minimum diameter allowed for the pie.
+ * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
  * @param animationSpec Specifies the animation to use when the pie chart is first drawn.
  */
 @ExperimentalKoalaPlotApi
@@ -184,10 +185,12 @@ public fun PieChart(
     holeSize: Float = 0f,
     holeContent: @Composable () -> Unit = {},
     minPieDiameter: Dp = 100.dp,
+    maxPieDiameter: Dp = 300.dp,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
     require(holeSize in 0f..1f) { "holeSize must be between 0 and 1" }
     require(labelSpacing >= 1f) { "labelSpacing must be greater than 1" }
+    require(maxPieDiameter != Dp.Unspecified) { "maxPieDiameter cannot be Unspecified" }
 
     // Animate pie growth whenever elements change, also modified alpha of labels
     val beta = remember(values) { Animatable(0f) }
@@ -236,7 +239,8 @@ public fun PieChart(
                 pieMeasurable,
                 labelMeasurables,
                 constraints,
-                minPieDiameter.toPx()
+                minPieDiameter.toPx(),
+                maxPieDiameter.toPx()
             )
 
             val labelOffsets = pieMeasurePolicy.computeLabelOffsets(pieDiameter, labelPlaceables)
