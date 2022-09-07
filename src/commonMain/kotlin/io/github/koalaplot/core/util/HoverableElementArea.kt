@@ -89,7 +89,7 @@ public fun HoverableElementArea(
             null
         }
 
-        layout(constraints.maxWidth, constraints.maxHeight) {
+        layout(placeable.width, placeable.height) {
             placeable.place(0, 0)
 
             hoverItem?.apply {

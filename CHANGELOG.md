@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- maxPieDiameter parameter to the PieChart Composable
+
+### Changed
+- HoverableElementArea sets its size based on contained content rather than filling its parent
+- Improve Bullet axis auto range implementation
+
+### Fixed
+- Ensure List<Float>.autoScaleRange() works if receiver's min & max values are equal, or zero.
+- LinearAxisModel tick value calculation due to precision causing tick values to be duplicated and skipped
+
+### Removed
+
+
 ## [0.1.2]
 - Fix BulletGraph auto axis range calculation so min and max of range cannot be equal
 - Fix rendering of feature bar when axis range does not start at 0
