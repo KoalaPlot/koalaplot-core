@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -180,7 +181,7 @@ public fun PieChart(
         DefaultSlice(colors[it])
     },
     label: @Composable (Int) -> Unit = {},
-    labelConnector: @Composable LabelConnectorScope.(Int) -> Unit = {},
+    labelConnector: @Composable LabelConnectorScope.(Int) -> Unit = { StraightLineConnector() },
     labelSpacing: Float = DefaultLabelDiameterScale,
     holeSize: Float = 0f,
     holeContent: @Composable () -> Unit = {},
@@ -476,7 +477,7 @@ private class Slice(
 @Composable
 public fun LabelConnectorScope.BezierLabelConnector(
     modifier: Modifier = Modifier,
-    connectorColor: Color = Color.Black,
+    connectorColor: Color = MaterialTheme.colors.onBackground,
     connectorStroke: Stroke = Stroke(width = 1f)
 ) {
     val length by remember(startPosition.value, endPosition.value) {
@@ -520,7 +521,7 @@ public fun LabelConnectorScope.BezierLabelConnector(
 @Composable
 public fun LabelConnectorScope.StraightLineConnector(
     modifier: Modifier = Modifier,
-    connectorColor: Color = Color.Black,
+    connectorColor: Color = MaterialTheme.colors.onBackground,
     connectorStroke: Stroke = Stroke(width = 1f)
 ) {
     val path = Path().apply {

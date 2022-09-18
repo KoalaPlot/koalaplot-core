@@ -8,20 +8,26 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+
 - maxPieDiameter parameter to the PieChart Composable
 
 ### Changed
+
 - HoverableElementArea sets its size based on contained content rather than filling its parent
 - Improve Bullet axis auto range implementation
+- PieChart to use a StraightLineConnector as the default labelConnector instead of none
+- StraightLineConnector and BezierLabelConnector to use a default color of the Material theme's onBackground instead of
+  black
 
 ### Fixed
-- Ensure List<Float>.autoScaleRange() works if receiver's min & max values are equal, or zero.
+
+- Ensure List<Float>.autoScaleRange() works if receiver's min & max values are equal or zero.
 - LinearAxisModel tick value calculation due to precision causing tick values to be duplicated and skipped
 
 ### Removed
 
-
 ## [0.1.2]
+
 - Fix BulletGraph auto axis range calculation so min and max of range cannot be equal
 - Fix rendering of feature bar when axis range does not start at 0
 
