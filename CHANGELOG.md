@@ -7,6 +7,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.2.0]
+
 ### Added
 
 - maxPieDiameter parameter to the PieChart Composable
@@ -23,8 +25,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Ensure List<Float>.autoScaleRange() works if receiver's min & max values are equal or zero.
 - LinearAxisModel tick value calculation due to precision causing tick values to be duplicated and skipped
-
-### Removed
 
 ## [0.1.2]
 
