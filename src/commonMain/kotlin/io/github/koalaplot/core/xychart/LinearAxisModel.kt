@@ -16,7 +16,6 @@ import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
-import kotlin.math.round
 import kotlin.math.sign
 
 private val TickRatios = listOf(0.1f, 0.2f, 0.5f, 1f, 2f)
@@ -50,8 +49,9 @@ public class LinearAxisModel constructor(
     private val allowPanning: Boolean = true,
 ) : AxisModel<Float> {
     init {
-        require(range.endInclusive > range.start)
-        { "Axis range end (${range.endInclusive}) must be greater than start (${range.start})" }
+        require(range.endInclusive > range.start) {
+            "Axis range end (${range.endInclusive}) must be greater than start (${range.start})"
+        }
         require(minimumMajorTickSpacing > 0.dp) { "Minimum major tick spacing must be greater than 0 dp" }
         require(zoomRangeLimit > 0f) {
             "Zoom range limit must be greater than 0"
@@ -76,7 +76,7 @@ public class LinearAxisModel constructor(
 
         return buildList {
             if (tickSpacing > 0) {
-                var tickCount = floor(currentRange.start/tickSpacing)
+                var tickCount = floor(currentRange.start / tickSpacing)
                 do {
                     val lastTick = tickCount * tickSpacing
                     if (lastTick in currentRange) {

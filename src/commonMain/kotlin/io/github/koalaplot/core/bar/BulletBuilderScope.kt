@@ -32,8 +32,6 @@ import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.DiamondShape
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.util.max
-import io.github.koalaplot.core.util.min
 import io.github.koalaplot.core.xychart.AxisStyle
 import io.github.koalaplot.core.xychart.LinearAxisModel
 import io.github.koalaplot.core.xychart.autoScaleRange
@@ -368,9 +366,9 @@ public class AxisSettings {
 
         private fun createLinearAxisModel(builtScope: BulletBuilderScope): LinearAxisModel {
             val range = (
-                builtScope.rangesScope.ranges.map { it.value }
-                    + builtScope.featuredMeasure.value
-                    + builtScope.comparativeMeasures.map { it.value }
+                builtScope.rangesScope.ranges.map { it.value } +
+                    builtScope.featuredMeasure.value +
+                    builtScope.comparativeMeasures.map { it.value }
                 ).autoScaleRange()
 
             return LinearAxisModel(range, allowZooming = false, allowPanning = false)
