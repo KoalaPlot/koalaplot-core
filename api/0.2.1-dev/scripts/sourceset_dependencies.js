@@ -1,0 +1,1 @@
+sourceset_dependencies='{":dokkaCustomFormat/androidAndroidTestRelease":[],":dokkaCustomFormat/androidDebug":[],":dokkaCustomFormat/androidMain":[":dokkaCustomFormat/commonMain"],":dokkaCustomFormat/androidRelease":[],":dokkaCustomFormat/commonMain":[],":dokkaCustomFormat/jsMain":[":dokkaCustomFormat/commonMain"],":dokkaCustomFormat/jvmMain":[":dokkaCustomFormat/commonMain"]}'
