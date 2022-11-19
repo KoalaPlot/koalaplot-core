@@ -7,6 +7,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+- Avoid visual artifacts between pie slices by drawing without antialiasing.
+
 ## [0.2.0]
 
 ### Added

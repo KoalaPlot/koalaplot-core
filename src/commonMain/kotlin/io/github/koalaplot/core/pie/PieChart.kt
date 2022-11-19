@@ -6,7 +6,6 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -28,14 +27,17 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
@@ -315,9 +317,7 @@ private fun HoverableElementAreaScope.Pie(
                 val diameter = min(constraints.maxWidth, constraints.maxHeight)
                 val sizeModifier = Modifier.size(diameter.toDp())
                 internalPieData.forEachIndexed { index, _ ->
-                    Box(
-                        modifier = sizeModifier
-                    ) {
+                    Box(modifier = sizeModifier) {
                         with(sliceScopes[index]) {
                             slice(index)
                         }
@@ -373,8 +373,18 @@ public fun PieSliceScope.DefaultSlice(
 
     Box(
         modifier = modifier.fillMaxSize()
+            .drawWithContent {
+                drawIntoCanvas {
+                    it.drawPath(
+                        (shape.createOutline(size, layoutDirection, this) as Outline.Generic).path,
+                        Paint().apply {
+                            this.color = color
+                            isAntiAlias = false
+                        }
+                    )
+                }
+            }
             .clip(shape)
-            .background(color, shape)
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
             .then(
                 if (clickable) Modifier.clickable(
