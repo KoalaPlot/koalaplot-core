@@ -347,6 +347,7 @@ private fun HoverableElementAreaScope.Pie(
  * desired, a good starting value is 1.05.
  * @param hoverElement Content to show when the mouse/pointer hovers over the slice
  * @param clickable If clicking should be enabled.
+ * @param antiAlias Set to true if the slice should be drawn with anti-aliasing, false otherwise
  * @param onClick handler of clicks on the slice
  */
 @ExperimentalKoalaPlotApi
@@ -358,6 +359,7 @@ public fun PieSliceScope.DefaultSlice(
     hoverExpandFactor: Float = 1.0f,
     hoverElement: @Composable () -> Unit = {},
     clickable: Boolean = false,
+    antiAlias: Boolean = false,
     onClick: () -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -379,7 +381,7 @@ public fun PieSliceScope.DefaultSlice(
                         (shape.createOutline(size, layoutDirection, this) as Outline.Generic).path,
                         Paint().apply {
                             this.color = color
-                            isAntiAlias = false
+                            isAntiAlias = antiAlias
                         }
                     )
                 }
