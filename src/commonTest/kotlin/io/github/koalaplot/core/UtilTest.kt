@@ -10,10 +10,7 @@ class UtilTest {
         val x = maximize(0.0, 10.0, 0.01) {
             it < 5.0
         }
-        assertEquals(
-            5.0, x, 5.0 * 0.01,
-            "Result $x was not close to 5.0"
-        )
+        assertEquals(5.0, x, 5.0 * 0.01, "Result $x was not close to 5.0")
     }
 
     @Test
@@ -21,10 +18,7 @@ class UtilTest {
         val x = maximize(0.0, Double.POSITIVE_INFINITY, 0.01) {
             it < 5.0
         }
-        assertEquals(
-            5.0, x, 5.0 * 0.01,
-            "Result $x was not close to 5.0"
-        )
+        assertEquals(5.0, x, 5.0 * 0.01, "Result $x was not close to 5.0")
     }
 
     @Test
@@ -32,9 +26,6 @@ class UtilTest {
         val x = -maximize(-10.0, 0.0, 0.01) {
             it < -5.0
         }
-        assertEquals(
-            5.0, x, 5.0 * 0.01,
-            "Result $x was not close to 5.0"
-        )
+        assertEquals(5.0, x, 5.0 * 0.01, "Result $x was not close to 5.0")
     }
 }

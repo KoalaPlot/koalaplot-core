@@ -6,7 +6,6 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -31,13 +30,17 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.withSaveLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
@@ -195,7 +198,6 @@ public fun PieChart(
     require(labelSpacing >= 1f) { "labelSpacing must be greater than 1" }
     require(maxPieDiameter != Dp.Unspecified) { "maxPieDiameter cannot be Unspecified" }
 
-    // Animate pie growth whenever elements change, also modified alpha of labels
     val beta = remember(values) { Animatable(0f) }
     val labelAlpha = remember(values) { Animatable(0f) }
 
@@ -214,14 +216,8 @@ public fun PieChart(
     // pieSliceData when the animation is complete - used for sizing & label layout/positioning
     val finalPieSliceData = remember(values) { makePieSliceData(values, 1f) }
 
-    val pieMeasurePolicy = remember(
-        finalPieSliceData, holeSize, labelSpacing, minPieDiameter,
-    ) {
-        PieMeasurePolicy(
-            finalPieSliceData,
-            labelSpacing,
-            InitOuterRadius
-        )
+    val pieMeasurePolicy = remember(finalPieSliceData, holeSize, labelSpacing, minPieDiameter) {
+        PieMeasurePolicy(finalPieSliceData, labelSpacing, InitOuterRadius)
     }
 
     HoverableElementArea(modifier = modifier) {
@@ -277,9 +273,13 @@ public fun PieChart(
 
             with(pieMeasurePolicy) {
                 layoutPie(
-                    size, labelOffsets, labelConnectorTranslations.map { it.first }, pieDiameter,
+                    size,
+                    labelOffsets,
+                    labelConnectorTranslations.map { it.first },
+                    pieDiameter,
                     PieMeasurePolicy.PiePlaceables(
-                        piePlaceable, holePlaceable,
+                        piePlaceable,
+                        holePlaceable,
                         labelPlaceables,
                         connectorPlaceables
                     )
@@ -316,8 +316,8 @@ private fun HoverableElementAreaScope.Pie(
             with(LocalDensity.current) {
                 val diameter = min(constraints.maxWidth, constraints.maxHeight)
                 val sizeModifier = Modifier.size(diameter.toDp())
-                internalPieData.forEachIndexed { index, _ ->
-                    Box(modifier = sizeModifier) {
+                Box(modifier = sizeModifier) {
+                    internalPieData.forEachIndexed { index, _ ->
                         with(sliceScopes[index]) {
                             slice(index)
                         }
@@ -348,6 +348,8 @@ private fun HoverableElementAreaScope.Pie(
  * @param hoverElement Content to show when the mouse/pointer hovers over the slice
  * @param clickable If clicking should be enabled.
  * @param antiAlias Set to true if the slice should be drawn with anti-aliasing, false otherwise
+ * @param gap Specifies the gap between slices. It is the angular distance, in degrees, between the
+ * start/stop values the slice represents and where the slice is actually drawn.
  * @param onClick handler of clicks on the slice
  */
 @ExperimentalKoalaPlotApi
@@ -360,6 +362,7 @@ public fun PieSliceScope.DefaultSlice(
     hoverElement: @Composable () -> Unit = {},
     clickable: Boolean = false,
     antiAlias: Boolean = false,
+    gap: Float = 0.0f,
     onClick: () -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -367,8 +370,8 @@ public fun PieSliceScope.DefaultSlice(
     val targetOuterRadius by animateFloatAsState(outerRadius * if (isHovered) hoverExpandFactor else 1f)
 
     val shape = Slice(
-        startAngle,
-        angle,
+        startAngle + gap,
+        angle - 2 * gap,
         innerRadius,
         targetOuterRadius
     )
@@ -377,23 +380,56 @@ public fun PieSliceScope.DefaultSlice(
         modifier = modifier.fillMaxSize()
             .drawWithContent {
                 drawIntoCanvas {
+                    val path = (shape.createOutline(size, layoutDirection, this) as Outline.Generic).path
+
+                    // draw slice
                     it.drawPath(
-                        (shape.createOutline(size, layoutDirection, this) as Outline.Generic).path,
+                        path,
                         Paint().apply {
-                            this.color = color
                             isAntiAlias = antiAlias
+                            this.color = color
                         }
                     )
+
+                    if (border != null) {
+                        it.withSaveLayer(Rect(Offset.Zero, size), Paint().apply { isAntiAlias = antiAlias }) {
+                            val clip = Path().apply {
+                                addRect(Rect(Offset.Zero, size))
+                                op(this, path, PathOperation.Difference)
+                            }
+
+                            it.drawPath(
+                                path,
+                                Paint().apply {
+                                    isAntiAlias = antiAlias
+                                    strokeWidth = border.width.toPx()
+                                    style = PaintingStyle.Stroke
+                                    border.brush.applyTo(size, this, 1f)
+                                }
+                            )
+
+                            // Remove part of border drawn outside of the slice bounds
+                            it.drawPath(
+                                clip,
+                                Paint().apply {
+                                    isAntiAlias = antiAlias
+                                    blendMode = BlendMode.Clear
+                                }
+                            )
+                        }
+                    }
                 }
-            }
-            .clip(shape)
-            .then(if (border != null) Modifier.border(border, shape) else Modifier)
+            }.clip(shape)
             .then(
-                if (clickable) Modifier.clickable(
-                    enabled = true,
-                    role = Role.Button,
-                    onClick = onClick
-                ) else Modifier
+                if (clickable) {
+                    Modifier.clickable(
+                        enabled = true,
+                        role = Role.Button,
+                        onClick = onClick
+                    )
+                } else {
+                    Modifier
+                }
             )
             .hoverableElement(hoverElement)
             .hoverable(interactionSource)
@@ -427,8 +463,10 @@ private class Slice(
                     // Outer circle
                     addArc(
                         Rect(
-                            size.width / 2f - radius, size.width / 2f - radius,
-                            size.width / 2f + radius, size.width / 2f + radius
+                            size.width / 2f - radius,
+                            size.width / 2f - radius,
+                            size.width / 2f + radius,
+                            size.width / 2f + radius
                         ),
                         startAngle,
                         angle
@@ -436,8 +474,10 @@ private class Slice(
                     // Inner circle
                     addArc(
                         Rect(
-                            size.width / 2f - holeRadius, size.width / 2f - holeRadius,
-                            size.width / 2f + holeRadius, size.width / 2f + holeRadius
+                            size.width / 2f - holeRadius,
+                            size.width / 2f - holeRadius,
+                            size.width / 2f + holeRadius,
+                            size.width / 2f + holeRadius
                         ),
                         startAngle,
                         -angle
@@ -450,8 +490,10 @@ private class Slice(
                     // Outer arc
                     addArc(
                         Rect(
-                            size.width / 2f - radius, size.width / 2f - radius,
-                            size.width / 2f + radius, size.width / 2f + radius
+                            size.width / 2f - radius,
+                            size.width / 2f - radius,
+                            size.width / 2f + radius,
+                            size.width / 2f + radius
                         ),
                         startAngle,
                         angle
@@ -506,11 +548,7 @@ public fun LabelConnectorScope.BezierLabelConnector(
         // control point 2
         val cp2 = endPosition.value + pol2Cart(length / 2, endAngle.value)
 
-        cubicTo(
-            cp1.x, cp1.y,
-            cp2.x, cp2.y,
-            endPosition.value.x, endPosition.value.y
-        )
+        cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, endPosition.value.x, endPosition.value.y)
     }
 
     Box(

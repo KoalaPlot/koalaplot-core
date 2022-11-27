@@ -124,9 +124,7 @@ public fun <X, Y> XYChart(
             val xAxisMeasurable = subcompose("xaxis") { Axis(xAxis) }[0]
             val yAxisMeasurable = subcompose("yaxis") { Axis(yAxis) }[0]
 
-            val chartScope = XYChartScopeImpl(
-                xAxisModel, yAxisModel, xAxis, yAxis, this@HoverableElementArea
-            )
+            val chartScope = XYChartScopeImpl(xAxisModel, yAxisModel, xAxis, yAxis, this@HoverableElementArea)
 
             val chartMeasurable = subcompose("chart") {
                 Box(

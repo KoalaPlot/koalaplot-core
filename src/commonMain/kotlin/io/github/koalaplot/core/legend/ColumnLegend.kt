@@ -74,9 +74,7 @@ private fun MeasureScope.measureColumnLegend(
     val labelWidth = labelPlaceables.maxOf { it.width }
 
     val rowHeights = (0 until itemCount).map {
-        max(
-            symbolPlaceables[it].height, max(valuePlaceables[it].height, labelPlaceables[it].height)
-        )
+        max(symbolPlaceables[it].height, max(valuePlaceables[it].height, labelPlaceables[it].height))
     }
 
     return layout(
@@ -104,9 +102,7 @@ private fun MeasureScope.measureColumnLegend(
                 offset
             )
             offset += Offset(labelWidth + columnGap.toPx(), 0f)
-            placeCell(
-                rowMeasurables[row].third, valuePlaceables[row], rowHeights[row], valueWidth, offset
-            )
+            placeCell(rowMeasurables[row].third, valuePlaceables[row], rowHeights[row], valueWidth, offset)
             offset += Offset(0f, rowHeights[row] + this.run { rowGap.toPx() })
         }
     }

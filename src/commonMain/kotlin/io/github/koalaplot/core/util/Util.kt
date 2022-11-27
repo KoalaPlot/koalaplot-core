@@ -35,8 +35,7 @@ public fun Double.toString(precision: Int): String {
     }
 
     // insert decimal point
-    if (precision != 0)
-        s.insert(s.lastIndex - (precision - 1), ".")
+    if (precision != 0) s.insert(s.lastIndex - (precision - 1), ".")
 
     // (re)insert negative sign
     if (this < 0) {
@@ -153,8 +152,8 @@ public fun Modifier.rotateVertically(rotation: VerticalRotation): Modifier = the
         ): Int {
             return measurable.maxIntrinsicHeight(height)
         }
-    })
-    .then(rotate(rotation.value))
+    }
+).then(rotate(rotation.value))
 
 @Suppress("MagicNumber")
 public enum class VerticalRotation(internal val value: Float) {

@@ -185,10 +185,11 @@ internal class AxisDelegate<T> private constructor(
 @Composable
 internal fun <T> Axis(delegate: AxisDelegate<T>) {
     Canvas(
-        modifier = if (delegate.orientation == AxisOrientation.Vertical)
+        modifier = if (delegate.orientation == AxisOrientation.Vertical) {
             Modifier.fillMaxHeight().width(delegate.thicknessDp)
-        else
+        } else {
             Modifier.fillMaxWidth().height(delegate.thicknessDp)
+        }
     ) {
         with(delegate) {
             drawAxis()

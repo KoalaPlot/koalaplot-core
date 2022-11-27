@@ -190,8 +190,7 @@ public fun <X, Y, E : BarChartEntry<X, Y>> XYChartScope<X, Y>.VerticalBarChart(
                                 ).roundToInt()
                     )
 
-                    if (!stacked)
-                        xOffset += placeables[elementIndex].width
+                    if (!stacked) xOffset += placeables[elementIndex].width
                 }
             }
         }

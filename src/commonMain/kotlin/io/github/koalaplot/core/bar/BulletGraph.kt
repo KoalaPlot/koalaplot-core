@@ -37,7 +37,9 @@ private val DefaultRangeShades = listOf(
 )
 private const val MinRangeShade = 0.99f
 
-private class BulletGraphBuilder @OptIn(ExperimentalKoalaPlotApi::class) constructor(
+private class BulletGraphBuilder
+@OptIn(ExperimentalKoalaPlotApi::class)
+constructor(
     val slotId: Int,
     val scope: SubcomposeMeasureScope,
     val bulletScope: BulletBuilderScope,

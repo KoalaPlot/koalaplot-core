@@ -92,7 +92,8 @@ public class LinearAxisModel constructor(
         val minTickSpacing = (minimumMajorTickSpacing / axisLength).coerceIn(0f..1f)
         val majorTickValues = computeMajorTickValues(minTickSpacing)
         val minorTickValues = computeMinorTickValues(
-            majorTickValues, computeMajorTickSpacing(minTickSpacing)
+            majorTickValues,
+            computeMajorTickSpacing(minTickSpacing)
         )
         return object : TickValues<Float> {
             override val majorTickValues = majorTickValues
@@ -221,8 +222,13 @@ public fun rememberLinearAxisModel(
     allowPanning: Boolean = true,
 ): LinearAxisModel = remember {
     LinearAxisModel(
-        range, zoomRangeLimit, minimumMajorTickIncrement, minimumMajorTickSpacing,
-        minorTickCount, allowZooming, allowPanning
+        range,
+        zoomRangeLimit,
+        minimumMajorTickIncrement,
+        minimumMajorTickSpacing,
+        minorTickCount,
+        allowZooming,
+        allowPanning
     )
 }
 

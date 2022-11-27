@@ -7,6 +7,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- Pie slice gap setting
+
+### Changed
+- Update compose to 1.2.1
+
+### Fixed
+- Avoid compose Exception and subsequent application crash when using a border on a pie slice
+
 ## [0.2.1]
 
 ### Fixed
