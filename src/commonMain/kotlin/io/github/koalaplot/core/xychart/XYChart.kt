@@ -512,7 +512,7 @@ public fun <X, Y> XYChart(
         xAxisLabels = {
             Text(
                 xAxisLabels(it),
-                color = MaterialTheme.colors.onBackground,
+                color = xAxisStyle.color,
                 style = MaterialTheme.typography.caption,
                 modifier = Modifier.padding(top = 2.dp)
             )
@@ -520,7 +520,7 @@ public fun <X, Y> XYChart(
         xAxisTitle = {
             Text(
                 xAxisTitle,
-                color = MaterialTheme.colors.onBackground,
+                color = xAxisStyle.color,
                 style = MaterialTheme.typography.subtitle1
             )
         },
@@ -528,7 +528,7 @@ public fun <X, Y> XYChart(
         yAxisLabels = {
             Text(
                 yAxisLabels(it),
-                color = MaterialTheme.colors.onBackground,
+                color = yAxisStyle.color,
                 style = MaterialTheme.typography.caption,
                 modifier = Modifier.padding(top = 2.dp)
             )
@@ -536,7 +536,7 @@ public fun <X, Y> XYChart(
         yAxisTitle = {
             Text(
                 yAxisTitle,
-                color = MaterialTheme.colors.onBackground,
+                color = yAxisStyle.color,
                 style = MaterialTheme.typography.subtitle1,
                 modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
                     .padding(bottom = KoalaPlotTheme.sizes.gap),
