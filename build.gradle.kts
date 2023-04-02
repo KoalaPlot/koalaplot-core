@@ -59,6 +59,15 @@ kotlin {
                 implementation(compose.material)
             }
         }
+
+        named("jvmTest") {
+            dependencies {
+                implementation(kotlin("test"))
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+                implementation(compose.uiTestJUnit4)
+                implementation(compose.desktop.currentOs)
+            }
+        }
     }
 }
 

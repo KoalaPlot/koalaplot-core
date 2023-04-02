@@ -78,7 +78,13 @@ private fun makePieSliceData(
 ): List<PieSliceData> {
     val total = data.sumOf {
         it.toDouble()
-    }.toFloat()
+    }.toFloat().let {
+        if (it == 0F) {
+            1F
+        } else {
+            it
+        }
+    }
 
     return buildList {
         var startAngle = AngleCCWTop

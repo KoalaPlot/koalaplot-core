@@ -15,6 +15,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 - Avoid compose Exception and subsequent application crash when using a border on a pie slice
+- Crash when pie chart values are all zeros
 
 ## [0.2.1]
 
