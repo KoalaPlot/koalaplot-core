@@ -24,7 +24,7 @@ dependencies {
 }
 
 group = "io.github.koalaplot"
-version = "0.3.0-dev1"
+version = "0.3.0"
 
 kotlin {
     explicitApi()
