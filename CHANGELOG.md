@@ -11,7 +11,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Pie slice gap setting
 
 ### Changed
-- Update compose to 1.2.1
+- Update Compose version to 1.3.1
+- Update Kotlin version to 1.8.10
+- Update Android plugin version to 7.4.2
+- Update Android compileSdk and targetSdk versions to 33
+- Migrate to Material 3
 
 ### Fixed
 - Avoid compose Exception and subsequent application crash when using a border on a pie slice

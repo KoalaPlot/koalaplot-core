@@ -1,7 +1,7 @@
 package io.github.koalaplot.core.util
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.material.LocalTextStyle
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFontLoader
+import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.Paragraph
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Constraints
@@ -34,7 +34,7 @@ public fun ResponsiveText(
     var lastSize by remember { mutableStateOf(Size(0f, 0f)) }
     var lastTextSize by remember { mutableStateOf(0.0f) }
 
-    val fontLoader = LocalFontLoader.current
+    val fontResolver = LocalFontFamilyResolver.current
     val density = LocalDensity.current
 
     fun findTextSize(
@@ -61,9 +61,9 @@ public fun ResponsiveText(
             text = text,
             style = style.copy(fontSize = sizeCheck.sp),
             maxLines = maxLines,
-            width = constraints.maxWidth.toFloat(),
+            constraints = constraints.copy(minWidth = 0, minHeight = 0),
             density = density,
-            resourceLoader = fontLoader,
+            fontFamilyResolver = fontResolver,
             ellipsis = ellipsis
         )
 
@@ -81,8 +81,8 @@ public fun ResponsiveText(
         val constraints = Constraints.fixed(size.width.toInt(), size.height.toInt())
 
         lastTextSize = if (size != lastSize) {
-            var minTextSize: Float
-            var maxTextSize: Float
+            val minTextSize: Float
+            val maxTextSize: Float
 
             if (size.width > lastSize.width && size.height > lastSize.height) {
                 minTextSize = lastTextSize
@@ -105,9 +105,9 @@ public fun ResponsiveText(
             text = text,
             style = style.copy(fontSize = lastTextSize.sp),
             maxLines = maxLines,
-            width = constraints.maxWidth.toFloat(),
+            constraints = constraints.copy(minWidth = 0, minHeight = 0),
             density = this,
-            resourceLoader = fontLoader,
+            fontFamilyResolver = fontResolver,
             ellipsis = ellipsis
         )
 

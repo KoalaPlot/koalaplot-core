@@ -41,7 +41,7 @@ kotlin {
             dependencies {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
-                implementation(compose.material)
+                implementation(compose.material3)
                 implementation(compose.ui)
                 implementation(compose.animation)
                 implementation(KotlinX.coroutines.core)
@@ -56,7 +56,7 @@ kotlin {
 
         named("jvmMain") {
             dependencies {
-                implementation(compose.material)
+                implementation(compose.material3)
             }
         }
 
@@ -73,11 +73,11 @@ kotlin {
 
 android {
     namespace = "io.github.koalaplot"
-    compileSdk = 32
+    compileSdk = 33
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 31
+        targetSdk = 33
     }
 
     buildFeatures {

@@ -5,8 +5,8 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -512,32 +512,32 @@ public fun <X, Y> XYChart(
         xAxisLabels = {
             Text(
                 xAxisLabels(it),
-                color = MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 2.dp)
             )
         },
         xAxisTitle = {
             Text(
                 xAxisTitle,
-                color = MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.subtitle1
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleMedium
             )
         },
         yAxisStyle,
         yAxisLabels = {
             Text(
                 yAxisLabels(it),
-                color = MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 2.dp)
             )
         },
         yAxisTitle = {
             Text(
                 yAxisTitle,
-                color = MaterialTheme.colors.onBackground,
-                style = MaterialTheme.typography.subtitle1,
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
                     .padding(bottom = KoalaPlotTheme.sizes.gap),
             )

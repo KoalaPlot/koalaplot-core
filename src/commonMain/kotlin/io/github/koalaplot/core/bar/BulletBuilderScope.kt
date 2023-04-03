@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -92,7 +92,7 @@ public class BulletBuilderScope {
     public fun featuredMeasureBar(
         value: Float,
         indicator: @Composable () -> Unit = {
-            HorizontalBarIndicator(SolidColor(MaterialTheme.colors.primary), fraction = FeaturedMeasureDefaultSize)
+            HorizontalBarIndicator(SolidColor(MaterialTheme.colorScheme.primary), fraction = FeaturedMeasureDefaultSize)
         }
     ) {
         featuredMeasure = FeaturedMeasure(value, FeaturedMeasureType.BAR, indicator)
@@ -188,7 +188,7 @@ internal fun SubcomposeMeasureScope.measureLabel(
  */
 @ExperimentalKoalaPlotApi
 @Composable
-public fun DiamondIndicator(color: Color = MaterialTheme.colors.primary, size: Dp) {
+public fun DiamondIndicator(color: Color = MaterialTheme.colorScheme.primary, size: Dp) {
     Symbol(shape = DiamondShape, size = size, fillBrush = SolidColor(color))
 }
 
@@ -199,7 +199,10 @@ public fun DiamondIndicator(color: Color = MaterialTheme.colors.primary, size: D
  */
 @ExperimentalKoalaPlotApi
 @Composable
-public fun DiamondIndicator(color: Color = MaterialTheme.colors.primary, sizeFraction: Float = DefaultSizeFraction) {
+public fun DiamondIndicator(
+    color: Color = MaterialTheme.colorScheme.primary,
+    sizeFraction: Float = DefaultSizeFraction
+) {
     Symbol(shape = DiamondShape, sizeFraction = sizeFraction, fillBrush = SolidColor(color))
 }
 
@@ -211,7 +214,7 @@ public fun DiamondIndicator(color: Color = MaterialTheme.colors.primary, sizeFra
 @ExperimentalKoalaPlotApi
 @Composable
 public fun LineIndicator(
-    color: Color = MaterialTheme.colors.primary,
+    color: Color = MaterialTheme.colorScheme.primary,
     heightFraction: Float = DefaultSizeFraction,
     width: Dp = 2.dp
 ) {
