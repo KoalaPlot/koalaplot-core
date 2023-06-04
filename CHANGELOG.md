@@ -7,6 +7,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Update Compose version to 1.4.0
+- Update Kotlin version to 1.8.20
+- Update Kotlin Coroutines to version 1.7.1
+- Update Detekt to version 1.23.0
+
 ## [0.3.0]
 
 ### Added

@@ -62,14 +62,14 @@ public fun HoverableElementArea(
     }
 
     Layout(
-        modifier = modifier.pointerPosition(Unit) { position = it }
+        modifier = modifier.pointerPosition(Unit) { position = it },
         // localProvider exhibiting inconsistent behavior between platforms and package location
-        /*.modifierLocalProvider(ModifierLocalSender) {
-            Sender { composable, display ->
-                isHovered = display
-                hoverElement = composable
-            }
-        }*/,
+//        .modifierLocalProvider(ModifierLocalSender) {
+//            Sender { composable, display ->
+//                isHovered = display
+//                hoverElement = composable
+//            }
+//        }
         content = {
             Box {
                 scope.content()
@@ -156,30 +156,32 @@ private class HoverableElementAreaScopeImpl(private val sender: Sender) :
 
         // modifierLocalConsumer was exhibiting inconsistent behavior between platforms and
         // package location of this code
-        Modifier/*.modifierLocalConsumer { sender = ModifierLocalSender.current }*/.pointerInput(
-            interactionSource
-        ) {
-            coroutineScope {
-                val currentContext = currentCoroutineContext()
-                val outerScope = this
-                awaitPointerEventScope {
-                    while (currentContext.isActive) {
-                        val event = awaitPointerEvent()
-                        when (event.type) {
-                            PointerEventType.Enter -> outerScope.launch(
-                                start = CoroutineStart.UNDISPATCHED
-                            ) {
-                                emitEnter()
-                            }
-                            PointerEventType.Exit -> outerScope.launch(
-                                start = CoroutineStart.UNDISPATCHED
-                            ) {
-                                emitExit()
+        Modifier // .modifierLocalConsumer { sender = ModifierLocalSender.current }
+            .pointerInput(
+                interactionSource
+            ) {
+                coroutineScope {
+                    val currentContext = currentCoroutineContext()
+                    val outerScope = this
+                    awaitPointerEventScope {
+                        while (currentContext.isActive) {
+                            val event = awaitPointerEvent()
+                            when (event.type) {
+                                PointerEventType.Enter -> outerScope.launch(
+                                    start = CoroutineStart.UNDISPATCHED
+                                ) {
+                                    emitEnter()
+                                }
+
+                                PointerEventType.Exit -> outerScope.launch(
+                                    start = CoroutineStart.UNDISPATCHED
+                                ) {
+                                    emitExit()
+                                }
                             }
                         }
                     }
                 }
             }
-        }
     }
 }

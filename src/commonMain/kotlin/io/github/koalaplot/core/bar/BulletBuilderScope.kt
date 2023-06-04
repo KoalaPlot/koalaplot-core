@@ -60,7 +60,7 @@ public class BulletBuilderScope {
     /**
      * Content for the bullet graph's label.
      */
-    public val label: Slot<@Composable () -> Unit> = Slot() {}
+    public val label: Slot<@Composable () -> Unit> = Slot {}
 
     /**
      * Sets the label's width. If the BulletGraph is in a layout of multiple bullet graphs this value will be
