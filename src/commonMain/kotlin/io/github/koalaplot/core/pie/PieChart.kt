@@ -180,6 +180,8 @@ private const val LabelFadeInDuration = 1000
  * @param holeContent Optional content that may be placed in the space of the donut hole.
  * @param minPieDiameter Minimum diameter allowed for the pie.
  * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
+ * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
+ * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
  * @param animationSpec Specifies the animation to use when the pie chart is first drawn.
  */
 @ExperimentalKoalaPlotApi
@@ -198,6 +200,7 @@ public fun PieChart(
     holeContent: @Composable () -> Unit = {},
     minPieDiameter: Dp = 100.dp,
     maxPieDiameter: Dp = 300.dp,
+    forceCenteredPie: Boolean = false,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
     require(holeSize in 0f..1f) { "holeSize must be between 0 and 1" }
@@ -222,8 +225,8 @@ public fun PieChart(
     // pieSliceData when the animation is complete - used for sizing & label layout/positioning
     val finalPieSliceData = remember(values) { makePieSliceData(values, 1f) }
 
-    val pieMeasurePolicy = remember(finalPieSliceData, holeSize, labelSpacing, minPieDiameter) {
-        PieMeasurePolicy(finalPieSliceData, labelSpacing, InitOuterRadius)
+    val pieMeasurePolicy = remember(finalPieSliceData, holeSize, labelSpacing, minPieDiameter, forceCenteredPie) {
+        PieMeasurePolicy(finalPieSliceData, labelSpacing, InitOuterRadius, forceCenteredPie)
     }
 
     HoverableElementArea(modifier = modifier) {

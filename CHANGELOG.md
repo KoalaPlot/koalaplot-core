@@ -13,6 +13,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update Kotlin Coroutines to version 1.7.1
 - Update Detekt to version 1.23.0
 
+### Added
+- forceCenteredPie parameter to PieChart that always places the pie in the center of the component, adjusting its size
+as needed to accommodate the labels.
+
 ## [0.3.0]
 
 ### Added

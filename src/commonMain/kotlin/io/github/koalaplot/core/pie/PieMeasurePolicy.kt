@@ -10,6 +10,7 @@ import io.github.koalaplot.core.util.DEG2RAD
 import io.github.koalaplot.core.util.maximize
 import io.github.koalaplot.core.util.pol2Cart
 import io.github.koalaplot.core.util.y2theta
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.max
@@ -18,10 +19,15 @@ import kotlin.math.sin
 
 internal data class LabelOffsets(val position: Offset, val anchorPoint: Offset)
 
+/**
+ * @param forceCenteredPie If true, will force the pie to be centered in the parent component by adjusting its size to
+ * accommodate asymmetric label sizes and positions.
+ */
 internal class PieMeasurePolicy constructor(
     private val pieSliceData: List<PieSliceData>,
     private val labelSpacing: Float,
-    private val initOuterRadius: Float
+    private val initOuterRadius: Float,
+    private val forceCenteredPie: Boolean = false
 ) {
     internal fun MeasureScope.layoutPie(
         size: Size,
@@ -30,11 +36,14 @@ internal class PieMeasurePolicy constructor(
         pieDiameter: Float,
         piePlaceables: PiePlaceables
     ) = layout(size.width.toInt(), size.height.toInt()) {
-        val translation =
+        val translation = if (forceCenteredPie) {
+            Offset(size.width / 2, size.height / 2)
+        } else {
             Offset(
                 max(-(labelOffsets.minOfOrNull { it.position.x } ?: 0f), pieDiameter / 2),
                 max(-(labelOffsets.minOfOrNull { it.position.y } ?: 0f), pieDiameter / 2)
             )
+        }
         piePlaceables.labels.forEachIndexed { index, placeable ->
             val position: Offset = labelOffsets[index].position + translation
             placeable.place(position.x.toInt(), position.y.toInt())
@@ -198,8 +207,16 @@ internal class PieMeasurePolicy constructor(
             maxY = max(maxY, labelOffsets[index].y + placeable.height)
         }
 
-        val width = maxX - minX
-        val height = maxY - minY
+        val width = if (forceCenteredPie) {
+            2 * max(abs(maxX), abs(minX)) // this works because the label positions were based on a pie center at (0,0)
+        } else {
+            maxX - minX
+        }
+        val height = if (forceCenteredPie) {
+            2 * max(abs(maxY), abs(minY)) // this works because the label positions were based on a pie center at (0,0)
+        } else {
+            maxY - minY
+        }
 
         return Size(width, height)
     }
