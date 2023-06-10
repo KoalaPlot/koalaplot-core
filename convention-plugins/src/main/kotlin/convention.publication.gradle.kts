@@ -1,8 +1,4 @@
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.tasks.bundling.Jar
-import org.gradle.kotlin.dsl.`maven-publish`
-import org.gradle.kotlin.dsl.signing
-import java.util.*
+import java.util.Properties
 
 plugins {
     `maven-publish`
@@ -42,7 +38,18 @@ val javadocJar by tasks.registering(Jar::class) {
 fun getExtraString(name: String) = ext[name]?.toString()
 
 publishing {
+    val isMac = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
+
     publications.withType<MavenPublication> {
+        // When on MacOS, only publish ios artifacts
+        tasks.withType<AbstractPublishToMaven>().matching {
+            it.publication == this
+        }.configureEach {
+            onlyIf {
+                (isMac && this@withType.name.contains("ios")) || !isMac
+            }
+        }
+
         // Stub javadoc.jar artifact
         artifact(javadocJar.get())
 
@@ -87,7 +94,7 @@ nexusPublishing {
 }
 
 signing {
-    setRequired({gradle.taskGraph.hasTask("publishToSonatype")})
+    setRequired({ gradle.taskGraph.hasTask("publishToSonatype") })
     useInMemoryPgpKeys(getExtraString("signing.key"), getExtraString("signing.password"))
     sign(publishing.publications)
 }

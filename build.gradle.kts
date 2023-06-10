@@ -32,9 +32,10 @@ kotlin {
     js(IR) {
         browser()
     }
-    android() {
+    android {
         publishLibraryVariants("release")
     }
+    ios()
 
     sourceSets {
         named("commonMain") {

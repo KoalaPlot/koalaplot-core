@@ -16,6 +16,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - forceCenteredPie parameter to PieChart that always places the pie in the center of the component, adjusting its size
 as needed to accommodate the labels.
+- Support for ios
 
 ## [0.3.0]
 
