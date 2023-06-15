@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
@@ -32,25 +33,92 @@ public fun <X, Y, P : Point<X, Y>> XYChartScope<X, Y>.LineChart(
     symbol: (@Composable HoverableElementAreaScope.(P) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
+    GeneralLineChart(data, lineStyle, symbol, modifier) { lastPoint, point ->
+        val strokeWidthPx = lineStyle!!.strokeWidth.toPx()
+        drawLine(
+            brush = lineStyle.brush,
+            lastPoint,
+            point,
+            strokeWidth = strokeWidthPx,
+            pathEffect = lineStyle.pathEffect,
+            alpha = lineStyle.alpha,
+            colorFilter = lineStyle.colorFilter,
+            blendMode = lineStyle.blendMode
+        )
+    }
+}
+
+/**
+ * An XY Chart that draws series as points and stairsteps between points.
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ * @param P The type of the line plot data points
+ * @param data Data series to plot.
+ * @param lineStyle Style to use for the line that connects the data points.
+ * @param symbol Composable for the symbol to be shown at each data point.
+ * @param modifier Modifier for the chart.
+ */
+@Composable
+public fun <X, Y, P : Point<X, Y>> XYChartScope<X, Y>.StairstepChart(
+    data: List<P>,
+    lineStyle: LineStyle,
+    symbol: (@Composable HoverableElementAreaScope.(P) -> Unit)? = null,
+    modifier: Modifier = Modifier,
+) {
+    GeneralLineChart(data, lineStyle, symbol, modifier) { lastPoint, point ->
+        val strokeWidthPx = lineStyle.strokeWidth.toPx()
+        val midPoint = lastPoint.copy(x = point.x)
+        drawLine(
+            brush = lineStyle.brush,
+            lastPoint,
+            midPoint,
+            strokeWidth = strokeWidthPx,
+            pathEffect = lineStyle.pathEffect,
+            alpha = lineStyle.alpha,
+            colorFilter = lineStyle.colorFilter,
+            blendMode = lineStyle.blendMode
+        )
+        drawLine(
+            brush = lineStyle.brush,
+            midPoint,
+            point,
+            strokeWidth = strokeWidthPx,
+            pathEffect = lineStyle.pathEffect,
+            alpha = lineStyle.alpha,
+            colorFilter = lineStyle.colorFilter,
+            blendMode = lineStyle.blendMode
+        )
+    }
+}
+
+/**
+ * An XY Chart that draws series as points and lines.
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ * @param P The type of the line plot data points
+ * @param data Data series to plot.
+ * @param lineStyle Style to use for the line that connects the data points. If null, no line is
+ * drawn.
+ * @param symbol Composable for the symbol to be shown at each data point.
+ * @param modifier Modifier for the chart.
+ */
+@Composable
+private fun <X, Y, P : Point<X, Y>> XYChartScope<X, Y>.GeneralLineChart(
+    data: List<P>,
+    lineStyle: LineStyle? = null,
+    symbol: (@Composable HoverableElementAreaScope.(P) -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    drawConnectorLine: DrawScope.(lastPoint: Offset, point: Offset) -> Unit,
+) {
     Layout(modifier = modifier, content = {
         Canvas(modifier = Modifier.fillMaxSize()) {
             scale(scaleX = 1f, scaleY = -1f) {
                 if (lineStyle != null && data.isNotEmpty()) {
-                    val strokeWidthPx = lineStyle.strokeWidth.toPx()
                     var lastPoint =
                         scale(data[0], size) // to prevent scaling every point twice
                     for (pointIndex in 1..data.lastIndex) {
                         val point = scale(data[pointIndex], size)
-                        drawLine(
-                            brush = lineStyle.brush,
-                            lastPoint,
-                            point,
-                            strokeWidth = strokeWidthPx,
-                            pathEffect = lineStyle.pathEffect,
-                            alpha = lineStyle.alpha,
-                            colorFilter = lineStyle.colorFilter,
-                            blendMode = lineStyle.blendMode
-                        )
+                        drawConnectorLine(lastPoint, point)
                         lastPoint = point
                     }
                 }
