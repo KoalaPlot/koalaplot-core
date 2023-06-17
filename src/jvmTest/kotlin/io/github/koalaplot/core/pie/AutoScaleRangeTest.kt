@@ -1,8 +1,8 @@
-package io.github.koalaplot.core
+package io.github.koalaplot.core.pie
 
 import io.github.koalaplot.core.xychart.autoScaleRange
-import kotlin.test.Test
-import kotlin.test.assertEquals
+import junit.framework.TestCase.assertEquals
+import org.junit.Test
 
 class AutoScaleRangeTest {
     // First pair is the input min/max of the data list, second pair is the expected output of autoScaleRange()

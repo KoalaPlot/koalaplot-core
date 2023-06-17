@@ -1,10 +1,9 @@
-package io.github.koalaplot.core
+package io.github.koalaplot.core.pie
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.xychart.LinearAxisModel
-import kotlin.math.abs
-import kotlin.test.Test
+import org.junit.Test
 import kotlin.test.assertEquals
 
 class LinearAxisStateTest {
@@ -58,6 +57,6 @@ private fun testLinearAxis(
     assertEquals(expected.size, ticks.size, "Number of ticks")
 
     expected.forEachIndexed { i, _ ->
-        assertEquals(expected[i], ticks[i], abs(expected[i] * 1e-3f), "Unexpected tick value")
+        assertEquals(expected[i], ticks[i], kotlin.math.abs(expected[i] * 1e-3f), "Unexpected tick value")
     }
 }

@@ -1,7 +1,7 @@
-package io.github.koalaplot.core
+package io.github.koalaplot.core.pie
 
 import io.github.koalaplot.core.util.maximize
-import kotlin.test.Test
+import org.junit.Test
 import kotlin.test.assertEquals
 
 class UtilTest {
