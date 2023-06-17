@@ -45,7 +45,6 @@ publishing {
         tasks.withType<AbstractPublishToMaven>().matching {
             it.publication == this
         }.configureEach {
-            //Couldn't test out this logic since I'm working on a mac
             onlyIf {
                 (isMac && this@withType.name.contains("ios")) || !isMac
             }
