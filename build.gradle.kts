@@ -36,6 +36,9 @@ kotlin {
         publishLibraryVariants("release")
     }
     ios()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     sourceSets {
         named("commonMain") {
@@ -67,6 +70,12 @@ kotlin {
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
                 implementation(compose.uiTestJUnit4)
                 implementation(compose.desktop.currentOs)
+            }
+        }
+
+        named("iosMain") {
+            dependencies {
+                implementation(compose.material3)
             }
         }
     }
