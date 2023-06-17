@@ -35,13 +35,12 @@ kotlin {
     android {
         publishLibraryVariants("release")
     }
-    ios()
     iosX64()
     iosArm64()
-    // iosSimulatorArm64()
+    iosSimulatorArm64()
 
     sourceSets {
-        named("commonMain") {
+        val commonMain by getting {
             dependencies {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
@@ -59,8 +58,10 @@ kotlin {
         }
 
         named("jvmMain") {
+            dependsOn(commonMain)
+
             dependencies {
-                implementation(compose.material3)
+
             }
         }
 
@@ -73,9 +74,17 @@ kotlin {
             }
         }
 
-        named("iosMain") {
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        create("iosMain") {
+            dependsOn(commonMain)
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
+
             dependencies {
-                implementation(compose.material3)
+
             }
         }
     }
@@ -87,7 +96,6 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 33
     }
 
     buildFeatures {
