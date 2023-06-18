@@ -22,12 +22,14 @@ class LinearAxisStateTest {
             0f..10f,
             50.dp,
             500.dp,
-            List(11) { it * 1f })
+            List(11) { it * 1f }
+        )
         testLinearAxis(
             0f..10f,
             100.dp,
             500.dp,
-            List(6) { it * 2f })
+            List(6) { it * 2f }
+        )
     }
 
     @Test
@@ -70,12 +72,14 @@ class LinearAxisStateTest {
             0f..1f,
             50.dp,
             500.dp,
-            List(11) { it * 0.1f })
+            List(11) { it * 0.1f }
+        )
         testLinearAxis(
             0f..1f,
             100.dp,
             500.dp,
-            List(6) { it * 0.2f })
+            List(6) { it * 0.2f }
+        )
     }
 
     @Test
@@ -93,12 +97,14 @@ class LinearAxisStateTest {
             0f..100f,
             50.dp,
             500.dp,
-            List(11) { it * 10f })
+            List(11) { it * 10f }
+        )
         testLinearAxis(
             0f..100f,
             100.dp,
             500.dp,
-            List(6) { it * 20f })
+            List(6) { it * 20f }
+        )
     }
 
     @Test
@@ -107,12 +113,14 @@ class LinearAxisStateTest {
             10f..90f,
             50.dp,
             500.dp,
-            List(9) { it * 10f + 10f })
+            List(9) { it * 10f + 10f }
+        )
         testLinearAxis(
             10f..90f,
             100.dp,
             500.dp,
-            List(4) { it * 20f + 20f })
+            List(4) { it * 20f + 20f }
+        )
     }
 }
 
