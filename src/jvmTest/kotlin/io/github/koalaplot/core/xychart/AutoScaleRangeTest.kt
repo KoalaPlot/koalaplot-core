@@ -1,6 +1,5 @@
-package io.github.koalaplot.core.pie
+package io.github.koalaplot.core.xychart
 
-import io.github.koalaplot.core.xychart.autoScaleRange
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 

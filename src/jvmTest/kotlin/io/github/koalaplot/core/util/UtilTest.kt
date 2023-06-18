@@ -1,6 +1,5 @@
-package io.github.koalaplot.core.pie
+package io.github.koalaplot.core.util
 
-import io.github.koalaplot.core.util.maximize
 import org.junit.Test
 import kotlin.test.assertEquals
 
