@@ -7,7 +7,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import io.github.koalaplot.core.util.times
 import kotlin.jvm.JvmName
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -107,7 +106,7 @@ public class LinearAxisModel constructor(
         }
         val length = currentRange.endInclusive - currentRange.start
         val magnitude = 10f.pow(floor(log10(length)))
-        val scaledTickRatios = TickRatios * magnitude
+        val scaledTickRatios = TickRatios.map { it * magnitude }
 
         // Test scaledTickRatios and pick the first that produces a distance greater than minTickSpacing
         // and an increment greater than minimumMajorTickIncrement

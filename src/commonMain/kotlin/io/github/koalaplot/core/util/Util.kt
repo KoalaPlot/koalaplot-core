@@ -175,3 +175,23 @@ internal fun max(vararg values: Float): Float {
     }
     return m
 }
+
+/**
+ * Finds the distance between a point [p0] and a line defined by points [p1] and [p2], and
+ * the point on the line that is closest to the point [p0].
+ */
+internal fun lineDistance(p1: Vector, p2: Vector, p0: Vector): Pair<Float, Vector> {
+    // Line unit vector
+    val line: Vector = line(p1, p2)
+
+    // get normal of the line
+    val n = Vector(-line.values[1], line.values[0])
+
+    val distance = abs((p0 - p1) * n) / n.norm()
+
+    val scalar: Float = ((p0 - p1) * line)
+
+    val point = p1 + scalar * line
+
+    return Pair(distance, point)
+}

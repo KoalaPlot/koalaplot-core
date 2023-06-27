@@ -31,6 +31,9 @@ internal enum class AxisOrientation {
 
 /**
  * Styling configuration for an Axis.
+ *
+ * @param labelRotation Rotation angle, in degrees, to apply to the axis labels. Increasing values result in
+ * counter-clockwise rotation. Valid values are between 0 and 90.
  */
 public data class AxisStyle(
     val color: Color = Color.Black,
@@ -38,7 +41,13 @@ public data class AxisStyle(
     val minorTickSize: Dp = 0.dp,
     val tickPosition: TickPosition = TickPosition.None,
     val lineWidth: Dp = 1.dp,
-)
+    val labelRotation: Int = 0
+) {
+    init {
+        @Suppress("MagicNumber")
+        require(labelRotation in 0..90) { "labelRotation must be between 0 and 90" }
+    }
+}
 
 /**
  * Creates and remembers an AxisStyle.
@@ -50,13 +59,15 @@ public fun rememberAxisStyle(
     minorTickSize: Dp = KoalaPlotTheme.axis.minorTickSize,
     tickPosition: TickPosition = KoalaPlotTheme.axis.tickPosition,
     lineWidth: Dp = KoalaPlotTheme.axis.lineThickness,
-): AxisStyle = remember(color, majorTickSize, minorTickSize, tickPosition, lineWidth) {
+    labelRotation: Int = 0
+): AxisStyle = remember(color, majorTickSize, minorTickSize, tickPosition, lineWidth, labelRotation) {
     AxisStyle(
         color,
         majorTickSize,
         minorTickSize,
         tickPosition,
-        lineWidth
+        lineWidth,
+        labelRotation
     )
 }
 
@@ -64,7 +75,7 @@ internal class AxisDelegate<T> private constructor(
     private val axisState: AxisState,
     private val tickValues: TickValues<T>,
     val orientation: AxisOrientation,
-    private val style: AxisStyle,
+    val style: AxisStyle,
 ) : AxisState by axisState, TickValues<T> by tickValues {
     companion object {
         fun <T> createVerticalAxis(axisModel: AxisModel<T>, style: AxisStyle, length: Dp): AxisDelegate<T> {

@@ -18,6 +18,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 as needed to accommodate the labels.
 - Support for ios (not working)
 - Step chart
+- Support for rotating x-axis and y-axis labels on XYCharts
 
 ## [0.3.0]
 
