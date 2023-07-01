@@ -129,8 +129,17 @@ public fun <X, Y, E : BarChartEntry<X, Y>> XYChartScope<X, Y>.VerticalBarChart(
         val barOffsets = HashMap<Placeable, ClosedRange<Int>>()
         var measurableIndex = 0
 
+        // compute width of area for bars at each x-axis value based on major tick spacing
+        val barGroupWidth = xAxisState.let {
+            if (it.majorTickOffsets.size > 1) {
+                it.majorTickOffsets[1] - it.majorTickOffsets[0]
+            } else {
+                1f
+            } * constraints.maxWidth * maxBarGroupWidth
+        }
+
         val seriesPlaceables = series.map { innerSeries ->
-            innerSeries.mapIndexed { index, element ->
+            innerSeries.map { element ->
                 val barMin = (
                     yAxisModel.computeOffset(element.yMin).coerceIn(0f, 1f) * constraints.maxHeight
                     ).roundToInt()
@@ -138,17 +147,10 @@ public fun <X, Y, E : BarChartEntry<X, Y>> XYChartScope<X, Y>.VerticalBarChart(
                     yAxisModel.computeOffset(element.yMax).coerceIn(0f, 1f) * constraints.maxHeight
                     ).roundToInt()
 
-                val thisElementOffset = xAxisModel.computeOffset(element.xValue)
-
-                var barWidth = if (index == innerSeries.lastIndex) {
-                    thisElementOffset - xAxisModel.computeOffset(innerSeries[index - 1].xValue)
+                val barWidth = if (!stacked) {
+                    barGroupWidth / series.size
                 } else {
-                    xAxisModel.computeOffset(innerSeries[index + 1].xValue) -
-                        xAxisModel.computeOffset(element.xValue)
-                } * constraints.maxWidth * maxBarGroupWidth
-
-                if (!stacked) {
-                    barWidth /= series.size
+                    barGroupWidth
                 }
 
                 val height = abs(barMax - barMin) * beta.value

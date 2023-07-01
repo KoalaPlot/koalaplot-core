@@ -20,6 +20,9 @@ as needed to accommodate the labels.
 - Step chart
 - Support for rotating x-axis and y-axis labels on XYCharts
 
+### Fixed
+- Vertical bar chart crash when only 1 data element in the series
+
 ## [0.3.0]
 
 ### Added
