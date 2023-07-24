@@ -1,7 +1,6 @@
 package io.github.koalaplot.core.util
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ExperimentalGraphicsApi
 
 /**
  * ColorPaletteGenerator will create [count] colors.
@@ -13,7 +12,6 @@ public typealias ColorPaletteGenerator = (count: Int) -> List<Color>
  * [count] colors. It uses the HSL model with the ability to separately specify
  * the [saturation] and [lightness] of the palette colors.
  */
-@OptIn(ExperimentalGraphicsApi::class)
 public fun generateHueColorPalette(
     count: Int,
     saturation: Float = 0.5f,
@@ -22,7 +20,7 @@ public fun generateHueColorPalette(
     val delta = (DegreesFullCircle / count)
 
     return buildList {
-        for (i in 0..count) {
+        for (i in 0 until  count) {
             add(Color.hsl((delta * i), saturation, lightness))
         }
     }
