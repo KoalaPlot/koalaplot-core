@@ -20,7 +20,7 @@ public fun generateHueColorPalette(
     val delta = (DegreesFullCircle / count)
 
     return buildList {
-        for (i in 0 until  count) {
+        for (i in 0 until count) {
             add(Color.hsl((delta * i), saturation, lightness))
         }
     }
