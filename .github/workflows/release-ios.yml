@@ -1,8 +1,6 @@
 name: Release IOS build artifacts to Maven Central
 
 on:
-    release:
-        types: [created]
     workflow_dispatch:
 
 jobs:
@@ -29,7 +27,7 @@ jobs:
             -   name: Publish artifacts
                 uses: gradle/gradle-build-action@v2
                 with:
-                    arguments: check publishToSonatype closeSonatypeStagingRepository #closeAndReleaseSonatypeStagingRepository
+                    arguments: check publishToSonatype closeAndReleaseSonatypeStagingRepository
                 env:
                     SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
                     SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
