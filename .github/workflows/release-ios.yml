@@ -1,4 +1,4 @@
-name: Release build artifacts to Maven Central
+name: Release IOS build artifacts to Maven Central
 
 on:
     release:
