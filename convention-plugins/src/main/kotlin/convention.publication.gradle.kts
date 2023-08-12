@@ -42,7 +42,7 @@ val isMac = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.ge
 // When on MacOS, only publish ios artifacts
 tasks.withType<AbstractPublishToMaven>().configureEach {
     onlyIf {
-        (isMac && name.contains("ios")) || !isMac
+        (isMac && name.contains("ios", ignoreCase = true)) || !isMac
     }
 }
 
