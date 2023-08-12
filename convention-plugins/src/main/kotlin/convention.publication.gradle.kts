@@ -37,19 +37,17 @@ val javadocJar by tasks.registering(Jar::class) {
 
 fun getExtraString(name: String) = ext[name]?.toString()
 
+val isMac = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
+
+// When on MacOS, only publish ios artifacts
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    onlyIf {
+        (isMac && name.contains("ios")) || !isMac
+    }
+}
+
 publishing {
-    val isMac = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
-
     publications.withType<MavenPublication> {
-        // When on MacOS, only publish ios artifacts
-        tasks.withType<AbstractPublishToMaven>().matching {
-            it.publication == this
-        }.configureEach {
-            onlyIf {
-                (isMac && this@withType.name.contains("ios")) || !isMac
-            }
-        }
-
         // Stub javadoc.jar artifact
         artifact(javadocJar.get())
 
