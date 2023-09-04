@@ -19,4 +19,15 @@ class PieChartTest {
             PieChart(listOf(0f, 0f))
         }
     }
+
+    /**
+     * Test creating a pie chart with 5 values, last one zero.
+     */
+    @OptIn(ExperimentalKoalaPlotApi::class)
+    @Test
+    fun LastZeroDataTest() {
+        composeTestRule.setContent {
+            PieChart(listOf(5f, 6f, 7f, 8f, 0f))
+        }
+    }
 }

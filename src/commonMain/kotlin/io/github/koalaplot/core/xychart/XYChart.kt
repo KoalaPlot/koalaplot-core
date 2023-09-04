@@ -282,15 +282,14 @@ private data class ChartAreas(
 ) {
     fun graphSize(): IntSize {
         return IntSize(
-            constraints.maxWidth -
+            (constraints.maxWidth -
+                max(yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset, xAxisFirstLabelExtensionWidth) -
+                xAxisLastLabelExtensionWidth).coerceAtLeast(0),
+            (constraints.maxHeight -
                 max(
-                    yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset,
-                    xAxisFirstLabelExtensionWidth
-                ) - xAxisLastLabelExtensionWidth,
-            constraints.maxHeight - max(
-                xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset,
-                yAxisFirstLabelExtensionHeight
-            ) - yAxisLastLabelExtensionHeight
+                    xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset, yAxisFirstLabelExtensionHeight
+                ) -
+                yAxisLastLabelExtensionHeight).coerceAtLeast(0)
         )
     }
 
@@ -372,10 +371,7 @@ private data class ChartAreas(
             yAxisFirstLabelExtensionHeight = yAxisLabels.firstOrNull()?.let {
                 val h =
                     it.maxIntrinsicHeight(
-                        max(
-                            0,
-                            constraints.maxWidth - graphSize().width - yAxisOffset - yAxisTitleWidth
-                        )
+                        (constraints.maxWidth - graphSize().width - yAxisOffset - yAxisTitleWidth).coerceAtLeast(0)
                     )
                 val w = it.maxIntrinsicWidth(h)
                 @Suppress("MagicNumber")
@@ -388,10 +384,7 @@ private data class ChartAreas(
             yAxisLastLabelExtensionHeight = yAxisLabels.lastOrNull()?.let {
                 val h =
                     it.maxIntrinsicHeight(
-                        max(
-                            0,
-                            constraints.maxWidth - graphSize().width - yAxisOffset - yAxisTitleWidth
-                        )
+                        (constraints.maxWidth - graphSize().width - yAxisOffset - yAxisTitleWidth).coerceAtLeast(0)
                     )
                 val w = it.maxIntrinsicWidth(h)
                 @Suppress("MagicNumber")
