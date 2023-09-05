@@ -81,6 +81,8 @@ public data class LineStyle(
  * @param yAxisStyle Style for the y-axis
  * @param yAxisLabels Composable to display labels for specific y-axis values
  * @param yAxisTitle Title for the y-axis
+ * @param panZoomEnabled True if the plot can be panned and zoomed, false to disable. Enabling panning and zooming may
+ * interfere with scrolling a parent container if the drag point is on the plot.
  * @param content The XY Chart content to be displayed, which should include one chart for each
  * series type to be displayed.
  */
@@ -99,10 +101,22 @@ public fun <X, Y> XYChart(
     horizontalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
     verticalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
     verticalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
+    panZoomEnabled: Boolean = true,
     content: @Composable XYChartScope<X, Y>.() -> Unit
 ) {
-    HoverableElementArea {
-        SubcomposeLayout(modifier = modifier) { constraints ->
+    val panZoomModifier = if (panZoomEnabled) {
+        Modifier.pointerInput(Unit) {
+            detectTransformGestures { centroid, pan, zoom, _ ->
+                transformAxis(yAxisModel, size.height, centroid.y, pan.y, zoom)
+                transformAxis(xAxisModel, size.width, centroid.x, -pan.x, zoom)
+            }
+        }
+    } else {
+        Modifier
+    }
+
+    HoverableElementArea(modifier = modifier) {
+        SubcomposeLayout { constraints ->
             val xAxisTitleMeasurable = subcompose("xaxistitle") {
                 Box { xAxisTitle() }
             }[0]
@@ -136,13 +150,7 @@ public fun <X, Y> XYChart(
 
             val chartMeasurable = subcompose("chart") {
                 Box(
-                    modifier = Modifier.clip(RectangleShape)
-                        .pointerInput(Unit) {
-                            detectTransformGestures { centroid, pan, zoom, _ ->
-                                transformAxis(yAxisModel, size.height, centroid.y, pan.y, zoom)
-                                transformAxis(xAxisModel, size.width, centroid.x, -pan.x, zoom)
-                            }
-                        }
+                    modifier = Modifier.clip(RectangleShape).then(panZoomModifier)
                 ) { chartScope.content() }
             }[0]
 
@@ -282,14 +290,19 @@ private data class ChartAreas(
 ) {
     fun graphSize(): IntSize {
         return IntSize(
-            (constraints.maxWidth -
-                max(yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset, xAxisFirstLabelExtensionWidth) -
-                xAxisLastLabelExtensionWidth).coerceAtLeast(0),
-            (constraints.maxHeight -
-                max(
-                    xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset, yAxisFirstLabelExtensionHeight
-                ) -
-                yAxisLastLabelExtensionHeight).coerceAtLeast(0)
+            (
+                constraints.maxWidth -
+                    max(yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset, xAxisFirstLabelExtensionWidth) -
+                    xAxisLastLabelExtensionWidth
+                ).coerceAtLeast(0),
+            (
+                constraints.maxHeight -
+                    max(
+                        xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset,
+                        yAxisFirstLabelExtensionHeight
+                    ) -
+                    yAxisLastLabelExtensionHeight
+                ).coerceAtLeast(0)
         )
     }
 
@@ -691,6 +704,8 @@ private fun DrawScope.drawGridLine(gridLineStyle: LineStyle?, start: Offset, end
  * @param yAxisStyle Style for the y-axis
  * @param yAxisLabels String factory of y-axis label Strings
  * @param yAxisTitle Title for the y-axis
+ * @param panZoomEnabled True if the plot can be panned and zoomed, false to disable. Enabling panning and zooming may
+ * interfere with scrolling a parent container if the drag point is on the plot.
  * @param content The XY Chart content to be displayed, which should include one chart for each
  * series type to be displayed.
  */
@@ -710,6 +725,7 @@ public fun <X, Y> XYChart(
     horizontalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
     verticalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
     verticalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
+    panZoomEnabled: Boolean = true,
     content: @Composable XYChartScope<X, Y>.() -> Unit
 ) {
     XYChart(
@@ -754,6 +770,7 @@ public fun <X, Y> XYChart(
         horizontalMinorGridLineStyle,
         verticalMajorGridLineStyle,
         verticalMinorGridLineStyle,
+        panZoomEnabled,
         content
     )
 }

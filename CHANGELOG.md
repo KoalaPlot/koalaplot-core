@@ -19,6 +19,7 @@ as needed to accommodate the labels.
 - Support for ios (not working)
 - Step chart
 - Support for rotating x-axis and y-axis labels on XYCharts
+- panZoomEnabled XYChart option that can be used to disable pan/zoom functionality  
 
 ### Fixed
 - Vertical bar chart crash when only 1 data element in the series
