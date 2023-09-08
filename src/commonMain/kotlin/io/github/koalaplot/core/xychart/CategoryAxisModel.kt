@@ -15,18 +15,16 @@ public class CategoryAxisModel<T>(
     override val minimumMajorTickSpacing: Dp = 50.dp,
 ) : AxisModel<T> {
     /**
-     * Returns the offset of the provided string within this Category axis. Returns NaN if
-     * [point] is not a valid category.
+     * Returns the offset of the provided string within this Category axis.
+     *
+     * @throws IllegalArgumentException if [point] is not a valid category.
      * @param point One of the categories for this axis.
      * @return The offset of the category along the axis, between 0 and 1
      */
     override fun computeOffset(point: T): Float {
         val index = categories.indexOf(point)
-        return if (index == -1) {
-            Float.NaN
-        } else {
-            ((index + 1).toFloat() / (categories.size + 1).toFloat())
-        }
+        require(index != -1) { "The provided category '$point' is not a valid value for this axis." }
+        return ((index + 1).toFloat() / (categories.size + 1).toFloat())
     }
 
     override fun computeTickValues(axisLength: Dp): io.github.koalaplot.core.xychart.TickValues<T> {

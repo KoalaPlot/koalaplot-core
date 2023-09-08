@@ -37,6 +37,8 @@ as needed to accommodate the labels.
 - Update Android plugin version to 7.4.2
 - Update Android compileSdk and targetSdk versions to 33
 - Migrate to Material 3
+- CategoryAxisModel.computeOffset will throw an IllegalArgumentException instead of returning NaN if an invalid
+category value is provided.
 
 ### Fixed
 - Avoid compose Exception and subsequent application crash when using a border on a pie slice
