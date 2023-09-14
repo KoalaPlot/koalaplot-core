@@ -32,7 +32,7 @@ kotlin {
     js(IR) {
         browser()
     }
-    android {
+    androidTarget {
         publishLibraryVariants("release")
     }
     iosX64()
@@ -98,10 +98,6 @@ android {
         minSdk = 21
     }
 
-    buildFeatures {
-        compose = true
-    }
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -140,9 +136,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 
     detekt {
-        source = files("src")
+        source.setFrom("src")
         parallel = true
-        config = files("$rootDir/detekt.yml")
+        config.setFrom("$rootDir/detekt.yml")
         buildUponDefaultConfig = true
     }
 }

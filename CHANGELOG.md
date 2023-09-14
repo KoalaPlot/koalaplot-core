@@ -8,10 +8,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Changed
-- Update Compose version to 1.4.0
-- Update Kotlin version to 1.8.20
-- Update Kotlin Coroutines to version 1.7.1
-- Update Detekt to version 1.23.0
+- Update Compose version to 1.5.1
+- Update Kotlin version to 1.9.10
+- Update Kotlin Coroutines to version 1.7.3
+- Update Detekt to version 1.23.1
+- Update Android Gradle plugin to 8.1.1
+- Upgrade Gradle to 8.3
 
 ### Added
 - forceCenteredPie parameter to PieChart that always places the pie in the center of the component, adjusting its size
