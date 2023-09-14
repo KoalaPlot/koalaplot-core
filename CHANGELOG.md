@@ -43,6 +43,7 @@ category value is provided.
 ### Fixed
 - Avoid compose Exception and subsequent application crash when using a border on a pie slice
 - Crash when pie chart values are all zeros
+- Crash when ColumnLegend was not provided symbol, label, and value Composables for every entry.
 
 ## [0.2.1]
 

@@ -1,5 +1,6 @@
 package io.github.koalaplot.core.legend
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,9 +35,9 @@ public fun ColumnLegend(
 ) {
     Layout(modifier = modifier.clipToBounds(), content = {
         for (i in 0 until itemCount) {
-            legendScopeInstance.symbol(i)
-            legendScopeInstance.label(i)
-            legendScopeInstance.value(i)
+            Box { legendScopeInstance.symbol(i) }
+            Box { legendScopeInstance.label(i) }
+            Box { legendScopeInstance.value(i) }
         }
     }) { measureables, constraints ->
         measureColumnLegend(itemCount, measureables, constraints, columnGap, rowGap)
