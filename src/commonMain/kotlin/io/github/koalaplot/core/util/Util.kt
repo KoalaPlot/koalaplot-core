@@ -30,7 +30,7 @@ public fun Double.toString(precision: Int): String {
     val s = StringBuilder(leftShifted.toString())
 
     // left-pad with 0's to ensure enough digits
-    (1..(precision + 1 - s.length)).forEach { _ ->
+    for (x in (1..(precision + 1 - s.length))) {
         s.insert(0, "0")
     }
 

@@ -69,7 +69,7 @@ kotlin {
             dependencies {
                 implementation(kotlin("test"))
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                implementation(compose.uiTestJUnit4)
+                implementation(compose.desktop.uiTestJUnit4)
                 implementation(compose.desktop.currentOs)
             }
         }
@@ -83,9 +83,7 @@ kotlin {
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
 
-            dependencies {
-
-            }
+            dependencies { }
         }
     }
 }
@@ -115,7 +113,7 @@ android {
  */
 tasks.register<org.jetbrains.dokka.gradle.DokkaTask>("dokkaCustomFormat") {
     moduleName.set("Koala Plot Core")
-    outputDirectory.set(buildDir.resolve("docs/api/${project.version}"))
+    outputDirectory.set(layout.buildDirectory.dir("docs/api/${project.version}").get())
 
     pluginConfiguration<org.jetbrains.dokka.base.DokkaBase, org.jetbrains.dokka.base.DokkaBaseConfiguration> {
         customStyleSheets = listOf(file("src/docs/dokka/logo-styles.css"))
