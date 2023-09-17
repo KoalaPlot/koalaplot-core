@@ -44,6 +44,38 @@ tasks.withType<AbstractPublishToMaven>().configureEach {
     onlyIf {
         (isMac && name.contains("ios", ignoreCase = true)) || !isMac
     }
+
+    // Fix errors related to declared dependencies between publishing tasks and signing tasks
+    if (name == "publishAndroidReleasePublicationToSonatypeRepository") {
+        dependsOn.add("signKotlinMultiplatformPublication")
+        dependsOn.add("signJsPublication")
+        dependsOn.add("signJvmPublication")
+    }
+
+    if (name == "publishJsPublicationToSonatypeRepository") {
+        dependsOn.add("signAndroidReleasePublication")
+        dependsOn.add("signJvmPublication")
+        dependsOn.add("signKotlinMultiplatformPublication")
+    }
+
+    if (name == "publishJvmPublicationToSonatypeRepository") {
+        dependsOn.add("signAndroidReleasePublication")
+        dependsOn.add("signJsPublication")
+        dependsOn.add("signKotlinMultiplatformPublication")
+    }
+
+    if (name == "publishKotlinMultiplatformPublicationToSonatypeRepository") {
+        dependsOn.add("signAndroidReleasePublication")
+        dependsOn.add("signJsPublication")
+        dependsOn.add("signJvmPublication")
+    }
+
+    if (name.contains("ios", ignoreCase = true)) {
+        dependsOn.add("signAndroidReleasePublication")
+        dependsOn.add("signJsPublication")
+        dependsOn.add("signJvmPublication")
+        dependsOn.add("signKotlinMultiplatformPublication")
+    }
 }
 
 publishing {
@@ -51,7 +83,7 @@ publishing {
         // Stub javadoc.jar artifact
         artifact(javadocJar.get())
 
-        // Provide artifacts information requited by Maven Central
+        // Provide artifacts information required by Maven Central
         pom {
             name.set("koalaplot-core")
             description.set("Koala Plot is a Compose Multiplatform based charting and plotting library written in Kotlin")
