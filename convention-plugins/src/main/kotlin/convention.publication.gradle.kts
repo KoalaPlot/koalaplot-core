@@ -74,6 +74,7 @@ tasks.withType<AbstractPublishToMaven>().configureEach {
         dependsOn.add("signAndroidReleasePublication")
         dependsOn.add("signJsPublication")
         dependsOn.add("signJvmPublication")
+        dependsOn.add("signIosSimulatorArm64Publication")
         dependsOn.add("signKotlinMultiplatformPublication")
     }
 }
