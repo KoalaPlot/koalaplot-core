@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -143,33 +144,37 @@ constructor(
     }
 
     @OptIn(ExperimentalKoalaPlotApi::class)
-    fun measureFeature(rangeWidth: Int, beta: Float) {
+    fun measureFeature(rangeWidth: Int, animationSpec: AnimationSpec<Float>) {
         requireNotNull(axisSettings.model) { "Axis model must not be null" }
 
+        val axisModel = axisSettings.model!!
+        val origin = computeFeatureBarOrigin(bulletScope.featuredMeasure.value, axisModel.range)
+        val featureWidth = rangeWidth * abs(
+            axisModel.computeOffset(bulletScope.featuredMeasure.value) - axisModel.computeOffset(origin)
+        )
+
         val measurable = scope.subcompose(slotId(Slots.FEATURE)) {
-            Box(contentAlignment = Alignment.Center) { bulletScope.featuredMeasure.indicator() }
+            // Animation scale factor
+            val beta = remember(bulletScope.featuredMeasure) { Animatable(0f) }
+            LaunchedEffect(bulletScope.featuredMeasure) {
+                beta.animateTo(1f, animationSpec = animationSpec)
+            }
+
+            with(scope) {
+                val sizeModifier = if (bulletScope.featuredMeasure.type == BulletBuilderScope.FeaturedMeasureType.BAR) {
+                    Modifier.size((beta.value * featureWidth).toDp(), rangeHeight.toDp())
+                } else {
+                    Modifier.size(rangeHeight.toDp(), rangeHeight.toDp())
+                }
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = sizeModifier
+                ) { bulletScope.featuredMeasure.indicator() }
+            }
         }[0]
 
-        val axisModel = axisSettings.model!!
-
-        featurePlaceable = if (bulletScope.featuredMeasure.type == BulletBuilderScope.FeaturedMeasureType.BAR) {
-            val origin = computeFeatureBarOrigin(bulletScope.featuredMeasure.value, axisModel.range)
-
-            measurable.measure(
-                Constraints.fixed(
-                    (
-                        rangeWidth *
-                            abs(
-                                axisModel.computeOffset(bulletScope.featuredMeasure.value) -
-                                    axisModel.computeOffset(origin)
-                            ) * beta
-                        ).roundToInt(),
-                    rangeHeight
-                )
-            )
-        } else {
-            measurable.measure(Constraints.fixed(rangeHeight, rangeHeight))
-        }
+        featurePlaceable = measurable.measure(Constraints(maxWidth = rangeWidth, maxHeight = rangeHeight))
     }
 
     @OptIn(ExperimentalKoalaPlotApi::class)
@@ -321,33 +326,27 @@ public fun BulletGraphs(
 ) {
     val graphScope = remember(builder) { BulletGraphScope().apply(builder) }
 
-    // Animation scale factor
-    val beta = remember(graphScope) { Animatable(0f) }
-    LaunchedEffect(graphScope) {
-        beta.animateTo(1f, animationSpec = animationSpec)
-    }
-
     if (graphScope.scopes.isEmpty()) {
         return
     }
 
-    val bulletScopes = graphScope.scopes
-    val axisSettings = bulletScopes.map { AxisSettings.fromScope(it) }
+    val axisSettings = graphScope.scopes.map { Pair(it, AxisSettings.fromScope(it)) }
 
     SubcomposeLayout(modifier = modifier) { constraints ->
         val bulletHeight =
             ((constraints.maxHeight - gap.roundToPx() * graphScope.scopes.size - 1) / graphScope.scopes.size)
                 .coerceAtLeast(0)
 
-        val builders = graphScope.scopes.mapIndexed { index, bulletScope ->
-            BulletGraphBuilder(index, this, bulletScope, bulletHeight, axisSettings[index])
+        val builders = axisSettings.mapIndexed { index, (bulletScope, axisSettings) ->
+            BulletGraphBuilder(index, this, bulletScope, bulletHeight, axisSettings)
         }
 
         val labelWidthMaxConstraint = calculateLabelWidthMaxConstraint(graphScope, constraints)
 
         builders.forEach { it.measureLabel(labelWidthMaxConstraint) }
 
-        val labelWidth = calculateLabelWidth(graphScope, labelWidthMaxConstraint, builders.map { it.labelPlaceable!! })
+        val labelWidth =
+            calculateLabelWidth(graphScope, labelWidthMaxConstraint, builders.map { it.labelPlaceable!! })
 
         builders.forEach { it.measureAxisLabels(constraints.maxWidth - labelWidth) }
 
@@ -359,7 +358,7 @@ public fun BulletGraphs(
         builders.forEach {
             it.measureAxis(rangeWidth)
             it.measureRanges(rangeWidth)
-            it.measureFeature(rangeWidth, beta.value)
+            it.measureFeature(rangeWidth, animationSpec)
             it.measureComparativeMeasures()
         }
 
@@ -387,9 +386,11 @@ private fun Density.calculateLabelWidthMaxConstraint(graphScope: BulletGraphScop
         is FixedFraction -> {
             (constraints.maxWidth * labelWidth.fraction).roundToInt()
         }
+
         is VariableFraction -> {
             (constraints.maxWidth * labelWidth.fraction).roundToInt()
         }
+
         is Fixed -> {
             labelWidth.size.roundToPx()
         }
@@ -439,21 +440,17 @@ private fun RangeIndicators(builtScope: BulletBuilderScope) {
 /**
  * A scope for constructing displays that layout and align features among multiple bullet graphs.
  */
-@ExperimentalKoalaPlotApi
 @BulletGraphDslMarker
-public class BulletGraphScope {
-    internal val scopes: MutableList<BulletBuilderScope> = mutableListOf()
-
-    /**
-     * Sets the label width for all BulletGraphs.
-     */
-    public var labelWidth: LabelWidth = FixedFraction(0.25f)
-
-    /**
-     * Creates a new bullet graph and allows its configuration via [BulletBuilderScope]. Bullet graphs
-     * are displayed in the order in which they are created from top to bottom.
-     */
+public data class BulletGraphScope
+@OptIn(ExperimentalKoalaPlotApi::class)
+constructor(
+    internal val scopes: MutableList<BulletBuilderScope> = mutableListOf(),
+    public var labelWidth: LabelWidth = VariableFraction(@Suppress("MagicNumber") 0.25f),
+) {
+    @OptIn(ExperimentalKoalaPlotApi::class)
     public fun bullet(builder: BulletBuilderScope.() -> Unit) {
-        scopes.add(BulletBuilderScope().apply(builder))
+        val scope = BulletBuilderScope()
+        scope.builder()
+        scopes.add(scope)
     }
 }

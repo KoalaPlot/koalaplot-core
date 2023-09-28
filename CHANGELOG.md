@@ -27,6 +27,7 @@ as needed to accommodate the labels.
 - Vertical bar chart crash when only 1 data element in the series
 - generateHueColorPalette generating 1 extra color and causing exception when number of colors is 0
 - XYChart crashes if graph size is computed to be < 0
+- BulletGraph reanimating unnecessarily
 
 ## [0.3.0]
 

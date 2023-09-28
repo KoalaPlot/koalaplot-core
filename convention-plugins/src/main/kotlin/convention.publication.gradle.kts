@@ -46,38 +46,15 @@ tasks.withType<AbstractPublishToMaven>().configureEach {
     }
 
     // Fix errors related to declared dependencies between publishing tasks and signing tasks
-    if (name == "publishAndroidReleasePublicationToSonatypeRepository") {
-        dependsOn.add("signKotlinMultiplatformPublication")
-        dependsOn.add("signJsPublication")
-        dependsOn.add("signJvmPublication")
-    }
-
-    if (name == "publishJsPublicationToSonatypeRepository") {
-        dependsOn.add("signAndroidReleasePublication")
-        dependsOn.add("signJvmPublication")
-        dependsOn.add("signKotlinMultiplatformPublication")
-    }
-
-    if (name == "publishJvmPublicationToSonatypeRepository") {
-        dependsOn.add("signAndroidReleasePublication")
-        dependsOn.add("signJsPublication")
-        dependsOn.add("signKotlinMultiplatformPublication")
-    }
-
-    if (name == "publishKotlinMultiplatformPublicationToSonatypeRepository") {
-        dependsOn.add("signAndroidReleasePublication")
-        dependsOn.add("signJsPublication")
-        dependsOn.add("signJvmPublication")
-    }
+    dependsOn.add("signAndroidReleasePublication")
+    dependsOn.add("signJsPublication")
+    dependsOn.add("signJvmPublication")
+    dependsOn.add("signKotlinMultiplatformPublication")
 
     if (name.contains("ios", ignoreCase = true)) {
-        dependsOn.add("signAndroidReleasePublication")
-        dependsOn.add("signJsPublication")
-        dependsOn.add("signJvmPublication")
         dependsOn.add("signIosArm64Publication")
         dependsOn.add("signIosSimulatorArm64Publication")
         dependsOn.add("signIosX64Publication")
-        dependsOn.add("signKotlinMultiplatformPublication")
     }
 }
 

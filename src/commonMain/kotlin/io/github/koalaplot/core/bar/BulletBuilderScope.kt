@@ -46,7 +46,26 @@ private const val FeaturedMeasureDefaultSize = 0.33f
 @ExperimentalKoalaPlotApi
 @BulletGraphDslMarker
 public class BulletBuilderScope {
-    internal data class ComparativeMeasure(val value: Float, val indicator: @Composable () -> Unit)
+    internal class ComparativeMeasure(val value: Float, val indicator: @Composable () -> Unit) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as ComparativeMeasure
+
+            if (value != other.value) return false
+            if (indicator != other.indicator) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = value.hashCode()
+            result = 31 * result + indicator.hashCode()
+            return result
+        }
+    }
+
     internal data class FeaturedMeasure(
         val value: Float,
         val type: FeaturedMeasureType,
@@ -142,6 +161,32 @@ public class BulletBuilderScope {
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as BulletBuilderScope
+
+        if (comparativeMeasures != other.comparativeMeasures) return false
+        if (featuredMeasure != other.featuredMeasure) return false
+        if (rangesScope != other.rangesScope) return false
+        if (label != other.label) return false
+        if (labelWidth != other.labelWidth) return false
+        if (axis != other.axis) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = comparativeMeasures.hashCode()
+        result = 31 * result + featuredMeasure.hashCode()
+        result = 31 * result + rangesScope.hashCode()
+        result = 31 * result + label.hashCode()
+        result = 31 * result + labelWidth.hashCode()
+        result = 31 * result + axis.hashCode()
+        return result
+    }
+
     /**
      * A scope for setting range boundaries. See [range] for specifying a specific range value and its graphical
      * representation.
@@ -164,6 +209,21 @@ public class BulletBuilderScope {
          */
         public fun range(endValue: Float, indicator: (@Composable () -> Unit)? = null) {
             ranges.add(Range(endValue, indicator))
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as RangesScope
+
+            if (ranges != other.ranges) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            return ranges.hashCode()
         }
     }
 
@@ -292,21 +352,21 @@ public sealed class LabelWidth
  * than the fixed fraction it will be right-justified to the graph.
  */
 @ExperimentalKoalaPlotApi
-public class FixedFraction(internal val fraction: Float) : LabelWidth()
+public data class FixedFraction(internal val fraction: Float) : LabelWidth()
 
 /**
  * Set the label width as a fixed [size] in Dp. If the label is smaller than the size it will be
  * right-justified to the graph.
  */
 @ExperimentalKoalaPlotApi
-public class Fixed(internal val size: Dp) : LabelWidth()
+public data class Fixed(internal val size: Dp) : LabelWidth()
 
 /**
  * Set the label width as a variable [fraction] of the overall graph width. If the label is smaller
  * than the fraction the graph will grow to occupy the available space.
  */
 @ExperimentalKoalaPlotApi
-public class VariableFraction(internal val fraction: Float) : LabelWidth()
+public data class VariableFraction(internal val fraction: Float) : LabelWidth()
 
 /**
  * A slot to hold a configurable value in the bullet graph dsl.
@@ -324,6 +384,21 @@ public open class Slot<T>(default: T) {
      */
     public operator fun invoke(setValue: T) {
         value = setValue
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as Slot<*>
+
+        if (value != other.value) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return value?.hashCode() ?: 0
     }
 }
 
@@ -351,6 +426,26 @@ public class AxisSettings {
     @Composable
     internal infix fun label(f: Float) {
         labels.value(f)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as AxisSettings
+
+        if (model != other.model) return false
+        if (labels != other.labels) return false
+        if (style != other.style) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = model?.hashCode() ?: 0
+        result = 31 * result + labels.hashCode()
+        result = 31 * result + (style?.hashCode() ?: 0)
+        return result
     }
 
     /**

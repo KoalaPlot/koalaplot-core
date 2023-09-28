@@ -205,6 +205,34 @@ public class LinearAxisModel constructor(
 
         currentRange = newLow..newHi
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as LinearAxisModel
+
+        if (range != other.range) return false
+        if (zoomRangeLimit != other.zoomRangeLimit) return false
+        if (minimumMajorTickIncrement != other.minimumMajorTickIncrement) return false
+        if (minimumMajorTickSpacing != other.minimumMajorTickSpacing) return false
+        if (minorTickCount != other.minorTickCount) return false
+        if (allowZooming != other.allowZooming) return false
+        if (allowPanning != other.allowPanning) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = range.hashCode()
+        result = 31 * result + zoomRangeLimit.hashCode()
+        result = 31 * result + minimumMajorTickIncrement.hashCode()
+        result = 31 * result + minimumMajorTickSpacing.hashCode()
+        result = 31 * result + minorTickCount
+        result = 31 * result + allowZooming.hashCode()
+        result = 31 * result + allowPanning.hashCode()
+        return result
+    }
 }
 
 /**
