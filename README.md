@@ -1,17 +1,17 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.koalaplot/koalaplot-core?color=278ec7)](https://repo1.maven.org/maven2/io/github/koalaplot/koalaplot-core/)
-[![Kotlin](https://img.shields.io/badge/kotlin-1.8.10-278ec7.svg?logo=kotlin)](http://kotlinlang.org)
-[![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](https://koalaplot.github.io/koalaplot-core/api/0.1.0/)
+[![Kotlin](https://img.shields.io/badge/kotlin-1.9.10-278ec7.svg?logo=kotlin)](http://kotlinlang.org)
+[![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](https://koalaplot.github.io/koalaplot-core/api/0.4.0/)
 [![License MIT](https://img.shields.io/badge/license-MIT-278ec7.svg)](https://github.com/KoalaPlot/koalaplot-core/tree/main/LICENSE.txt)
 
 # Koala Plot
 
 Koala Plot is a [Compose Multiplatform](https://www.jetbrains.com/lp/compose-mpp/) based charting and plotting library
 allowing you to build great looking interactive charts for
-[Android](https://developer.android.com/jetpack/compose), desktop, and web using a single API and code base.
+[Android](https://developer.android.com/jetpack/compose), desktop, ios, and web using a single API and code base.
 
 Try out the [web version of the samples](https://koalaplot.github.io/koalaplot-samples/index.html) for a quick look at
 the possibilities when using Koala Plot. Note that this uses the alpha Compose web-canvas capability, so there may be
-bugs in the underlying Compose framework, and it is fixed at a resolution of 1024 x 768.
+bugs in the underlying Compose Web framework.
 
 This project is in a pre-release experimental/alpha state. We encourage you to give it a try, make suggestions for
 improvement, and even [contribute](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTIBUTING.md)! It is expected
@@ -31,8 +31,13 @@ borders, shapes, user interaction, etc. Web support is provided by the Compose-w
     * Linear or Log y-axis
     * Numeric or category x-axis
     * Composable axis titles and value labels
+    * Optional Composable symbols for data points
     * Optional Composable symbols at each data point with default implementations
     * Zoom and pan one or both axes (Android only, for now)
+    * Optional shaded areas (area chart)
+* Stacked area chart
+  * Plots multiple lines with shaded areas between them and accumulated values
+  * Similar feature set as the Line chart
 * Vertical bar chart
     * Linear or Log y-axis
     * Numeric or category x-axis
@@ -64,7 +69,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("io.github.koalaplot:koalaplot-core:0.1.0")
+    implementation("io.github.koalaplot:koalaplot-core:0.4.0")
 }
 ```
 
@@ -99,8 +104,8 @@ the [samples](https://koalaplot.github.io/koalaplot-samples).
 
 # Documentation
 
-- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.4.0-dev1)
-- [Release 0.3.0](https://koalaplot.github.io/koalaplot-core/api/0.3.0)
+- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.4.0)
+- [Release 0.4.0](https://koalaplot.github.io/koalaplot-core/api/0.4.0)
 
 Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples) for code examples.
 

@@ -7,6 +7,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.0]
+
 ### Changed
 - Update Compose version to 1.5.1
 - Update Kotlin version to 1.9.10
@@ -21,7 +23,10 @@ as needed to accommodate the labels.
 - Support for ios (not working)
 - Step chart
 - Support for rotating x-axis and y-axis labels on XYCharts
-- panZoomEnabled XYChart option that can be used to disable pan/zoom functionality  
+- panZoomEnabled XYChart option that can be used to disable pan/zoom functionality
+- Animation for line charts
+- Area option for line charts
+- Stacked area chart
 
 ### Fixed
 - Vertical bar chart crash when only 1 data element in the series
