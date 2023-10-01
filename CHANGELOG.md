@@ -20,7 +20,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - forceCenteredPie parameter to PieChart that always places the pie in the center of the component, adjusting its size
 as needed to accommodate the labels.
-- Support for ios (not working)
+- Support for ios
 - Step chart
 - Support for rotating x-axis and y-axis labels on XYCharts
 - panZoomEnabled XYChart option that can be used to disable pan/zoom functionality
