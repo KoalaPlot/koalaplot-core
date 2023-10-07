@@ -21,7 +21,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.unit.Constraints
-import io.github.koalaplot.core.theme.KoalaPlotTheme
+import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.util.fixedHeight
 import io.github.koalaplot.core.util.generateHueColorPalette

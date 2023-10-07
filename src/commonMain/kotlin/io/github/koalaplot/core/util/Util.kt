@@ -76,7 +76,7 @@ private fun maximizeUnguarded(
     tolerance: Double = 0.01,
     eval: (Double) -> Boolean
 ): Double {
-    if (abs((max - min) / min) < tolerance) {
+    if (abs((max - min) / ((max + min) / 2)) < tolerance || (max == 0.0 && min == 0.0)) {
         return min
     }
 

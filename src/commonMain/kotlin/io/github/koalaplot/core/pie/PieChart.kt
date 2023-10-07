@@ -50,16 +50,17 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import io.github.koalaplot.core.theme.KoalaPlotTheme
+import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.DegreesFullCircle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.HoverableElementArea
 import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.util.circumscribedSquareSize
+import io.github.koalaplot.core.util.deg
 import io.github.koalaplot.core.util.generateHueColorPalette
 import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
-import io.github.koalaplot.core.util.pol2Cart
+import io.github.koalaplot.core.util.polarToCartesian
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -493,8 +494,8 @@ private class Slice(
                     )
                 } else {
                     // First line segment from start point to first outer corner
-                    moveTo(center + pol2Cart(holeRadius, startAngle))
-                    lineTo(center + pol2Cart(radius, startAngle))
+                    moveTo(center + polarToCartesian(holeRadius, startAngle.deg))
+                    lineTo(center + polarToCartesian(radius, startAngle.deg))
 
                     // Outer arc
                     addArc(
@@ -509,7 +510,7 @@ private class Slice(
                     )
 
                     // Line from second outer corner to inner corner or center
-                    lineTo(center + pol2Cart(holeRadius, startAngle + angle))
+                    lineTo(center + polarToCartesian(holeRadius, (startAngle + angle).deg))
 
                     if (holeRadius != 0f) {
                         // Inner arc
@@ -552,10 +553,10 @@ public fun LabelConnectorScope.BezierLabelConnector(
         moveTo(startPosition.value)
 
         // control point 1
-        val cp1 = startPosition.value + pol2Cart(length / 2, startAngle.value)
+        val cp1 = startPosition.value + polarToCartesian(length / 2, startAngle.value.deg)
 
         // control point 2
-        val cp2 = endPosition.value + pol2Cart(length / 2, endAngle.value)
+        val cp2 = endPosition.value + polarToCartesian(length / 2, endAngle.value.deg)
 
         cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, endPosition.value.x, endPosition.value.y)
     }

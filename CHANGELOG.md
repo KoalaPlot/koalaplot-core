@@ -7,6 +7,16 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Update to Compose version 1.5.3
+- Moved package for AreaStyle, LineStyle, Point, DefaultPoint, and KoalaPlotTheme
+
+### Added
+- Polar/Radar/Spider plots
+
+### Fixed
+
+
 ## [0.4.0]
 
 ### Changed

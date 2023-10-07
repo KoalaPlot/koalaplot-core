@@ -7,8 +7,9 @@ import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.unit.Constraints
 import io.github.koalaplot.core.util.DEG2RAD
+import io.github.koalaplot.core.util.deg
 import io.github.koalaplot.core.util.maximize
-import io.github.koalaplot.core.util.pol2Cart
+import io.github.koalaplot.core.util.polarToCartesian
 import io.github.koalaplot.core.util.y2theta
 import kotlin.math.abs
 import kotlin.math.cos
@@ -89,9 +90,9 @@ internal class PieMeasurePolicy constructor(
             for (i in labelOffsets.indices) {
                 val labelConnectorScope = LabelConnectorScopeImpl()
                 with(labelConnectorScope) {
-                    startPosition.value = pol2Cart(
+                    startPosition.value = polarToCartesian(
                         pieDiameter / 2f * initOuterRadius,
-                        pieSliceData[i].startAngle + pieSliceData[i].angleExtent / 2f
+                        (pieSliceData[i].startAngle + pieSliceData[i].angleExtent / 2f).deg
                     )
                     endPosition.value = labelOffsets[i].anchorPoint
                     startAngle.value =

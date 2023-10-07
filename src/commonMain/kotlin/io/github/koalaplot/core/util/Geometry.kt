@@ -1,10 +1,14 @@
+@file:Suppress("TooManyFunctions")
+
 package io.github.koalaplot.core.util
 
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.unit.Constraints
+import kotlin.jvm.JvmInline
 import kotlin.math.PI
+import kotlin.math.acos
 import kotlin.math.asin
 import kotlin.math.cos
 import kotlin.math.sin
@@ -14,12 +18,90 @@ internal const val DEG2RAD = PI / 180.0
 
 internal const val DegreesFullCircle = 360.0f
 
+public sealed interface AngularValue
+
+@JvmInline
+public value class Degrees(public val value: Double) : AngularValue {
+    public override fun toString(): String {
+        return value.toString()
+    }
+}
+
+@JvmInline
+public value class Radians(public val value: Double) : AngularValue {
+    public override fun toString(): String {
+        return value.toString()
+    }
+}
+
+public fun Degrees.toRadians(): Radians = Radians(value * (DEG2RAD))
+
+public fun Radians.toDegrees(): Degrees = Degrees(value / (DEG2RAD))
+
+public fun Float.toRadians(): Radians = Radians(this.toDouble())
+
+public fun Double.toRadians(): Radians = Radians(this)
+
+public fun Float.toDegrees(): Degrees = Degrees(this.toDouble())
+
+public fun Double.toDegrees(): Degrees = Degrees(this)
+
+public inline val Float.rad: Radians get() = Radians(this.toDouble())
+public inline val Double.rad: Radians get() = Radians(this)
+public inline val Float.deg: Degrees get() = Degrees(this.toDouble())
+public inline val Double.deg: Degrees get() = Degrees(this)
+public inline val Int.deg: Degrees get() = Degrees(this.toDouble())
+
+public fun AngularValue.toRadians(): Radians {
+    return when (this) {
+        is Radians -> this
+        is Degrees -> toRadians()
+    }
+}
+
+public fun AngularValue.toDegrees(): Degrees {
+    return when (this) {
+        is Radians -> toDegrees()
+        is Degrees -> this
+    }
+}
+
 /**
- * Polar to cartesian coordinates.
+ * Polar to cartesian coordinate transformation.
  */
-internal fun pol2Cart(radius: Float, angleDeg: Float): Offset {
-    val angleRad = angleDeg * DEG2RAD
-    return Offset(cos(angleRad).toFloat(), sin(angleRad).toFloat()) * radius
+internal fun polarToCartesian(radius: Float, angle: Degrees): Offset = polarToCartesian(radius, angle.toRadians())
+
+/**
+ * Polar to cartesian coordinate transformation.
+ */
+internal fun polarToCartesian(radius: Float, angle: Radians): Offset {
+    return Offset((radius * cos(angle.value)).toFloat(), (radius * sin(angle.value)).toFloat())
+}
+
+internal fun polarToCartesian(radius: Float, angle: AngularValue): Offset {
+    return polarToCartesian(radius, angle.toRadians())
+}
+
+internal fun cos(angle: AngularValue): Double = cos(angle.toRadians().value)
+internal fun sin(angle: AngularValue): Double = sin(angle.toRadians().value)
+
+internal data class PolarCoordinate(val radius: Float, val angle: AngularValue)
+
+/**
+ * Cartesian to polar coordinate transformation.
+ */
+internal fun cartesianToPolar(offset: Offset): PolarCoordinate {
+    val distance = offset.getDistance()
+    return if (distance == 0f) {
+        PolarCoordinate(0f, Radians(0.0))
+    } else {
+        // acos returns an angle between 0 and PI
+        var theta = acos(offset.x / distance)
+        if (offset.y < 0) {
+            theta = -theta
+        }
+        PolarCoordinate(offset.getDistance(), Radians(theta.toDouble()))
+    }
 }
 
 /**

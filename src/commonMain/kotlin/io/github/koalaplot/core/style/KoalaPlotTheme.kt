@@ -1,4 +1,4 @@
-package io.github.koalaplot.core.theme
+package io.github.koalaplot.core.style
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.spring
@@ -11,7 +11,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.legend.LegendLocation
-import io.github.koalaplot.core.xychart.LineStyle
 import io.github.koalaplot.core.xychart.TickPosition
 
 /**

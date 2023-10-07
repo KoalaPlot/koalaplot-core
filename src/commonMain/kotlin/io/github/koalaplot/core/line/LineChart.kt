@@ -11,12 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -24,11 +20,13 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.unit.Constraints
-import io.github.koalaplot.core.theme.KoalaPlotTheme
+import io.github.koalaplot.core.Point
+import io.github.koalaplot.core.style.AreaStyle
+import io.github.koalaplot.core.style.KoalaPlotTheme
+import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
-import io.github.koalaplot.core.xychart.LineStyle
 import io.github.koalaplot.core.xychart.XYChartScope
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -51,29 +49,13 @@ public sealed interface AreaBaseline<X, Y> {
 }
 
 /**
- * Provides styling for areas drawn between a line and a baseline on a line chart or stacked area chart.
- *
- * @param brush the color/fill to be applied to the area
- * @param alpha opacity to be applied to the brush from 0.0f to 1.0f representing fully transparent to
- * fully opaque respectively
- * @param colorFilter [ColorFilter] to apply to the brush when drawn into the destination
- * @param blendMode the [BlendMode] blending algorithm to apply to the brush
- **/
-public data class AreaStyle<X, Y>(
-    val brush: Brush,
-    val alpha: Float = 1.0f, // @FloatRange(from = 0.0, to = 1.0)
-    val colorFilter: ColorFilter? = null,
-    val blendMode: BlendMode = DrawScope.DefaultBlendMode,
-)
-
-/**
  * Provides styling for a single series in a [StackedAreaChart].
  *
  * @param lineStyle The style to apply to the line.
  * @param areaStyle The style to apply to the area.
  *
  */
-public data class StackedAreaStyle<X, Y>(val lineStyle: LineStyle, val areaStyle: AreaStyle<X, Y>)
+public data class StackedAreaStyle(val lineStyle: LineStyle, val areaStyle: AreaStyle)
 
 /**
  * A Stacked Area Chart is like a line chart with filled areas between lines, but where each successive line
@@ -92,7 +74,7 @@ public data class StackedAreaStyle<X, Y>(val lineStyle: LineStyle, val areaStyle
 @Composable
 public fun <X, Y> XYChartScope<X, Y>.StackedAreaChart(
     data: List<MultiPoint<X, Y>>,
-    styles: List<StackedAreaStyle<X, Y>>,
+    styles: List<StackedAreaStyle>,
     firstBaseline: AreaBaseline.ConstantLine<X, Y>,
     modifier: Modifier = Modifier,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
@@ -165,7 +147,7 @@ public fun <X, Y> XYChartScope<X, Y>.LineChart(
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
     symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
-    areaStyle: AreaStyle<X, Y>? = null,
+    areaStyle: AreaStyle? = null,
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
@@ -219,7 +201,7 @@ public fun <X, Y> XYChartScope<X, Y>.StairstepChart(
     lineStyle: LineStyle,
     modifier: Modifier = Modifier,
     symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
-    areaStyle: AreaStyle<X, Y>? = null,
+    areaStyle: AreaStyle? = null,
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
@@ -273,7 +255,7 @@ private fun <X, Y> XYChartScope<X, Y>.GeneralLineChart(
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
     symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
-    areaStyle: AreaStyle<X, Y>? = null,
+    areaStyle: AreaStyle? = null,
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float>,
     drawConnectorLine: Path.(points: List<Point<X, Y>>) -> Unit,
@@ -440,41 +422,6 @@ private fun <X, Y> XYChartScope<X, Y>.scale(
 private fun <X, Y> XYChartScope<X, Y>.scale(point: Point<X, Y>): Offset {
     return Offset(xAxisModel.computeOffset(point.x), yAxisModel.computeOffset(point.y))
 }
-
-/**
- * Represents a point on a [LineChart].
- * @param X The type of the x-axis values
- * @param Y The type of the y-axis values
- */
-public interface Point<X, Y> {
-    /**
-     * The x-axis value of this Point.
-     */
-    public val x: X
-
-    /**
-     * The y-axis value of this Point.
-     */
-    public val y: Y
-}
-
-// preferred naming per API Guidelines for Jetpack Compose
-// See https://github.com/androidx/androidx/blob/androidx-main/compose/docs/compose-api-guidelines.md
-/**
- * Creates a new DefaultPoint at the specified coordinates.
- * @param X The type of the x-axis value
- * @param Y The type of the y-axis value
- */
-@Suppress("FunctionNaming")
-public fun <X, Y> Point(x: X, y: Y): Point<X, Y> = DefaultPoint(x, y)
-
-/**
- * Default implementation of the Point interface.
- * @param X The type of the x-axis values
- * @param Y The type of the y-axis values
- */
-public data class DefaultPoint<X, Y>(override val x: X, override val y: Y) :
-    Point<X, Y>
 
 /**
  * Represents a set of points for a [StackedAreaChart].
