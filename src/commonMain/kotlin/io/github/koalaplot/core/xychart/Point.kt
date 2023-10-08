@@ -1,4 +1,4 @@
-package io.github.koalaplot.core
+package io.github.koalaplot.core.xychart
 
 /**
  * Represents a point on a 2-d plot.

@@ -11,7 +11,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
-import io.github.koalaplot.core.Point
 import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
@@ -83,8 +82,8 @@ private fun <T> DrawScope.drawStraightRadialGridLines(
         var startAngle = angles.last()
         for (angleIndex in 0..angles.lastIndex) {
             drawLine(
-                start = polarPlotScope.polarToCartesian(Point(radius, startAngle), size),
-                end = polarPlotScope.polarToCartesian(Point(radius, angles[angleIndex]), size),
+                start = polarPlotScope.polarToCartesian(PolarPoint(radius, startAngle), size),
+                end = polarPlotScope.polarToCartesian(PolarPoint(radius, angles[angleIndex]), size),
                 brush = style.brush,
                 strokeWidth = style.strokeWidth.toPx(),
                 pathEffect = style.pathEffect,
@@ -128,7 +127,7 @@ private fun <T> DrawScope.drawAngularGridLines(
     angles.forEach { angle ->
         drawLine(
             start = Offset(0f, 0f),
-            end = polarPlotScope.polarToCartesian(Point(radius, angle), size),
+            end = polarPlotScope.polarToCartesian(PolarPoint(radius, angle), size),
             brush = style.brush,
             strokeWidth = style.strokeWidth.toPx(),
             pathEffect = style.pathEffect,
@@ -158,13 +157,13 @@ internal fun <T> PolarPlotScope<T>.generateGridBoundaryPath(
         val radius = radialAxisModel.tickValues.last()
 
         Path().apply {
-            moveTo(polarToCartesian(Point(radius, angles.first()), size))
+            moveTo(polarToCartesian(PolarPoint(radius, angles.first()), size))
 
             for (angleIndex in 1..angles.lastIndex) {
-                lineTo(polarToCartesian(Point(radius, angles[angleIndex]), size))
+                lineTo(polarToCartesian(PolarPoint(radius, angles[angleIndex]), size))
             }
 
-            lineTo(polarToCartesian(Point(radius, angles.first()), size))
+            lineTo(polarToCartesian(PolarPoint(radius, angles.first()), size))
         }
     }
 }

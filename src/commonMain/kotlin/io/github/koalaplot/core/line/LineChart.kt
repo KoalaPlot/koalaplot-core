@@ -20,13 +20,13 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.unit.Constraints
-import io.github.koalaplot.core.Point
 import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
+import io.github.koalaplot.core.xychart.Point
 import io.github.koalaplot.core.xychart.XYChartScope
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -394,26 +394,12 @@ private fun <X, Y, P : Point<X, Y>> XYChartScope<X, Y>.Symbols(
                 data.indices.forEach {
                     val p = measurables[it].measure(constraints.copy(minWidth = 0, minHeight = 0))
                     var position = scale(data[it], size)
-                    position = position.copy(y = constraints.maxHeight - position.y)
                     position -= Offset(p.width / 2f, p.height / 2f)
                     p.place(position.x.toInt(), position.y.toInt())
                 }
             }
         }
     }
-}
-
-/**
- * Scales the [point] to an offset along the x and y axes with a scale factor of [size] along each.
- */
-private fun <X, Y> XYChartScope<X, Y>.scale(
-    point: Point<X, Y>,
-    size: Size
-): Offset {
-    return Offset(
-        xAxisModel.computeOffset(point.x) * size.width,
-        yAxisModel.computeOffset(point.y) * size.height
-    )
 }
 
 /**

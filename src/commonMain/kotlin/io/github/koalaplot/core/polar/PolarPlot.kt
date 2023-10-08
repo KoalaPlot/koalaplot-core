@@ -16,7 +16,6 @@ import androidx.compose.ui.layout.MultiContentMeasurePolicy
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
-import io.github.koalaplot.core.Point
 import io.github.koalaplot.core.polar.RadialGridType.CIRCLES
 import io.github.koalaplot.core.polar.RadialGridType.LINES
 import io.github.koalaplot.core.style.AreaStyle
@@ -58,7 +57,7 @@ public interface PolarPlotScope<T> : HoverableElementAreaScope {
      * Transforms the provided [point] from polar plot axis coordinates to cartesian coordinates for on-screen
      * drawing, provided a [size] of the drawing area.
      */
-    public fun polarToCartesian(point: Point<Float, T>, size: Size): Offset
+    public fun polarToCartesian(point: PolarPoint<Float, T>, size: Size): Offset
 }
 
 /**
@@ -134,7 +133,7 @@ public fun <T> PolarPlot(
         val scope = object : PolarPlotScope<T>, HoverableElementAreaScope by this {
             override val radialAxisModel = radialAxisModel
             override val angularAxisModel = angularAxisModel
-            override fun polarToCartesian(point: Point<Float, T>, size: Size): Offset {
+            override fun polarToCartesian(point: PolarPoint<Float, T>, size: Size): Offset {
                 return polarToCartesianPlot(point, angularAxisModel, radialAxisModel, size)
             }
         }
@@ -178,15 +177,15 @@ private fun toPolarAngle(inputAngle: AngularValue): AngularValue {
 }
 
 private fun <T> polarToCartesianPlot(
-    point: Point<Float, T>,
+    point: PolarPoint<Float, T>,
     angularAxisModel: AngularAxisModel<T>,
     radialAxisModel: RadialAxisModel,
     size: Size
 ): Offset {
     // Transform the angle to where 0 is at the 12 O'Clock position.
-    val theta = toPolarAngle(angularAxisModel.computeOffset(point.y))
+    val theta = toPolarAngle(angularAxisModel.computeOffset(point.theta))
 
-    val r = min(size.width / 2, size.height / 2) * radialAxisModel.computeOffset(point.x)
+    val r = min(size.width / 2, size.height / 2) * radialAxisModel.computeOffset(point.r)
     return polarToCartesian(r, theta)
 }
 

@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
@@ -568,6 +569,19 @@ public interface XYChartScope<X, Y> : HoverableElementAreaScope {
     public val yAxisModel: AxisModel<Y>
     public val xAxisState: AxisState
     public val yAxisState: AxisState
+
+    /**
+     * Transforms [point] from [AxisModel] space to display coordinates provided a plot area [size].
+     */
+    public fun scale(
+        point: Point<X, Y>,
+        size: Size
+    ): Offset {
+        return Offset(
+            xAxisModel.computeOffset(point.x) * size.width,
+            size.height - yAxisModel.computeOffset(point.y) * size.height
+        )
+    }
 }
 
 private class XYChartScopeImpl<X, Y>(

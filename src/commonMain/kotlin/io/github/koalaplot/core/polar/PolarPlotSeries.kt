@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.unit.Constraints
-import io.github.koalaplot.core.Point
 import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
@@ -37,11 +36,11 @@ import io.github.koalaplot.core.util.HoverableElementAreaScope
 @ExperimentalKoalaPlotApi
 @Composable
 public fun <T> PolarPlotScope<T>.PolarPlotSeries(
-    data: List<Point<Float, T>>,
+    data: List<PolarPoint<Float, T>>,
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
     areaStyle: AreaStyle? = null,
-    symbols: (@Composable HoverableElementAreaScope.(Point<Float, T>) -> Unit)? = null,
+    symbols: (@Composable HoverableElementAreaScope.(PolarPoint<Float, T>) -> Unit)? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
     if (data.isEmpty()) return
@@ -94,9 +93,9 @@ public fun <T> PolarPlotScope<T>.PolarPlotSeries(
 
 @Composable
 private fun <T> PolarPlotScope<T>.Symbols(
-    data: List<Point<Float, T>>,
+    data: List<PolarPoint<Float, T>>,
     beta: Float,
-    symbol: (@Composable HoverableElementAreaScope.(Point<Float, T>) -> Unit)? = null,
+    symbol: (@Composable HoverableElementAreaScope.(PolarPoint<Float, T>) -> Unit)? = null,
 ) {
     if (symbol != null) {
         Layout(

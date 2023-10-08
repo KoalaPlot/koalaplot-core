@@ -7,22 +7,10 @@ import io.github.koalaplot.core.util.rotate
 import io.github.koalaplot.core.util.toIntOffset
 import kotlin.math.abs
 
-internal sealed class AnchorPoint {
-    object TopLeft : AnchorPoint()
-    object TopCenter : AnchorPoint()
-    object TopRight : AnchorPoint()
-    object RightMiddle : AnchorPoint()
-    object BottomRight : AnchorPoint()
-    object BottomCenter : AnchorPoint()
-    object BottomLeft : AnchorPoint()
-    object LeftMiddle : AnchorPoint()
-    object Center : AnchorPoint()
-}
-
 /**
  * A delegate for a Placeable that has rotated content. In Compose, the rotate modifier applies a transformation to
  * the drawing canvas of the composable, but doesn't reflect that in its dimensions or position. This class serves
- * as a delegate to assist in sizing and positioning the content of a Composable that has had rotation applies.
+ * as a delegate to assist in sizing and positioning the content of a Composable that has had rotation applied.
  *
  * The delegate supports 9 anchor points that can be used for positioning and dimensioning. They are located at the
  * top left, top center, top right, right middle, bottom right, bottom center, bottom left, left middle, and center of
