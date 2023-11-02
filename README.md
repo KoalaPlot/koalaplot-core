@@ -14,7 +14,7 @@ the possibilities when using Koala Plot. Note that this uses the alpha Compose w
 bugs in the underlying Compose Web framework.
 
 This project is in a pre-release experimental/alpha state. We encourage you to give it a try, make suggestions for
-improvement, and even [contribute](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTIBUTING.md)! It is expected
+improvement, and even [contribute](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTRIBUTING.md)! It is expected
 that the API surface and functionality will change as we gain experience using the library in applications.
 
 # Current Features
