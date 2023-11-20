@@ -1,4 +1,4 @@
-package io.github.koalaplot.core.xychart
+package io.github.koalaplot.core.xygraph
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

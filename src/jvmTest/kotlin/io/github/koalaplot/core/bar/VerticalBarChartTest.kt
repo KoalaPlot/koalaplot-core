@@ -2,8 +2,8 @@ package io.github.koalaplot.core.bar
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.xychart.XYChart
-import io.github.koalaplot.core.xychart.rememberLinearAxisModel
+import io.github.koalaplot.core.xygraph.XYGraph
+import io.github.koalaplot.core.xygraph.rememberLinearAxisModel
 import org.junit.Rule
 import org.junit.Test
 
@@ -18,11 +18,19 @@ class VerticalBarChartTest {
     @Test
     fun oneBarTest() {
         composeTestRule.setContent {
-            XYChart(
+            XYGraph(
                 rememberLinearAxisModel(0f..10f),
                 rememberLinearAxisModel(0f..10f),
             ) {
-                VerticalBarChart(listOf(listOf(DefaultBarChartEntry(5f, 0f, 10f))))
+                VerticalBarPlot(
+                    listOf(
+                        DefaultBarPlotEntry(
+                            5f,
+                            DefaultVerticalBarPosition(0f, 10f)
+                        )
+                    ),
+                    bar = {}
+                )
             }
         }
     }

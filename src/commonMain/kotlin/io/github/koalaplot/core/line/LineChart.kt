@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.unit.Constraints
@@ -26,10 +25,10 @@ import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
-import io.github.koalaplot.core.xychart.Point
 import io.github.koalaplot.core.xychart.XYChartScope
-import kotlin.math.pow
-import kotlin.math.sqrt
+import io.github.koalaplot.core.xychart.XYChartScopeAdapter
+import io.github.koalaplot.core.xygraph.Point
+import io.github.koalaplot.core.xygraph.XYGraphScope
 
 /**
  * Specifies baseline coordinates for drawing filled areas on line charts.
@@ -58,12 +57,12 @@ public sealed interface AreaBaseline<X, Y> {
 public data class StackedAreaStyle(val lineStyle: LineStyle, val areaStyle: AreaStyle)
 
 /**
- * A Stacked Area Chart is like a line chart with filled areas between lines, but where each successive line
+ * A Stacked Area Plot is like a line plot but with filled areas between lines, and where each successive line
  * is added to all of the lines before it, so they stack.
  *
  * @param X Data type of x-axis values
  * @param Y Data type of y-axis values
- * @param data List of [MultiPoint] data items for the chart. Each MultiPoint must hold the same number of
+ * @param data List of [MultiPoint] data items for the plot. Each MultiPoint must hold the same number of
  * y-axis values.
  * @param styles A list of [StackedAreaStyle]s to be applied to each series in the data. The size of this list must
  * match the number of data series provided by [data]
@@ -72,7 +71,7 @@ public data class StackedAreaStyle(val lineStyle: LineStyle, val areaStyle: Area
  * @param animationSpec The animation to provide to the graph when it is created or changed.
  */
 @Composable
-public fun <X, Y> XYChartScope<X, Y>.StackedAreaChart(
+public fun <X, Y> XYGraphScope<X, Y>.StackedAreaPlot(
     data: List<MultiPoint<X, Y>>,
     styles: List<StackedAreaStyle>,
     firstBaseline: AreaBaseline.ConstantLine<X, Y>,
@@ -94,7 +93,7 @@ public fun <X, Y> XYChartScope<X, Y>.StackedAreaChart(
         }
     }
 
-    GeneralLineChart(
+    GeneralLinePlot(
         ListAdapter(0),
         modifier,
         styles[0].lineStyle,
@@ -102,15 +101,15 @@ public fun <X, Y> XYChartScope<X, Y>.StackedAreaChart(
         styles[0].areaStyle,
         firstBaseline,
         animationSpec
-    ) { points: List<Point<X, Y>> ->
-        moveTo(scale(points[0]))
+    ) { points: List<Point<X, Y>>, size: Size ->
+        moveTo(scale(points[0], size))
         for (index in 1..points.lastIndex) {
-            lineTo(scale(points[index]))
+            lineTo(scale(points[index], size))
         }
     }
 
     for (series in 1..<data[0].y.size) {
-        GeneralLineChart(
+        GeneralLinePlot(
             ListAdapter(series),
             modifier,
             styles[series].lineStyle,
@@ -118,17 +117,32 @@ public fun <X, Y> XYChartScope<X, Y>.StackedAreaChart(
             styles[series].areaStyle,
             AreaBaseline.ArbitraryLine(ListAdapter(series - 1)),
             animationSpec
-        ) { points: List<Point<X, Y>> ->
-            moveTo(scale(points[0]))
+        ) { points: List<Point<X, Y>>, size: Size ->
+            moveTo(scale(points[0], size))
             for (index in 1..points.lastIndex) {
-                lineTo(scale(points[index]))
+                lineTo(scale(points[index], size))
             }
         }
     }
 }
 
+@Deprecated(
+    "Replace with the version that uses XYGraphScope as receiver",
+    ReplaceWith("XYGraphScope.StackedAreaPlot")
+)
+@Composable
+public fun <X, Y> XYChartScope<X, Y>.StackedAreaChart(
+    data: List<MultiPoint<X, Y>>,
+    styles: List<StackedAreaStyle>,
+    firstBaseline: AreaBaseline.ConstantLine<X, Y>,
+    modifier: Modifier = Modifier,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+) {
+    XYChartScopeAdapter(this).StackedAreaPlot(data, styles, firstBaseline, modifier, animationSpec)
+}
+
 /**
- * An XY Chart that draws series as points and lines.
+ * A line plot that draws data as points and lines on an [XYGraph].
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values
  * @param data Data series to plot.
@@ -139,10 +153,10 @@ public fun <X, Y> XYChartScope<X, Y>.StackedAreaChart(
  * @param areaBaseline Baseline location for the area. Must be not be null if areaStyle and lineStyle are also not null.
  * If [areaBaseline] is an [AreaBaseline.ArbitraryLine] then the size of the line data must be equal to that of
  * [data], and their x-axis values must match.
- * @param modifier Modifier for the chart.
+ * @param modifier Modifier for the plot.
  */
 @Composable
-public fun <X, Y> XYChartScope<X, Y>.LineChart(
+public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
     data: List<Point<X, Y>>,
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
@@ -163,7 +177,7 @@ public fun <X, Y> XYChartScope<X, Y>.LineChart(
         }
     }
 
-    GeneralLineChart(
+    GeneralLinePlot(
         data,
         modifier,
         lineStyle,
@@ -171,10 +185,50 @@ public fun <X, Y> XYChartScope<X, Y>.LineChart(
         areaStyle,
         areaBaseline,
         animationSpec
-    ) { points: List<Point<X, Y>> ->
-        moveTo(scale(points[0]))
+    ) { points: List<Point<X, Y>>, size: Size ->
+        moveTo(scale(points[0], size))
         for (index in 1..points.lastIndex) {
-            lineTo(scale(points[index]))
+            lineTo(scale(points[index], size))
+        }
+    }
+}
+
+@Deprecated(
+    "Replace with the version that uses XYGraphScope as receiver",
+    ReplaceWith("XYGraphScope.LinePlot")
+)
+@Composable
+public fun <X, Y> XYChartScope<X, Y>.LineChart(
+    data: List<io.github.koalaplot.core.xychart.Point<X, Y>>,
+    modifier: Modifier = Modifier,
+    lineStyle: LineStyle? = null,
+    symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    areaStyle: AreaStyle? = null,
+    areaBaseline: AreaBaseline<X, Y>? = null,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+) {
+    XYChartScopeAdapter(this).LinePlot(
+        PointListAdapter(data),
+        modifier,
+        lineStyle,
+        symbol,
+        areaStyle,
+        areaBaseline,
+        animationSpec
+    )
+}
+
+private class PointListAdapter<X, Y>(val data: List<io.github.koalaplot.core.xychart.Point<X, Y>>) :
+    AbstractList<Point<X, Y>>() {
+    override val size: Int
+        get() = data.size
+
+    override fun get(index: Int): Point<X, Y> {
+        return object : Point<X, Y> {
+            override val x: X
+                get() = data[index].x
+            override val y: Y
+                get() = data[index].y
         }
     }
 }
@@ -196,7 +250,7 @@ public fun <X, Y> XYChartScope<X, Y>.LineChart(
  * @param modifier Modifier for the chart.
  */
 @Composable
-public fun <X, Y> XYChartScope<X, Y>.StairstepChart(
+public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     data: List<Point<X, Y>>,
     lineStyle: LineStyle,
     modifier: Modifier = Modifier,
@@ -216,7 +270,7 @@ public fun <X, Y> XYChartScope<X, Y>.StairstepChart(
         }
     }
 
-    GeneralLineChart(
+    GeneralLinePlot(
         data,
         modifier,
         lineStyle,
@@ -224,24 +278,48 @@ public fun <X, Y> XYChartScope<X, Y>.StairstepChart(
         areaStyle,
         areaBaseline,
         animationSpec
-    ) { points: List<Point<X, Y>> ->
+    ) { points: List<Point<X, Y>>, size: Size ->
         // val strokeWidthPx = lineStyle.strokeWidth.toPx()
         var lastPoint = points[0]
-        var scaledLastPoint = scale(lastPoint)
+        var scaledLastPoint = scale(lastPoint, size)
 
         moveTo(scaledLastPoint)
         for (index in 1..points.lastIndex) {
-            val midPoint = scale(Point(x = points[index].x, y = lastPoint.y))
+            val midPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
             lineTo(midPoint)
             lastPoint = points[index]
-            scaledLastPoint = scale(lastPoint)
+            scaledLastPoint = scale(lastPoint, size)
             lineTo(scaledLastPoint)
         }
     }
 }
 
+@Deprecated(
+    "Replace with the version that uses XYGraphScope as receiver",
+    ReplaceWith("XYGraphScope.LinePlot")
+)
+@Composable
+public fun <X, Y> XYChartScope<X, Y>.StairstepChart(
+    data: List<io.github.koalaplot.core.xychart.Point<X, Y>>,
+    lineStyle: LineStyle,
+    modifier: Modifier = Modifier,
+    symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    areaStyle: AreaStyle? = null,
+    areaBaseline: AreaBaseline<X, Y>? = null,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+) {
+    XYChartScopeAdapter(this).StairstepPlot(
+        PointListAdapter(data),
+        lineStyle,
+        modifier,
+        symbol,
+        areaStyle,
+        areaBaseline,
+        animationSpec
+    )
+}
+
 /**
- * An XY Chart that draws series as points and lines.
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values
  * @param data Data series to plot.
@@ -250,7 +328,7 @@ public fun <X, Y> XYChartScope<X, Y>.StairstepChart(
  * @param modifier Modifier for the chart.
  */
 @Composable
-private fun <X, Y> XYChartScope<X, Y>.GeneralLineChart(
+private fun <X, Y> XYGraphScope<X, Y>.GeneralLinePlot(
     data: List<Point<X, Y>>,
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
@@ -258,7 +336,7 @@ private fun <X, Y> XYChartScope<X, Y>.GeneralLineChart(
     areaStyle: AreaStyle? = null,
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float>,
-    drawConnectorLine: Path.(points: List<Point<X, Y>>) -> Unit,
+    drawConnectorLine: Path.(points: List<Point<X, Y>>, size: Size) -> Unit,
 ) {
     if (data.isEmpty()) return
 
@@ -272,52 +350,44 @@ private fun <X, Y> XYChartScope<X, Y>.GeneralLineChart(
         },
         content = {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                withTransform({
-                    translate(top = size.height)
-                    scale(1f, -1f, pivot = Offset(0f, 0f))
-                    scale(size.width, size.height, pivot = Offset(0f, 0f))
-                }) {
-                    var mainLinePath: Path? = null
-                    var areaPath: Path? = null
-                    if (lineStyle != null) {
-                        mainLinePath = Path().apply {
-                            drawConnectorLine(data)
-                        }
-
-                        if (areaBaseline != null) {
-                            areaPath = generateArea(areaBaseline, data, mainLinePath, drawConnectorLine)
-                        }
+                var mainLinePath: Path? = null
+                var areaPath: Path? = null
+                if (lineStyle != null) {
+                    mainLinePath = Path().apply {
+                        drawConnectorLine(data, size)
                     }
 
-                    areaStyle?.let {
-                        areaPath?.let {
-                            drawPath(
-                                it,
-                                brush = areaStyle.brush,
-                                alpha = areaStyle.alpha,
-                                style = Fill,
-                                colorFilter = areaStyle.colorFilter,
-                                blendMode = areaStyle.blendMode
-                            )
-                        }
+                    if (areaBaseline != null) {
+                        areaPath = generateArea(areaBaseline, data, mainLinePath, size, drawConnectorLine)
                     }
+                }
 
-                    lineStyle?.let {
-                        // Density and hence toPx() doesn't change with DrawScope scaling, so this approximates it
-                        val strokeScale = sqrt(size.width.pow(2) + size.height.pow(2))
-                        mainLinePath?.let {
-                            drawPath(
-                                it,
-                                brush = lineStyle.brush,
-                                alpha = lineStyle.alpha,
-                                style = Stroke(
-                                    lineStyle.strokeWidth.toPx() / strokeScale,
-                                    pathEffect = lineStyle.pathEffect
-                                ),
-                                colorFilter = lineStyle.colorFilter,
-                                blendMode = lineStyle.blendMode
-                            )
-                        }
+                areaStyle?.let {
+                    areaPath?.let {
+                        drawPath(
+                            it,
+                            brush = areaStyle.brush,
+                            alpha = areaStyle.alpha,
+                            style = Fill,
+                            colorFilter = areaStyle.colorFilter,
+                            blendMode = areaStyle.blendMode
+                        )
+                    }
+                }
+
+                lineStyle?.let {
+                    mainLinePath?.let {
+                        drawPath(
+                            it,
+                            brush = lineStyle.brush,
+                            alpha = lineStyle.alpha,
+                            style = Stroke(
+                                lineStyle.strokeWidth.toPx(),
+                                pathEffect = lineStyle.pathEffect
+                            ),
+                            colorFilter = lineStyle.colorFilter,
+                            blendMode = lineStyle.blendMode
+                        )
                     }
                 }
             }
@@ -332,11 +402,12 @@ private fun <X, Y> XYChartScope<X, Y>.GeneralLineChart(
     }
 }
 
-private fun <X, Y> XYChartScope<X, Y>.generateArea(
+private fun <X, Y> XYGraphScope<X, Y>.generateArea(
     areaBaseline: AreaBaseline<X, Y>,
     data: List<Point<X, Y>>,
     mainLinePath: Path,
-    drawConnectorLine: Path.(points: List<Point<X, Y>>) -> Unit
+    size: Size,
+    drawConnectorLine: Path.(points: List<Point<X, Y>>, size: Size) -> Unit
 ): Path {
     return Path().apply {
         fillType = PathFillType.EvenOdd
@@ -345,13 +416,13 @@ private fun <X, Y> XYChartScope<X, Y>.generateArea(
                 addPath(mainLinePath)
 
                 // right edge of fill area
-                lineTo(scale(Point(data.last().x, areaBaseline.values.last().y)))
+                lineTo(scale(Point(data.last().x, areaBaseline.values.last().y), size))
 
                 // draw baseline
-                drawConnectorLine(areaBaseline.values.reversed())
+                drawConnectorLine(areaBaseline.values.reversed(), size)
 
                 // draw left edge of fill area
-                lineTo(scale(data.first()))
+                lineTo(scale(data.first(), size))
 
                 close()
             }
@@ -360,13 +431,13 @@ private fun <X, Y> XYChartScope<X, Y>.generateArea(
                 addPath(mainLinePath)
 
                 // right edge
-                lineTo(scale(Point(data.last().x, areaBaseline.value)))
+                lineTo(scale(Point(data.last().x, areaBaseline.value), size))
 
                 // baseline
-                lineTo(scale(Point(data.first().x, areaBaseline.value)))
+                lineTo(scale(Point(data.first().x, areaBaseline.value), size))
 
                 // left edge
-                lineTo(scale(data.first()))
+                lineTo(scale(data.first(), size))
 
                 close()
             }
@@ -375,7 +446,7 @@ private fun <X, Y> XYChartScope<X, Y>.generateArea(
 }
 
 @Composable
-private fun <X, Y, P : Point<X, Y>> XYChartScope<X, Y>.Symbols(
+private fun <X, Y, P : Point<X, Y>> XYGraphScope<X, Y>.Symbols(
     data: List<P>,
     symbol: (@Composable HoverableElementAreaScope.(P) -> Unit)? = null,
 ) {
@@ -403,14 +474,7 @@ private fun <X, Y, P : Point<X, Y>> XYChartScope<X, Y>.Symbols(
 }
 
 /**
- * Scales the [point] to an offset along the x and y axes.
- */
-private fun <X, Y> XYChartScope<X, Y>.scale(point: Point<X, Y>): Offset {
-    return Offset(xAxisModel.computeOffset(point.x), yAxisModel.computeOffset(point.y))
-}
-
-/**
- * Represents a set of points for a [StackedAreaChart].
+ * Represents a set of points for a [StackedAreaPlot].
  *
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values

@@ -107,7 +107,10 @@ public data class Axis(
     val majorTickSize: Dp = 7.dp,
     val minorTickSize: Dp = 3.dp,
     val lineThickness: Dp = 0.dp,
+    @Deprecated("Migrate from XYChart to XYGraph")
     val tickPosition: TickPosition = TickPosition.Outside,
+    val xyGraphTickPosition: io.github.koalaplot.core.xygraph.TickPosition =
+        io.github.koalaplot.core.xygraph.TickPosition.Outside,
     val majorGridlineStyle: LineStyle? = LineStyle(
         SolidColor(Color.LightGray),
         strokeWidth = 0.dp

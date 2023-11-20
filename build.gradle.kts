@@ -24,7 +24,7 @@ dependencies {
 }
 
 group = "io.github.koalaplot"
-version = "0.5.0-dev1"
+version = "0.5.0-dev2"
 
 kotlin {
     explicitApi()
@@ -45,8 +45,8 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material3)
-                implementation(compose.ui)
-                implementation(compose.animation)
+                api(compose.ui)
+                api(compose.animation)
                 implementation(KotlinX.coroutines.core)
             }
         }

@@ -8,20 +8,29 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Changed
+
 - Update to Compose version 1.5.10
 - Update Kotlin version to 1.9.20
 - Moved package for AreaStyle, LineStyle, Point, DefaultPoint, and KoalaPlotTheme
+- Line/Area chart scaling applied to paths instead of canvas so PathEffects scale the same as drawing on an unscaled
+  Canvas
+- Deprecated XYChart and renamed to XYGraph
+- Deprecated LineChart, StairStepChart, and StackedAreaChart and renamed to LinePlot, StairStepPlot, and AreaPlot
+- Separated variants of VerticalBarChart, depending on grouping or stacking, into GroupedVerticalBarPlot,
+  VerticalBarPlot, and StackedVerticalBarPlot
 
 ### Added
+
 - Polar/Radar/Spider plots
 - Annotations for XY Charts
+- More helper functions for auto scaling axis ranges
 
 ### Fixed
-
 
 ## [0.4.0]
 
 ### Changed
+
 - Update Compose version to 1.5.1
 - Update Kotlin version to 1.9.10
 - Update Kotlin Coroutines to version 1.7.3
@@ -30,8 +39,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Upgrade Gradle to 8.3
 
 ### Added
+
 - forceCenteredPie parameter to PieChart that always places the pie in the center of the component, adjusting its size
-as needed to accommodate the labels.
+  as needed to accommodate the labels.
 - Support for ios
 - Step chart
 - Support for rotating x-axis and y-axis labels on XYCharts
@@ -41,6 +51,7 @@ as needed to accommodate the labels.
 - Stacked area chart
 
 ### Fixed
+
 - Vertical bar chart crash when only 1 data element in the series
 - generateHueColorPalette generating 1 extra color and causing exception when number of colors is 0
 - XYChart crashes if graph size is computed to be < 0
@@ -49,18 +60,21 @@ as needed to accommodate the labels.
 ## [0.3.0]
 
 ### Added
+
 - Pie slice gap setting
 
 ### Changed
+
 - Update Compose version to 1.3.1
 - Update Kotlin version to 1.8.10
 - Update Android plugin version to 7.4.2
 - Update Android compileSdk and targetSdk versions to 33
 - Migrate to Material 3
 - CategoryAxisModel.computeOffset will throw an IllegalArgumentException instead of returning NaN if an invalid
-category value is provided.
+  category value is provided.
 
 ### Fixed
+
 - Avoid compose Exception and subsequent application crash when using a border on a pie slice
 - Crash when pie chart values are all zeros
 - Crash when ColumnLegend was not provided symbol, label, and value Composables for every entry.
