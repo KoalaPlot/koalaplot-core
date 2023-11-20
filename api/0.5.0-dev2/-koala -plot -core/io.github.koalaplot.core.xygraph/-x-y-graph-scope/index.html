@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>XYGraphScope</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+<link href="../../../images/logo-icon.svg">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            Koala Plot Core
+                    </a>
+            </div>
+            <div class="library-version">
+0.5.0-dev2            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector common-like" data-active="" data-filter=":dokkaCustomFormat/commonMain">common</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="Koala Plot Core::io.github.koalaplot.core.xygraph/XYGraphScope///PointingToDeclaration//475666615">
+  <div class="breadcrumbs"><a href="../../../index.html">Koala Plot Core</a><span class="delimiter">/</span><a href="../index.html">io.github.koalaplot.core.xygraph</a><span class="delimiter">/</span><span class="current">XYGraphScope</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>XYGraph</span><wbr></wbr><span><span>Scope</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">Y</a><span class="token operator">&gt;</span> : <a href="../../io.github.koalaplot.core.util/-hoverable-element-area-scope/index.html">HoverableElementAreaScope</a></div><p class="paragraph">A scope for XY plots providing axis and state context.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="899925688%2FProperties%2F475666615" anchor-label="xAxisModel" id="899925688%2FProperties%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="x-axis-model.html"><span>x</span><wbr></wbr><span>Axis</span><wbr></wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="899925688%2FProperties%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">val </span><a href="x-axis-model.html">xAxisModel</a><span class="token operator">: </span><a href="../-axis-model/index.html">AxisModel</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">X</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2070224304%2FProperties%2F475666615" anchor-label="xAxisState" id="-2070224304%2FProperties%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="x-axis-state.html"><span>x</span><wbr></wbr><span>Axis</span><wbr></wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2070224304%2FProperties%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">val </span><a href="x-axis-state.html">xAxisState</a><span class="token operator">: </span><a href="../-axis-state/index.html">AxisState</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1669560711%2FProperties%2F475666615" anchor-label="yAxisModel" id="-1669560711%2FProperties%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="y-axis-model.html"><span>y</span><wbr></wbr><span>Axis</span><wbr></wbr><span><span>Model</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1669560711%2FProperties%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">val </span><a href="y-axis-model.html">yAxisModel</a><span class="token operator">: </span><a href="../-axis-model/index.html">AxisModel</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">Y</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-344743407%2FProperties%2F475666615" anchor-label="yAxisState" id="-344743407%2FProperties%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="y-axis-state.html"><span>y</span><wbr></wbr><span>Axis</span><wbr></wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-344743407%2FProperties%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">val </span><a href="y-axis-state.html">yAxisState</a><span class="token operator">: </span><a href="../-axis-state/index.html">AxisState</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-529742348%2FFunctions%2F475666615" anchor-label="GroupedVerticalBarPlot" id="-529742348%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html"><span>Grouped</span><wbr></wbr><span>Vertical</span><wbr></wbr><span>Bar</span><wbr></wbr><span><span>Plot</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-529742348%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html">Y</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html">E</a><span class="token operator"> : </span><a href="../../io.github.koalaplot.core.bar/-bar-plot-grouped-point-entry/index.html">BarPlotGroupedPointEntry</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html">Y</a><span class="token operator">&gt;</span><span class="token operator">&gt; </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html"><span class="token function">GroupedVerticalBarPlot</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html">E</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">bar<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-bar-scope/index.html">BarScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword"></span>dataIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><span class="token keyword"></span>groupIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><span class="token keyword"></span>entry<span class="token operator">: </span><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html">E</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator"> = </span>{ i, g, _ -&gt;
+        val colors = remember(data) {
+            generateHueColorPalette(data.maxOf { it.y.size })
+        }
+        DefaultVerticalBar(
+            brush = SolidColor(colors[g]),
+            modifier = Modifier.fillMaxWidth(KoalaPlotTheme.sizes.barWidth)
+        )
+    }<span class="token punctuation">, </span></span><span class="parameter ">maxBarGroupWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">0.9f</span><span class="token punctuation">, </span></span><span class="parameter ">animationSpec<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/animation/core/AnimationSpec.html">AnimationSpec</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>KoalaPlotTheme.animationSpec</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A Vertical Bar Plot to be used in an XYGraph and that plots multiple series side-by-side.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-922513297%2FFunctions%2F475666615" anchor-label="HorizontalLineAnnotation" id="-922513297%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-horizontal-line-annotation.html"><span>Horizontal</span><wbr></wbr><span>Line</span><wbr></wbr><span><span>Annotation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-922513297%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-horizontal-line-annotation.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-horizontal-line-annotation.html">Y</a><span class="token operator">&gt; </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-horizontal-line-annotation.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-horizontal-line-annotation.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../-horizontal-line-annotation.html"><span class="token function">HorizontalLineAnnotation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">location<span class="token operator">: </span><a href="../-horizontal-line-annotation.html">Y</a><span class="token punctuation">, </span></span><span class="parameter ">lineStyle<span class="token operator">: </span><a href="../../io.github.koalaplot.core.style/-line-style/index.html">LineStyle</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Places a vertical line marker on the plot at the specified x-axis <a href="../-horizontal-line-annotation.html">location</a> styled using the provided <a href="../-horizontal-line-annotation.html">lineStyle</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1736316809%2FFunctions%2F475666615" anchor-label="hoverableElement" id="1736316809%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.koalaplot.core.util/-hoverable-element-area-scope/hoverable-element.html"><span>hoverable</span><wbr></wbr><span><span>Element</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1736316809%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token punctuation">.</span><a href="../../io.github.koalaplot.core.util/-hoverable-element-area-scope/hoverable-element.html"><span class="token function">hoverableElement</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">element<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1722631872%2FFunctions%2F475666615" anchor-label="LinePlot" id="-1722631872%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.koalaplot.core.line/-line-plot.html"><span>Line</span><wbr></wbr><span><span>Plot</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1722631872%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-line-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-line-plot.html">Y</a><span class="token operator">&gt; </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-line-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-line-plot.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../../io.github.koalaplot.core.line/-line-plot.html"><span class="token function">LinePlot</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-point/index.html">Point</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-line-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-line-plot.html">Y</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">lineStyle<span class="token operator">: </span><a href="../../io.github.koalaplot.core.style/-line-style/index.html">LineStyle</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">symbol<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.util/-hoverable-element-area-scope/index.html">HoverableElementAreaScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../-point/index.html">Point</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-line-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-line-plot.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">areaStyle<span class="token operator">: </span><a href="../../io.github.koalaplot.core.style/-area-style/index.html">AreaStyle</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">areaBaseline<span class="token operator">: </span><a href="../../io.github.koalaplot.core.line/-area-baseline/index.html">AreaBaseline</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-line-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-line-plot.html">Y</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">animationSpec<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/animation/core/AnimationSpec.html">AnimationSpec</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>KoalaPlotTheme.animationSpec</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A line plot that draws data as points and lines on an XYGraph.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1620878309%2FFunctions%2F475666615" anchor-label="scale" id="-1620878309%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="scale.html"><span><span>scale</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1620878309%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="scale.html"><span class="token function">scale</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">point<span class="token operator">: </span><a href="../-point/index.html">Point</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">size<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/geometry/Size.html">Size</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/geometry/Offset.html">Offset</a></div><div class="brief "><p class="paragraph">Transforms <a href="scale.html">point</a> from <a href="../-axis-model/index.html">AxisModel</a> space to display coordinates provided a plot area <a href="scale.html">size</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2131390319%2FFunctions%2F475666615" anchor-label="StackedAreaPlot" id="-2131390319%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html"><span>Stacked</span><wbr></wbr><span>Area</span><wbr></wbr><span><span>Plot</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2131390319%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html">Y</a><span class="token operator">&gt; </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html"><span class="token function">StackedAreaPlot</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-multi-point/index.html">MultiPoint</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html">Y</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">styles<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stacked-area-style/index.html">StackedAreaStyle</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">firstBaseline<span class="token operator">: </span><a href="../../io.github.koalaplot.core.line/-area-baseline/-constant-line/index.html">AreaBaseline.ConstantLine</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">animationSpec<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/animation/core/AnimationSpec.html">AnimationSpec</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>KoalaPlotTheme.animationSpec</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A Stacked Area Plot is like a line plot but with filled areas between lines, and where each successive line is added to all of the lines before it, so they stack.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-527612337%2FFunctions%2F475666615" anchor-label="StackedVerticalBarPlot" id="-527612337%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html"><span>Stacked</span><wbr></wbr><span>Vertical</span><wbr></wbr><span>Bar</span><wbr></wbr><span><span>Plot</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-527612337%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html">Y</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html">E</a><span class="token operator"> : </span><a href="../../io.github.koalaplot.core.bar/-bar-plot-stacked-point-entry/index.html">BarPlotStackedPointEntry</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html">Y</a><span class="token operator">&gt;</span><span class="token operator">&gt; </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html"><span class="token function">StackedVerticalBarPlot</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html">E</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">bar<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-bar-scope/index.html">BarScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword"></span>xIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span><span class="token keyword"></span>barIndex<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">barWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">0.9f</span><span class="token punctuation">, </span></span><span class="parameter ">animationSpec<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/animation/core/AnimationSpec.html">AnimationSpec</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>KoalaPlotTheme.animationSpec</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Composes a stacked vertical bar plot. This is a convenience method which defers to <a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html">VerticalBarPlot</a>. A stacked bar plot can be also achieved by placing multiple <a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html">VerticalBarPlot</a>s on an <a href="../-x-y-graph.html">io.github.koalaplot.core.xygraph.XYGraph</a>, one for each &quot;layer&quot; of bars.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1417332698%2FFunctions%2F475666615" anchor-label="StairstepPlot" id="-1417332698%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html"><span>Stairstep</span><wbr></wbr><span><span>Plot</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1417332698%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html">Y</a><span class="token operator">&gt; </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html"><span class="token function">StairstepPlot</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-point/index.html">Point</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html">Y</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">lineStyle<span class="token operator">: </span><a href="../../io.github.koalaplot.core.style/-line-style/index.html">LineStyle</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">symbol<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.util/-hoverable-element-area-scope/index.html">HoverableElementAreaScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../-point/index.html">Point</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">areaStyle<span class="token operator">: </span><a href="../../io.github.koalaplot.core.style/-area-style/index.html">AreaStyle</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">areaBaseline<span class="token operator">: </span><a href="../../io.github.koalaplot.core.line/-area-baseline/index.html">AreaBaseline</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html">Y</a><span class="token operator">&gt;</span><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">animationSpec<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/animation/core/AnimationSpec.html">AnimationSpec</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>KoalaPlotTheme.animationSpec</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">An XY Chart that draws series as points and stairsteps between points.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1113252160%2FFunctions%2F475666615" anchor-label="VerticalBarPlot" id="1113252160%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html"><span>Vertical</span><wbr></wbr><span>Bar</span><wbr></wbr><span><span>Plot</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1113252160%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html">Y</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html">E</a><span class="token operator"> : </span><a href="../../io.github.koalaplot.core.bar/-bar-plot-entry/index.html">BarPlotEntry</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html">Y</a><span class="token operator">&gt;</span><span class="token operator">&gt; </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html"><span class="token function">VerticalBarPlot</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">data<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html">E</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">bar<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token keyword"></span><a href="../../io.github.koalaplot.core.bar/-bar-scope/index.html">BarScope</a><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token keyword"></span>index<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">barWidth<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator"> = </span><span class="token constant">0.9f</span><span class="token punctuation">, </span></span><span class="parameter ">animationSpec<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/animation/core/AnimationSpec.html">AnimationSpec</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span><span class="token operator"> = </span>KoalaPlotTheme.animationSpec</span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">A VerticalBarPlot to be used in an XYGraph and that plots data points as vertical bars.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-172171427%2FFunctions%2F475666615" anchor-label="VerticalLineAnnotation" id="-172171427%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-vertical-line-annotation.html"><span>Vertical</span><wbr></wbr><span>Line</span><wbr></wbr><span><span>Annotation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-172171427%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-vertical-line-annotation.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-vertical-line-annotation.html">Y</a><span class="token operator">&gt; </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-vertical-line-annotation.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-vertical-line-annotation.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../-vertical-line-annotation.html"><span class="token function">VerticalLineAnnotation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">location<span class="token operator">: </span><a href="../-vertical-line-annotation.html">X</a><span class="token punctuation">, </span></span><span class="parameter ">lineStyle<span class="token operator">: </span><a href="../../io.github.koalaplot.core.style/-line-style/index.html">LineStyle</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Places a vertical line marker on the plot at the specified x-axis <a href="../-vertical-line-annotation.html">location</a> styled using the provided <a href="../-vertical-line-annotation.html">lineStyle</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-835640208%2FFunctions%2F475666615" anchor-label="XYAnnotation" id="-835640208%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-x-y-annotation.html"><span><span>XYAnnotation</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-835640208%2FFunctions%2F475666615"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-x-y-annotation.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-x-y-annotation.html">Y</a><span class="token operator">&gt; </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-x-y-annotation.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-x-y-annotation.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../-x-y-annotation.html"><span class="token function">XYAnnotation</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">location<span class="token operator">: </span><a href="../-point/index.html">Point</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../-x-y-annotation.html">X</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-x-y-annotation.html">Y</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">anchorPoint<span class="token operator">: </span><a href="../-anchor-point/index.html">AnchorPoint</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a> </span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Places a <a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html">Composable</a> as an annotation on an <a href="../-x-y-graph.html">XYGraph</a> with the <a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html">Composable</a>'s <a href="../-x-y-annotation.html">anchorPoint</a> placed at the provided <a href="../-x-y-annotation.html">location</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
