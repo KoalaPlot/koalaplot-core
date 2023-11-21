@@ -26,6 +26,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - More helper functions for auto scaling axis ranges
 
 ### Fixed
+- LinearAxisModel adding 2 extra minor ticks overlapping the first and last major ticks
 
 ## [0.4.0]
 

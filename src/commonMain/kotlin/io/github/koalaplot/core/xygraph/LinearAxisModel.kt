@@ -134,7 +134,7 @@ public class LinearAxisModel constructor(
             }
 
             // create ticks after last major tick, if still space in the range
-            var i = 0
+            var i = 1
             do {
                 val nextTick = majorTickValues.last() + minorIncrement * i
                 if (nextTick in currentRange) {
@@ -144,7 +144,7 @@ public class LinearAxisModel constructor(
             } while (nextTick in currentRange)
 
             // create ticks before first major tick. if still space in the range
-            i = 0
+            i = 1
             do {
                 val nextTick = majorTickValues.first() - minorIncrement * i
                 if (nextTick in currentRange) {
