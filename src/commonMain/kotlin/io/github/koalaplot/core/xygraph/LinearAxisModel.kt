@@ -247,7 +247,15 @@ public fun rememberLinearAxisModel(
     minorTickCount: Int = 4,
     allowZooming: Boolean = true,
     allowPanning: Boolean = true,
-): LinearAxisModel = remember {
+): LinearAxisModel = remember(
+    range,
+    zoomRangeLimit,
+    minimumMajorTickIncrement,
+    minimumMajorTickSpacing,
+    minorTickCount,
+    allowZooming,
+    allowPanning
+) {
     LinearAxisModel(
         range,
         zoomRangeLimit,
