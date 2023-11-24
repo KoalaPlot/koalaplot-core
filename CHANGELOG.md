@@ -19,6 +19,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Separated variants of VerticalBarChart, depending on grouping or stacking, into GroupedVerticalBarPlot,
   VerticalBarPlot, and StackedVerticalBarPlot
 - Area plots no longer require LineStyle to be non-null
+- Separate AreaPlot from LinePlot to simplify null/not-null requirements on parameters to LinePlot
 
 ### Added
 

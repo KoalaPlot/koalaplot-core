@@ -142,38 +142,29 @@ public fun <X, Y> XYChartScope<X, Y>.StackedAreaChart(
 }
 
 /**
- * A line plot that draws data as points and lines on an [XYGraph].
+ * An area plot that draws data as points and lines with a filled area to a baseline.
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values
  * @param data Data series to plot.
  * @param lineStyle Style to use for the line that connects the data points. If null, no line is drawn.
  * @param symbol Composable for the symbol to be shown at each data point.
  * @param areaStyle Style to use for filling the area between the line and a baseline. If null, no area will be drawn.
- * @param areaBaseline Baseline location for the area. Must be not be null if areaStyle and lineStyle are also not null.
- * If [areaBaseline] is an [AreaBaseline.ArbitraryLine] then the size of the line data must be equal to that of
- * [data], and their x-axis values must match.
+ * @param areaBaseline Baseline location for the area. If [areaBaseline] is an [AreaBaseline.ArbitraryLine] then it is
+ * recommended that the first and last x-axis values for the baseline match those in the [data] so the
+ * left and right area bounds will be vertical.
  * @param modifier Modifier for the plot.
  */
 @Composable
-public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
+public fun <X, Y> XYGraphScope<X, Y>.AreaPlot(
     data: List<Point<X, Y>>,
+    areaBaseline: AreaBaseline<X, Y>,
+    areaStyle: AreaStyle,
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
     symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
-    areaStyle: AreaStyle? = null,
-    areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
     if (data.isEmpty()) return
-
-    if (areaStyle != null) {
-        require(areaBaseline != null) { "areaBaseline must be provided for area charts" }
-        if (areaBaseline is AreaBaseline.ArbitraryLine) {
-            require(areaBaseline.values.size == data.size) {
-                "baseline values must be the same size as the data"
-            }
-        }
-    }
 
     GeneralLinePlot(
         data,
@@ -182,6 +173,41 @@ public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
         symbol,
         areaStyle,
         areaBaseline,
+        animationSpec
+    ) { points: List<Point<X, Y>>, size: Size ->
+        moveTo(scale(points[0], size))
+        for (index in 1..points.lastIndex) {
+            lineTo(scale(points[index], size))
+        }
+    }
+}
+
+/**
+ * A line plot that draws data as points and lines on an [XYGraph].
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ * @param data Data series to plot.
+ * @param lineStyle Style to use for the line that connects the data points. If null, no line is drawn.
+ * @param symbol Composable for the symbol to be shown at each data point.
+ * @param modifier Modifier for the plot.
+ */
+@Composable
+public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
+    data: List<Point<X, Y>>,
+    modifier: Modifier = Modifier,
+    lineStyle: LineStyle? = null,
+    symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+) {
+    if (data.isEmpty()) return
+
+    GeneralLinePlot(
+        data,
+        modifier,
+        lineStyle,
+        symbol,
+        null,
+        null,
         animationSpec
     ) { points: List<Point<X, Y>>, size: Size ->
         moveTo(scale(points[0], size))
@@ -205,15 +231,25 @@ public fun <X, Y> XYChartScope<X, Y>.LineChart(
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
-    XYChartScopeAdapter(this).LinePlot(
-        PointListAdapter(data),
-        modifier,
-        lineStyle,
-        symbol,
-        areaStyle,
-        areaBaseline,
-        animationSpec
-    )
+    if (areaStyle != null && areaBaseline != null) {
+        XYChartScopeAdapter(this).AreaPlot(
+            PointListAdapter(data),
+            areaBaseline,
+            areaStyle,
+            modifier,
+            lineStyle,
+            symbol,
+            animationSpec
+        )
+    } else {
+        XYChartScopeAdapter(this).LinePlot(
+            PointListAdapter(data),
+            modifier,
+            lineStyle,
+            symbol,
+            animationSpec
+        )
+    }
 }
 
 private class PointListAdapter<X, Y>(val data: List<io.github.koalaplot.core.xychart.Point<X, Y>>) :
@@ -403,7 +439,7 @@ private fun <X, Y> XYGraphScope<X, Y>.generateArea(
                 addPath(mainLinePath)
 
                 // right edge of fill area
-                lineTo(scale(Point(data.last().x, areaBaseline.values.last().y), size))
+                lineTo(scale(areaBaseline.values.last(), size))
 
                 // draw baseline
                 drawConnectorLine(areaBaseline.values.reversed(), size)
