@@ -18,6 +18,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Deprecated LineChart, StairStepChart, and StackedAreaChart and renamed to LinePlot, StairStepPlot, and AreaPlot
 - Separated variants of VerticalBarChart, depending on grouping or stacking, into GroupedVerticalBarPlot,
   VerticalBarPlot, and StackedVerticalBarPlot
+- Area plots no longer require LineStyle to be non-null
 
 ### Added
 

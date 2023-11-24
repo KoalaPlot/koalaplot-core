@@ -149,7 +149,6 @@ public fun <X, Y> XYChartScope<X, Y>.StackedAreaChart(
  * @param lineStyle Style to use for the line that connects the data points. If null, no line is drawn.
  * @param symbol Composable for the symbol to be shown at each data point.
  * @param areaStyle Style to use for filling the area between the line and a baseline. If null, no area will be drawn.
- * [lineStyle] must also be non-null for the area to be drawn.
  * @param areaBaseline Baseline location for the area. Must be not be null if areaStyle and lineStyle are also not null.
  * If [areaBaseline] is an [AreaBaseline.ArbitraryLine] then the size of the line data must be equal to that of
  * [data], and their x-axis values must match.
@@ -168,7 +167,6 @@ public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
     if (data.isEmpty()) return
 
     if (areaStyle != null) {
-        require(lineStyle != null) { "lineStyle must be provided for area charts" }
         require(areaBaseline != null) { "areaBaseline must be provided for area charts" }
         if (areaBaseline is AreaBaseline.ArbitraryLine) {
             require(areaBaseline.values.size == data.size) {
@@ -350,45 +348,34 @@ private fun <X, Y> XYGraphScope<X, Y>.GeneralLinePlot(
         },
         content = {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                var mainLinePath: Path? = null
-                var areaPath: Path? = null
-                if (lineStyle != null) {
-                    mainLinePath = Path().apply {
-                        drawConnectorLine(data, size)
-                    }
-
-                    if (areaBaseline != null) {
-                        areaPath = generateArea(areaBaseline, data, mainLinePath, size, drawConnectorLine)
-                    }
+                val mainLinePath = Path().apply {
+                    drawConnectorLine(data, size)
                 }
 
-                areaStyle?.let {
-                    areaPath?.let {
-                        drawPath(
-                            it,
-                            brush = areaStyle.brush,
-                            alpha = areaStyle.alpha,
-                            style = Fill,
-                            colorFilter = areaStyle.colorFilter,
-                            blendMode = areaStyle.blendMode
-                        )
-                    }
+                if (areaBaseline != null && areaStyle != null) {
+                    val areaPath = generateArea(areaBaseline, data, mainLinePath, size, drawConnectorLine)
+                    drawPath(
+                        areaPath,
+                        brush = areaStyle.brush,
+                        alpha = areaStyle.alpha,
+                        style = Fill,
+                        colorFilter = areaStyle.colorFilter,
+                        blendMode = areaStyle.blendMode
+                    )
                 }
 
                 lineStyle?.let {
-                    mainLinePath?.let {
-                        drawPath(
-                            it,
-                            brush = lineStyle.brush,
-                            alpha = lineStyle.alpha,
-                            style = Stroke(
-                                lineStyle.strokeWidth.toPx(),
-                                pathEffect = lineStyle.pathEffect
-                            ),
-                            colorFilter = lineStyle.colorFilter,
-                            blendMode = lineStyle.blendMode
-                        )
-                    }
+                    drawPath(
+                        mainLinePath,
+                        brush = lineStyle.brush,
+                        alpha = lineStyle.alpha,
+                        style = Stroke(
+                            lineStyle.strokeWidth.toPx(),
+                            pathEffect = lineStyle.pathEffect
+                        ),
+                        colorFilter = lineStyle.colorFilter,
+                        blendMode = lineStyle.blendMode
+                    )
                 }
             }
             Symbols(data, symbol)
