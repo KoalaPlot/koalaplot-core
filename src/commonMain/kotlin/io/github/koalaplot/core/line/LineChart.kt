@@ -72,7 +72,7 @@ public data class StackedAreaStyle(val lineStyle: LineStyle, val areaStyle: Area
  */
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.StackedAreaPlot(
-    data: List<MultiPoint<X, Y>>,
+    data: List<StackedAreaPlotEntry<X, Y>>,
     styles: List<StackedAreaStyle>,
     firstBaseline: AreaBaseline.ConstantLine<X, Y>,
     modifier: Modifier = Modifier,
@@ -81,15 +81,14 @@ public fun <X, Y> XYGraphScope<X, Y>.StackedAreaPlot(
     if (data.isEmpty()) return
 
     /**
-     * An adapter between Multipoints and Points. This approach is prioritizing memory usage over number of
-     * calculations as it is not caching values and recomputes them instead.
+     * An adapter between Multipoints and Points for use with GeneralLinePlot.
      */
     class ListAdapter(val series: Int) : AbstractList<Point<X, Y>>() {
         override val size: Int
             get() = data.size
 
         override fun get(index: Int): Point<X, Y> {
-            return data[index].accumulateTo(series)
+            return Point(data[index].x, data[index].y[series])
         }
     }
 
@@ -138,7 +137,55 @@ public fun <X, Y> XYChartScope<X, Y>.StackedAreaChart(
     modifier: Modifier = Modifier,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
-    XYChartScopeAdapter(this).StackedAreaPlot(data, styles, firstBaseline, modifier, animationSpec)
+    /**
+     * An adapter between Multipoints and Points. This approach is prioritizing memory usage over number of
+     * calculations as it is not caching values and recomputes them instead.
+     */
+    class ListAdapter(val series: Int) : AbstractList<Point<X, Y>>() {
+        override val size: Int
+            get() = data.size
+
+        override fun get(index: Int): Point<X, Y> {
+            return data[index].accumulateTo(series)
+        }
+    }
+
+    fun Point<X, Y>.pt(): io.github.koalaplot.core.xychart.Point<X, Y> {
+        return io.github.koalaplot.core.xychart.Point(x, y)
+    }
+
+    XYChartScopeAdapter(this).GeneralLinePlot(
+        ListAdapter(0),
+        modifier,
+        styles[0].lineStyle,
+        null,
+        styles[0].areaStyle,
+        firstBaseline,
+        animationSpec
+    ) { points: List<Point<X, Y>>, size: Size ->
+
+        moveTo(scale(points[0].pt(), size))
+        for (index in 1..points.lastIndex) {
+            lineTo(scale(points[index].pt(), size))
+        }
+    }
+
+    for (series in 1..<data[0].y.size) {
+        XYChartScopeAdapter(this).GeneralLinePlot(
+            ListAdapter(series),
+            modifier,
+            styles[series].lineStyle,
+            null,
+            styles[series].areaStyle,
+            AreaBaseline.ArbitraryLine(ListAdapter(series - 1)),
+            animationSpec
+        ) { points: List<Point<X, Y>>, size: Size ->
+            moveTo(scale(points[0].pt(), size))
+            for (index in 1..points.lastIndex) {
+                lineTo(scale(points[index].pt(), size))
+            }
+        }
+    }
 }
 
 /**
@@ -502,6 +549,7 @@ private fun <X, Y, P : Point<X, Y>> XYGraphScope<X, Y>.Symbols(
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values
  */
+@Deprecated("Use StackedAreaPlotEntry instead.")
 public interface MultiPoint<X, Y> {
     /**
      * The x-axis value of this [MultiPoint].
@@ -521,10 +569,30 @@ public interface MultiPoint<X, Y> {
 }
 
 /**
+ * Represents a set of points for a [StackedAreaPlot]. For higher performance/lower memory footprint when using
+ * Floating point values, use [FloatStackedAreaPlotEntry].
+ *
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ */
+public interface StackedAreaPlotEntry<X, Y> {
+    /**
+     * The x-axis value of this [StackedAreaPlotEntry].
+     */
+    public val x: X
+
+    /**
+     * The y-axis coordinate of each line in the stack, where lower indices are for lines lower in the stack.
+     */
+    public val y: Array<Y>
+}
+
+/**
  * Default implementation of the [MultiPoint] interface using Floats for y-axis values.
  *
  * @param X Data type for x-axis values
  */
+@Deprecated("Use StackedAreaPlotEntry instead.")
 public data class DefaultMultiPoint<X>(override val x: X, override val y: List<Float>) : MultiPoint<X, Float> {
     override fun accumulateTo(series: Int): Point<X, Float> {
         var sum = 0f
@@ -532,5 +600,42 @@ public data class DefaultMultiPoint<X>(override val x: X, override val y: List<F
             sum += y[seriesIndex]
         }
         return Point(x, sum)
+    }
+}
+
+/**
+ * Adapts data for use in a [StackedAreaPlot] where the input data consists of a List of x-axis coordinates and
+ * multiple Lists of Float y-axis coordinates, one per line, where the values are before stacking. This adapter
+ * will sum y-axis values to compute each line's height in the [StackedAreaPlot]. The size of [xData] and all
+ * series in [yData] must be equal.
+ */
+public class StackedAreaPlotDataAdapter<X>(private val xData: List<X>, private val yData: List<List<Float>>) :
+    AbstractList<StackedAreaPlotEntry<X, Float>>() {
+
+    init {
+        if (xData.isNotEmpty()) {
+            require(yData.isNotEmpty()) { "yData must not be empty if xData is not empty" }
+            yData.forEachIndexed { index, data ->
+                require(xData.size == data.size) {
+                    "Size of yData with index $index must be the same size as xData."
+                }
+            }
+        }
+    }
+
+    override val size: Int = xData.size
+
+    override fun get(index: Int): StackedAreaPlotEntry<X, Float> {
+        return object : StackedAreaPlotEntry<X, Float> {
+            override val x: X = xData[index]
+            override val y: Array<Float>
+                get() {
+                    var last = 0f
+                    return Array(yData.size) {
+                        last += yData[it][index]
+                        last
+                    }
+                }
+        }
     }
 }
