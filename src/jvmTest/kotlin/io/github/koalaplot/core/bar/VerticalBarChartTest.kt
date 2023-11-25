@@ -24,7 +24,7 @@ class VerticalBarChartTest {
             ) {
                 VerticalBarPlot(
                     listOf(
-                        DefaultBarPlotEntry(
+                        DefaultVerticalBarPlotEntry(
                             5f,
                             DefaultVerticalBarPosition(0f, 10f)
                         )

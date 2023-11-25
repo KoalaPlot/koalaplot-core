@@ -26,6 +26,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Polar/Radar/Spider plots
 - Annotations for XY Charts
 - More helper functions for auto scaling axis ranges
+- VerticalBarPlot overload for single series taking list of x-axis values and y-axis Floats.
+- Vertical bar plot builder DSLs
 
 ### Fixed
 - LinearAxisModel adding 2 extra minor ticks overlapping the first and last major ticks
