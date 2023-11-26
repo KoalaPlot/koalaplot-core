@@ -23,7 +23,7 @@ import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.HoverableElementAreaScope
 
 /**
- * Plots a series on a [PolarPlot].
+ * Plots a series on a [PolarGraph].
  *
  * @param data Data points to display.
  * @param lineStyle Styling for line segments that interconnect the data points. Defaults to null for no lines.
@@ -35,7 +35,7 @@ import io.github.koalaplot.core.util.HoverableElementAreaScope
  */
 @ExperimentalKoalaPlotApi
 @Composable
-public fun <T> PolarPlotScope<T>.PolarPlotSeries(
+public fun <T> PolarGraphScope<T>.PolarPlotSeries(
     data: List<PolarPoint<Float, T>>,
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
@@ -92,7 +92,7 @@ public fun <T> PolarPlotScope<T>.PolarPlotSeries(
 }
 
 @Composable
-private fun <T> PolarPlotScope<T>.Symbols(
+private fun <T> PolarGraphScope<T>.Symbols(
     data: List<PolarPoint<Float, T>>,
     beta: Float,
     symbol: (@Composable HoverableElementAreaScope.(PolarPoint<Float, T>) -> Unit)? = null,

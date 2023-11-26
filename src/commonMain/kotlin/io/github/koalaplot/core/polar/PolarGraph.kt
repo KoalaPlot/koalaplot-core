@@ -1,6 +1,8 @@
 package io.github.koalaplot.core.polar
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -40,13 +42,13 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
- * Scope for plot series content placed on a [PolarPlot].
+ * Scope for plot series content placed on a [PolarGraph].
  */
-public interface PolarPlotScope<T> : HoverableElementAreaScope {
+public interface PolarGraphScope<T> : HoverableElementAreaScope {
     /**
-     * Provides the [RadialAxisModel] for the plot to scale coordinates.
+     * Provides the [FloatRadialAxisModel] for the plot to scale coordinates.
      */
-    public val radialAxisModel: RadialAxisModel
+    public val radialAxisModel: FloatRadialAxisModel
 
     /**
      * Provides the [AngularAxisModel] for the plot to scale coordinates.
@@ -71,7 +73,7 @@ public enum class RadialGridType {
 }
 
 /**
- * Properties used to customize the visuals and layout of a [PolarPlot].
+ * Properties used to customize the visuals and layout of a [PolarGraph].
  * @param radialGridType The type of radial grid lines to use - circles or line segments between radial axis line.
  * @param radialAxisGridLineStyle Styling for the radial axis grid lines
  * @param angularAxisGridLineStyle Styling for the angular axis grid lines
@@ -79,7 +81,7 @@ public enum class RadialGridType {
  * @param radialLabelGap Distance between the radial labels and the axis line
  * @param background The style to apply to the background of the plot area that contains the gridlines.
  */
-public data class PolarPlotProperties(
+public data class PolarGraphProperties(
     val radialGridType: RadialGridType,
     val radialAxisGridLineStyle: LineStyle?,
     val angularAxisGridLineStyle: LineStyle?,
@@ -89,14 +91,14 @@ public data class PolarPlotProperties(
 )
 
 /**
- * Contains default values for PolarPlots.
+ * Contains default values for [PolarGraph]s.
  */
-public object PolarPlotDefaults {
+public object PolarGraphDefaults {
     /**
-     * Default values for [PolarPlotProperties].
+     * Default values for [PolarGraphProperties].
      */
     @Composable
-    public fun PolarPlotPropertyDefaults(): PolarPlotProperties = PolarPlotProperties(
+    public fun PolarGraphPropertyDefaults(): PolarGraphProperties = PolarGraphProperties(
         CIRCLES,
         KoalaPlotTheme.axis.majorGridlineStyle,
         KoalaPlotTheme.axis.majorGridlineStyle,
@@ -107,30 +109,31 @@ public object PolarPlotDefaults {
 }
 
 /**
- * A PolarPlot with a radial axis and an angular axis. Multiple series of data can be plotted on a polar plot
- * as lines and/or shaded regions with or without symbols at each plotted point.
+ * A Graph using polar coordinates - a radial axis and an angular axis.
+ * Multiple series of data can be plotted on a polar graph as lines and/or shaded regions with or without
+ * symbols at each plotted point.
  *
  * @param T The data type for the angular axis
  * @param radialAxisModel Provides the radial axis coordinate system
  * @param angularAxisModel An [AngularAxisModel] providing the angular axis coordinate system
  * @param radialAxisLabels [Composable] providing radial axis labels.
  * @param angularAxisLabels [Composable] providing angular axis labels.
- * @param polarPlotProperties Properties to customize plot styling.
+ * @param polarGraphProperties Properties to customize plot styling.
  * @param content Content to display on the plot, see [PolarPlotSeries].
  */
 @ExperimentalKoalaPlotApi
 @Composable
-public fun <T> PolarPlot(
-    radialAxisModel: RadialAxisModel,
+public fun <T> PolarGraph(
+    radialAxisModel: FloatRadialAxisModel,
     angularAxisModel: AngularAxisModel<T>,
     radialAxisLabels: @Composable (Float) -> Unit,
     angularAxisLabels: @Composable (T) -> Unit,
     modifier: Modifier = Modifier,
-    polarPlotProperties: PolarPlotProperties = PolarPlotDefaults.PolarPlotPropertyDefaults(),
-    content: @Composable PolarPlotScope<T>.() -> Unit
+    polarGraphProperties: PolarGraphProperties = PolarGraphDefaults.PolarGraphPropertyDefaults(),
+    content: @Composable PolarGraphScope<T>.() -> Unit
 ) {
     HoverableElementArea(modifier = modifier) {
-        val scope = object : PolarPlotScope<T>, HoverableElementAreaScope by this {
+        val scope = object : PolarGraphScope<T>, HoverableElementAreaScope by this {
             override val radialAxisModel = radialAxisModel
             override val angularAxisModel = angularAxisModel
             override fun polarToCartesian(point: PolarPoint<Float, T>, size: Size): Offset {
@@ -140,9 +143,7 @@ public fun <T> PolarPlot(
 
         Layout(
             contents = buildList {
-                add {
-                    scope.Grid(polarPlotProperties)
-                }
+                add { scope.Grid(polarGraphProperties) }
                 add {
                     radialAxisModel.tickValues.forEach {
                         Box { radialAxisLabels(it) }
@@ -156,7 +157,7 @@ public fun <T> PolarPlot(
                 add {
                     Box(
                         modifier = Modifier.drawWithContent {
-                            val clipPath = scope.generateGridBoundaryPath(size, polarPlotProperties.radialGridType)
+                            val clipPath = scope.generateGridBoundaryPath(size, polarGraphProperties.radialGridType)
                             clipPath(clipPath) {
                                 this@drawWithContent.drawContent()
                             }
@@ -164,35 +165,51 @@ public fun <T> PolarPlot(
                     ) { scope.content() }
                 }
             },
-            measurePolicy = PolarPlotMeasurePolicy(angularAxisModel, radialAxisModel, polarPlotProperties)
+            measurePolicy = PolarGraphMeasurePolicy(angularAxisModel, radialAxisModel, polarGraphProperties)
         )
     }
 }
 
 /**
- * Transforms [inputAngle] to where 0 is at the 12 O'Clock position.
+ * Transforms [inputAngle] to start at 3 O'Clock and increment counter-clockwise like
+ * the normal mathematical convention.
  */
-private fun toPolarAngle(inputAngle: AngularValue): AngularValue {
-    return (inputAngle.toRadians().value - PI / 2.0).toRadians()
+private fun <T> AngularAxisModel<T>.toPolarAngle(inputAngle: AngularValue): AngularValue {
+    val sign = if (angleDirection == AngularAxisModel.AngleDirection.CLOCKWISE) {
+        1.0
+    } else {
+        -1.0
+    }
+
+    val originOffset = when (angleZero) {
+        AngularAxisModel.AngleZero.THREE_OCLOCK -> 0.0
+        AngularAxisModel.AngleZero.SIX_OCLOCK -> PI / 2.0
+        AngularAxisModel.AngleZero.NINE_OCLOCK -> PI
+        AngularAxisModel.AngleZero.TWELVE_OCLOCK -> -PI / 2.0
+    }
+
+    // return (inputAngle.toRadians().value - PI / 2.0).toRadians()
+    // return (-inputAngle.toRadians().value).toRadians()
+    return (sign * inputAngle.toRadians().value + originOffset).toRadians()
 }
 
 private fun <T> polarToCartesianPlot(
     point: PolarPoint<Float, T>,
     angularAxisModel: AngularAxisModel<T>,
-    radialAxisModel: RadialAxisModel,
+    radialAxisModel: FloatRadialAxisModel,
     size: Size
 ): Offset {
     // Transform the angle to where 0 is at the 12 O'Clock position.
-    val theta = toPolarAngle(angularAxisModel.computeOffset(point.theta))
+    val theta = angularAxisModel.toPolarAngle(angularAxisModel.computeOffset(point.theta))
 
     val r = min(size.width / 2, size.height / 2) * radialAxisModel.computeOffset(point.r)
     return polarToCartesian(r, theta)
 }
 
-private class PolarPlotMeasurePolicy<T>(
+private class PolarGraphMeasurePolicy<T>(
     private val angularAxisModel: AngularAxisModel<T>,
-    private val radialAxisModel: RadialAxisModel,
-    private val plotProperties: PolarPlotProperties
+    private val radialAxisModel: FloatRadialAxisModel,
+    private val plotProperties: PolarGraphProperties
 ) : MultiContentMeasurePolicy {
     private val gridIndex = 0
     private val radialAxisIndex = 1
@@ -213,7 +230,7 @@ private class PolarPlotMeasurePolicy<T>(
 
         // Measure all the angularAxis labels
         val angularAxisLabelPlaceables = angularAxisModel.getTickValues().mapIndexed { index, t ->
-            val offset = toPolarAngle(angularAxisModel.computeOffset(t))
+            val offset = angularAxisModel.toPolarAngle(angularAxisModel.computeOffset(t))
 
             angularAxisLabelMeasurables[index].measure(
                 // constraints,
@@ -255,7 +272,7 @@ private class PolarPlotMeasurePolicy<T>(
             contentPlaceable.place((plotSize.width / 2).roundToInt(), (plotSize.height / 2).roundToInt())
 
             angularAxisModel.getTickValues().forEachIndexed { index, t ->
-                val angle = toPolarAngle(angularAxisModel.computeOffset(t))
+                val angle = angularAxisModel.toPolarAngle(angularAxisModel.computeOffset(t))
                 val label = angularAxisLabelPlaceables[index]
 
                 val labelOffset = Offset(
@@ -290,7 +307,7 @@ private class PolarPlotMeasurePolicy<T>(
         val rects = doRadialLabelLayout(
             plotRadius,
             angularAxisModel.getTickValues().map {
-                toPolarAngle(angularAxisModel.computeOffset(it))
+                angularAxisModel.toPolarAngle(angularAxisModel.computeOffset(it))
             },
             labelSizes
         )
@@ -452,4 +469,51 @@ private data class AngularSector(val minAngle: AngularValue, val maxAngle: Angul
         @Suppress("MagicNumber")
         return (angle.toDegrees().value % 360.0 + 360.0) % 360.0
     }
+}
+
+/**
+ * A Graph using polar coordinates - a radial axis and an angular axis.
+ * Multiple series of data can be plotted on a polar graph as lines and/or shaded regions with or without
+ * symbols at each plotted point.
+ *
+ * @param T The data type for the angular axis
+ * @param radialAxisModel Provides the radial axis coordinate system
+ * @param angularAxisModel An [AngularAxisModel] providing the angular axis coordinate system
+ * @param radialAxisLabelText Provides strings for radial axis labels.
+ * @param angularAxisLabelText Provides strings for angular axis labels.
+ * @param polarGraphProperties Properties to customize plot styling.
+ * @param content Content to display on the plot, see [PolarPlotSeries].
+ */
+@ExperimentalKoalaPlotApi
+@Composable
+public fun <T> PolarGraph(
+    radialAxisModel: FloatRadialAxisModel,
+    angularAxisModel: AngularAxisModel<T>,
+    radialAxisLabelText: (Float) -> String = { it.toString() },
+    angularAxisLabelText: (T) -> String = { it.toString() },
+    modifier: Modifier = Modifier,
+    polarGraphProperties: PolarGraphProperties = PolarGraphDefaults.PolarGraphPropertyDefaults(),
+    content: @Composable PolarGraphScope<T>.() -> Unit
+) {
+    PolarGraph(
+        radialAxisModel,
+        angularAxisModel,
+        radialAxisLabels = {
+            Text(
+                radialAxisLabelText(it),
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        angularAxisLabels = {
+            Text(
+                angularAxisLabelText(it),
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodySmall
+            )
+        },
+        modifier,
+        polarGraphProperties,
+        content
+    )
 }

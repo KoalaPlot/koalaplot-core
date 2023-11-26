@@ -21,32 +21,32 @@ import kotlin.math.min
  * restrict its size to the required diameter.
  */
 @Composable
-internal fun <T> PolarPlotScope<T>.Grid(
-    polarPlotProperties: PolarPlotProperties,
+internal fun <T> PolarGraphScope<T>.Grid(
+    polarGraphProperties: PolarGraphProperties,
 ) {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        if (polarPlotProperties.background != null) {
-            val backgroundPath = generateGridBoundaryPath(size, polarPlotProperties.radialGridType)
+        if (polarGraphProperties.background != null) {
+            val backgroundPath = generateGridBoundaryPath(size, polarGraphProperties.radialGridType)
 
             drawPath(
                 backgroundPath,
-                polarPlotProperties.background.brush,
-                polarPlotProperties.background.alpha,
+                polarGraphProperties.background.brush,
+                polarGraphProperties.background.alpha,
                 Fill,
-                polarPlotProperties.background.colorFilter,
-                polarPlotProperties.background.blendMode
+                polarGraphProperties.background.colorFilter,
+                polarGraphProperties.background.blendMode
             )
         }
 
         drawRadialGridLines(
             this@Grid,
-            polarPlotProperties.radialAxisGridLineStyle,
-            polarPlotProperties.radialGridType,
+            polarGraphProperties.radialAxisGridLineStyle,
+            polarGraphProperties.radialGridType,
         )
 
         drawAngularGridLines(
             this@Grid,
-            polarPlotProperties.angularAxisGridLineStyle
+            polarGraphProperties.angularAxisGridLineStyle
         )
     }
 }
@@ -55,35 +55,35 @@ internal fun <T> PolarPlotScope<T>.Grid(
  * Draws radial grid lines/circles
  */
 private fun <T> DrawScope.drawRadialGridLines(
-    polarPlotScope: PolarPlotScope<T>,
+    polarGraphScope: PolarGraphScope<T>,
     style: LineStyle?,
     radialGridType: RadialGridType
 ) {
-    val radii = polarPlotScope.radialAxisModel.tickValues.map { polarPlotScope.radialAxisModel.computeOffset(it) }
+    val radii = polarGraphScope.radialAxisModel.tickValues.map { polarGraphScope.radialAxisModel.computeOffset(it) }
     if (radii.isEmpty()) return
 
     if (style != null) {
         if (radialGridType == RadialGridType.CIRCLES) {
-            drawCircularRadialGridLines(polarPlotScope.radialAxisModel, style)
+            drawCircularRadialGridLines(polarGraphScope.radialAxisModel, style)
         } else {
-            drawStraightRadialGridLines(polarPlotScope, style)
+            drawStraightRadialGridLines(polarGraphScope, style)
         }
     }
 }
 
 private fun <T> DrawScope.drawStraightRadialGridLines(
-    polarPlotScope: PolarPlotScope<T>,
+    polarGraphScope: PolarGraphScope<T>,
     style: LineStyle
 ) {
-    val angles = polarPlotScope.angularAxisModel.getTickValues()
-    val radii = polarPlotScope.radialAxisModel.tickValues
+    val angles = polarGraphScope.angularAxisModel.getTickValues()
+    val radii = polarGraphScope.radialAxisModel.tickValues
 
     radii.forEach { radius ->
         var startAngle = angles.last()
         for (angleIndex in 0..angles.lastIndex) {
             drawLine(
-                start = polarPlotScope.polarToCartesian(PolarPoint(radius, startAngle), size),
-                end = polarPlotScope.polarToCartesian(PolarPoint(radius, angles[angleIndex]), size),
+                start = polarGraphScope.polarToCartesian(PolarPoint(radius, startAngle), size),
+                end = polarGraphScope.polarToCartesian(PolarPoint(radius, angles[angleIndex]), size),
                 brush = style.brush,
                 strokeWidth = style.strokeWidth.toPx(),
                 pathEffect = style.pathEffect,
@@ -97,7 +97,7 @@ private fun <T> DrawScope.drawStraightRadialGridLines(
 }
 
 private fun DrawScope.drawCircularRadialGridLines(
-    radialAxisModel: RadialAxisModel,
+    radialAxisModel: FloatRadialAxisModel,
     style: LineStyle,
 ) {
     val radii = radialAxisModel.tickValues.map { radialAxisModel.computeOffset(it) }
@@ -116,18 +116,18 @@ private fun DrawScope.drawCircularRadialGridLines(
 }
 
 private fun <T> DrawScope.drawAngularGridLines(
-    polarPlotScope: PolarPlotScope<T>,
+    polarGraphScope: PolarGraphScope<T>,
     style: LineStyle?
 ) {
     if (style == null) return
 
-    val radius = polarPlotScope.radialAxisModel.tickValues.last()
-    val angles = polarPlotScope.angularAxisModel.getTickValues()
+    val radius = polarGraphScope.radialAxisModel.tickValues.last()
+    val angles = polarGraphScope.angularAxisModel.getTickValues()
 
     angles.forEach { angle ->
         drawLine(
             start = Offset(0f, 0f),
-            end = polarPlotScope.polarToCartesian(PolarPoint(radius, angle), size),
+            end = polarGraphScope.polarToCartesian(PolarPoint(radius, angle), size),
             brush = style.brush,
             strokeWidth = style.strokeWidth.toPx(),
             pathEffect = style.pathEffect,
@@ -142,7 +142,7 @@ private fun <T> DrawScope.drawAngularGridLines(
  * Create a path that is the boundary of the grid, depending on the radial grid type. This path is used for
  * setting the clip boundary at the edge of the grid, as well as for drawing the background.
  */
-internal fun <T> PolarPlotScope<T>.generateGridBoundaryPath(
+internal fun <T> PolarGraphScope<T>.generateGridBoundaryPath(
     size: Size,
     type: RadialGridType
 ): Path {

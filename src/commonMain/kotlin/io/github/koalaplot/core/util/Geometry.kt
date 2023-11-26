@@ -18,8 +18,14 @@ internal const val DEG2RAD = PI / 180.0
 
 internal const val DegreesFullCircle = 360.0f
 
+/**
+ * AngularValue is a sealed type hierarchy representing angular position around the unit circle.
+ */
 public sealed interface AngularValue
 
+/**
+ * An [AngularValue] in units of Degrees.
+ */
 @JvmInline
 public value class Degrees(public val value: Double) : AngularValue {
     public override fun toString(): String {
@@ -27,6 +33,9 @@ public value class Degrees(public val value: Double) : AngularValue {
     }
 }
 
+/**
+ * An [AngularValue] in units of Radians.
+ */
 @JvmInline
 public value class Radians(public val value: Double) : AngularValue {
     public override fun toString(): String {
@@ -34,16 +43,34 @@ public value class Radians(public val value: Double) : AngularValue {
     }
 }
 
+/**
+ * Converts from [Degrees] to [Radians].
+ */
 public fun Degrees.toRadians(): Radians = Radians(value * (DEG2RAD))
 
+/**
+ * Converts from [Radians] to [Degrees].
+ */
 public fun Radians.toDegrees(): Degrees = Degrees(value / (DEG2RAD))
 
+/**
+ * Converts a Float to the [Radians] type.
+ */
 public fun Float.toRadians(): Radians = Radians(this.toDouble())
 
+/**
+ * Converts a Double to the [Radians] type.
+ */
 public fun Double.toRadians(): Radians = Radians(this)
 
+/**
+ * Converts a Float to the [Degrees] type.
+ */
 public fun Float.toDegrees(): Degrees = Degrees(this.toDouble())
 
+/**
+ * Converts a Double to the [Degrees] type.
+ */
 public fun Double.toDegrees(): Degrees = Degrees(this)
 
 public inline val Float.rad: Radians get() = Radians(this.toDouble())
@@ -52,6 +79,9 @@ public inline val Float.deg: Degrees get() = Degrees(this.toDouble())
 public inline val Double.deg: Degrees get() = Degrees(this)
 public inline val Int.deg: Degrees get() = Degrees(this.toDouble())
 
+/**
+ * Returns an [AngularValue] as [Radians].
+ */
 public fun AngularValue.toRadians(): Radians {
     return when (this) {
         is Radians -> this
@@ -59,6 +89,9 @@ public fun AngularValue.toRadians(): Radians {
     }
 }
 
+/**
+ * Returns an [AngularValue] as [Degrees].
+ */
 public fun AngularValue.toDegrees(): Degrees {
     return when (this) {
         is Radians -> toDegrees()
