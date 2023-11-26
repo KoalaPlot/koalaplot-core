@@ -67,24 +67,24 @@
   <div class="breadcrumbs"><a href="../../../index.html">Koala Plot Core</a><span class="delimiter">/</span><a href="../index.html">io.github.koalaplot.core.polar</a><span class="delimiter">/</span><span class="current">RadialAxisModel</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Radial</span><wbr></wbr><span>Axis</span><wbr></wbr><span><span>Model</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">RadialAxisModel</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tickValues<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div><p class="paragraph">A model for a radial axis that uses Float values and is linear.</p><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>tick</span><wbr></wbr><span><span>Values</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Values for each tick on the axis. Must have at least 2 values.</p></div></div></div></div></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">RadialAxisModel</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span></div><p class="paragraph">A model for a radial axis that transforms from axis space to drawing space.</p><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-float-radial-axis-model/index.html">FloatRadialAxisModel</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
-      <div data-togglable="CONSTRUCTOR">
-        <h2 class="">Constructors</h2>
-        <div class="table"><a data-name="-881923953%2FConstructors%2F475666615" anchor-label="RadialAxisModel" id="-881923953%2FConstructors%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
-          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-834631754%2FProperties%2F475666615" anchor-label="tickValues" id="-834631754%2FProperties%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+          <div class="table-row" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-radial-axis-model.html"><span>Radial</span><wbr></wbr><span>Axis</span><wbr></wbr><span><span>Model</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-881923953%2FConstructors%2F475666615"></span>
+                  <div><a href="tick-values.html"><span>tick</span><wbr></wbr><span><span>Values</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-834631754%2FProperties%2F475666615"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">tickValues<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">val </span><a href="tick-values.html">tickValues</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Provides a list of tick values that should be rendered for the axis.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -93,17 +93,17 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-108330708%2FFunctions%2F475666615" anchor-label="computeOffset" id="-108330708%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
+        <div class="table"><a data-name="-120854909%2FFunctions%2F475666615" anchor-label="computeOffset" id="-120854909%2FFunctions%2F475666615" data-filterable-set=":dokkaCustomFormat/commonMain"></a>
           <div class="table-row" data-filterable-current=":dokkaCustomFormat/commonMain" data-filterable-set=":dokkaCustomFormat/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="compute-offset.html"><span>compute</span><wbr></wbr><span><span>Offset</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-108330708%2FFunctions%2F475666615"></span>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-120854909%2FFunctions%2F475666615"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="compute-offset.html"><span class="token function">computeOffset</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">point<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaCustomFormat/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="compute-offset.html"><span class="token function">computeOffset</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">point<span class="token operator">: </span><a href="index.html">T</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></div><div class="brief "><p class="paragraph">Transforms the provided <a href="compute-offset.html">point</a> in this axis space to the fraction representing the point's distance from the origin relative to the overall axis length.</p></div></div></div>
                 </div>
               </div>
             </div>
