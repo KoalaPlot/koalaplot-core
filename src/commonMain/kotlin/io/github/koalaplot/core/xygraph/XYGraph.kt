@@ -193,7 +193,7 @@ private data class Measurables(
 )
 
 private const val IterationLimit = 10
-private const val ChangeThreshold = 0.05
+private const val ChangeThreshold = 0.01 // Threshold for relative size changes to stop iterating
 
 /**
  * Calculates the heights of the x-axis labels constrained by the space available to them.
@@ -310,6 +310,13 @@ private data class ChartAreas(
             )
         ) ?: 0
 
+        val lastXAxisTickLabelWidth = xAxisLabels.lastOrNull()?.maxIntrinsicWidth(
+            max(
+                0,
+                constraints.maxHeight - graphSize().height - xAxisHeight + xAxisOffset - xAxisTitleHeight
+            )
+        ) ?: 0
+
         return copy(
             xAxisLabelAreaHeight = xAxisLabels.mapIndexed { index, label ->
                 Vector(
@@ -318,7 +325,7 @@ private data class ChartAreas(
                 ).rotate(rotation.toFloat())[1] * 2f
             }.maxOfOrNull { it.roundToInt() } ?: 0,
             xAxisFirstLabelExtensionWidth = if (rotation == 0) {
-                xTickSpacing(xAxisLabels.size) / 2
+                firstXAxisTickLabelWidth / 2
             } else {
                 IntOffset(
                     firstXAxisTickLabelWidth,
@@ -326,7 +333,7 @@ private data class ChartAreas(
                 ).rotate(rotation).x
             },
             xAxisLastLabelExtensionWidth = if (rotation == 0) {
-                xTickSpacing(xAxisLabels.size) / 2
+                lastXAxisTickLabelWidth / 2
             } else {
                 val off =
                     IntOffset(
