@@ -3,7 +3,9 @@ package io.github.koalaplot.core.xygraph
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -94,11 +96,11 @@ public fun <X, Y> XYGraph(
     HoverableElementArea(modifier = modifier) {
         SubcomposeLayout { constraints ->
             val xAxisTitleMeasurable = subcompose("xaxistitle") {
-                Box { xAxisTitle() }
+                Box(modifier = Modifier.fillMaxWidth()) { xAxisTitle() }
             }[0]
 
             val yAxisTitleMeasurable = subcompose("yaxistitle") {
-                Box { yAxisTitle() }
+                Box(modifier = Modifier.fillMaxHeight()) { yAxisTitle() }
             }[0]
 
             // Computing the tick values isn't exact because composables can't be measured twice

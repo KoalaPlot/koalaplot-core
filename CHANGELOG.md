@@ -14,12 +14,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Moved package for AreaStyle, LineStyle, Point, DefaultPoint, and KoalaPlotTheme
 - Line/Area chart scaling applied to paths instead of canvas so PathEffects scale the same as drawing on an unscaled
   Canvas
-- Deprecated XYChart and renamed to XYGraph
+- Deprecated XYChart and renamed to XYGraph - behavior and breaking changes introduced into XYGraph (see below)
 - Deprecated LineChart, StairStepChart, and StackedAreaChart and renamed to LinePlot, StairStepPlot, and AreaPlot
 - Separated variants of VerticalBarChart, depending on grouping or stacking, into GroupedVerticalBarPlot,
   VerticalBarPlot, and StackedVerticalBarPlot
 - Area plots no longer require LineStyle to be non-null
 - Separate AreaPlot from LinePlot to simplify null/not-null requirements on parameters to LinePlot
+- X and Y-axis titles in XYGraph fill entire width/height of plot so user can choose to align content along the axis
+  rather than centered-only. Consequently, default behavior is for titles to be "start" positioned instead of centered.
 
 ### Added
 
@@ -30,7 +32,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Vertical bar plot builder DSLs
 
 ### Fixed
+
 - LinearAxisModel adding 2 extra minor ticks overlapping the first and last major ticks
+- XYGraph width calculation to consume more of the available space
 
 ## [0.4.0]
 
