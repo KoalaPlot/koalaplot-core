@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -741,11 +742,13 @@ public fun <X, Y> XYGraph(
         },
         xAxisTitle = {
             if (xAxisTitle != null)
-                Text(
-                    xAxisTitle,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.titleMedium
-                )
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(
+                        xAxisTitle,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
         },
         yAxisStyle,
         yAxisLabels = {
@@ -758,13 +761,15 @@ public fun <X, Y> XYGraph(
         },
         yAxisTitle = {
             if (yAxisTitle != null) {
-                Text(
-                    yAxisTitle,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
-                        .padding(bottom = KoalaPlotTheme.sizes.gap),
-                )
+                Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
+                    Text(
+                        yAxisTitle,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
+                            .padding(bottom = KoalaPlotTheme.sizes.gap),
+                    )
+                }
             }
         },
         horizontalMajorGridLineStyle,
