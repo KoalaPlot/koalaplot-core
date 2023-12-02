@@ -741,7 +741,7 @@ public fun <X, Y> XYGraph(
             )
         },
         xAxisTitle = {
-            if (xAxisTitle != null)
+            if (xAxisTitle != null) {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Text(
                         xAxisTitle,
@@ -749,6 +749,7 @@ public fun <X, Y> XYGraph(
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
+            }
         },
         yAxisStyle,
         yAxisLabels = {
