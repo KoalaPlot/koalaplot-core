@@ -713,10 +713,10 @@ public fun <X, Y> XYGraph(
     modifier: Modifier = Modifier,
     xAxisStyle: AxisStyle = rememberAxisStyle(),
     xAxisLabels: (X) -> String = { it.toString() },
-    xAxisTitle: String = "",
+    xAxisTitle: String? = null,
     yAxisStyle: AxisStyle = rememberAxisStyle(),
     yAxisLabels: (Y) -> String = { it.toString() },
-    yAxisTitle: String = "",
+    yAxisTitle: String? = null,
     horizontalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
     horizontalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
     verticalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
@@ -738,11 +738,12 @@ public fun <X, Y> XYGraph(
             )
         },
         xAxisTitle = {
-            Text(
-                xAxisTitle,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleMedium
-            )
+            if (xAxisTitle != null)
+                Text(
+                    xAxisTitle,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleMedium
+                )
         },
         yAxisStyle,
         yAxisLabels = {
@@ -754,13 +755,15 @@ public fun <X, Y> XYGraph(
             )
         },
         yAxisTitle = {
-            Text(
-                yAxisTitle,
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
-                    .padding(bottom = KoalaPlotTheme.sizes.gap),
-            )
+            if (yAxisTitle != null) {
+                Text(
+                    yAxisTitle,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
+                        .padding(bottom = KoalaPlotTheme.sizes.gap),
+                )
+            }
         },
         horizontalMajorGridLineStyle,
         horizontalMinorGridLineStyle,
