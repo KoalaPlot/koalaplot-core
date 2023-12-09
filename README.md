@@ -1,5 +1,5 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.koalaplot/koalaplot-core?color=278ec7)](https://repo1.maven.org/maven2/io/github/koalaplot/koalaplot-core/)
-[![Kotlin](https://img.shields.io/badge/kotlin-1.9.10-278ec7.svg?logo=kotlin)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-1.9.21-278ec7.svg?logo=kotlin)](http://kotlinlang.org)
 [![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](https://koalaplot.github.io/koalaplot-core/api/0.5.0/)
 [![License MIT](https://img.shields.io/badge/license-MIT-278ec7.svg)](https://github.com/KoalaPlot/koalaplot-core/tree/main/LICENSE.txt)
 
@@ -9,13 +9,16 @@ Koala Plot is a [Compose Multiplatform](https://www.jetbrains.com/lp/compose-mpp
 allowing you to build great looking interactive charts for
 [Android](https://developer.android.com/jetpack/compose), desktop, ios, and web using a single API and code base.
 
-Try out the [web version of the samples](https://koalaplot.github.io/koalaplot-samples/index.html) for a quick look at
-the possibilities when using Koala Plot. Note that this uses the alpha Compose web-canvas capability, so there may be
-bugs in the underlying Compose Web framework.
+Try out
+the [web version of the samples](https://koalaplot.github.io/koalaplot-samples/wasmJs/productionExecutable/index.html)
+for a quick look at the possibilities when using Koala Plot. Note that this uses
+the [alpha Kotlin wasm Compose web-canvas](https://kotlinlang.org/docs/wasm-overview.html) capability, and you'll
+need a browser supporting the [wasm garbage collection feature](https://github.com/WebAssembly/gc). For more information
+see [https://kotl.in/wasm_help](https://kotl.in/wasm_help).
 
 This project is in a pre-release experimental/alpha state. We encourage you to give it a try, make suggestions for
-improvement, and even [contribute](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTRIBUTING.md)! It is expected
-that the API surface and functionality will change as we gain experience using the library in applications.
+improvement, and even [contribute](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTRIBUTING.md)! It is
+expected that the API surface and functionality will change as we gain experience using the library in applications.
 
 # Current Features
 
@@ -27,7 +30,7 @@ borders, shapes, user interaction, etc. Web support is provided by the Compose-w
     * Optional Composable labels and Composable connectors with provided linear and bezier implementations
     * Composable content for donut chart centers
     * Customizable first-draw animation
-* Line chart
+* Line graphs
     * Linear or Log y-axis
     * Numeric or category x-axis
     * Composable axis titles and value labels
@@ -35,10 +38,10 @@ borders, shapes, user interaction, etc. Web support is provided by the Compose-w
     * Optional Composable symbols at each data point with default implementations
     * Zoom and pan one or both axes (Android only, for now)
     * Optional shaded areas (area chart)
-* Stacked area chart
-  * Plots multiple lines with shaded areas between them and accumulated values
-  * Similar feature set as the Line chart
-* Vertical bar chart
+* Stacked area graphs
+    * Plots multiple lines with shaded areas between them and accumulated values
+    * Similar feature set as the Line chart
+* Vertical bar graph
     * Linear or Log y-axis
     * Numeric or category x-axis
     * Composable vertical bars with a provided default implementation
@@ -48,6 +51,9 @@ borders, shapes, user interaction, etc. Web support is provided by the Compose-w
     * Zoom and pan one or both axes (Android only, for now)
 * Bullet Graph
     * Individual or multiple vertically aligned bullet graphs
+* Radar/Polar/Spider plots
+  * Lines, areas, symbols, or a combination
+  * Configurable origin position and angle orientation (clockwise/counter-clockwise)
 * Chart layout
     * Combines an optional Composable title, plot, and legend with any of 4 positions
 * Legends
@@ -80,26 +86,23 @@ the [samples](https://koalaplot.github.io/koalaplot-samples).
 
 ```kotlin
     BulletGraph {
-        label {
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(end = KoalaPlotTheme.sizes.gap)
-            ) {
-                Text(
-                    "Revenue 2005 YTD",
-                    textAlign = TextAlign.End
-                )
-                Text(
-                    "(US $ in thousands)",
-                    textAlign = TextAlign.End
-                )
-            }
+    label {
+        Column(horizontalAlignment = Alignment.End,
+            modifier = Modifier.padding(end = KoalaPlotTheme.sizes.gap)) {
+            Text("Revenue 2005 YTD",
+                textAlign = TextAlign.End)
+            Text("(US $ in thousands)",
+                textAlign = TextAlign.End)
         }
-        axis { labels { "${it.toInt()}" } }
-        comparativeMeasure(260f)
-        featuredMeasureBar(275f)
-        ranges(0f, 200f, 250f, 300f)
     }
+    axis { labels { "${it.toInt()}" } }
+    comparativeMeasure(260f)
+    featuredMeasureBar(275f)
+    ranges(0f,
+        200f,
+        250f,
+        300f)
+}
 ```
 
 # Documentation
