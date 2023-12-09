@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.koalaplot/koalaplot-core?color=278ec7)](https://repo1.maven.org/maven2/io/github/koalaplot/koalaplot-core/)
 [![Kotlin](https://img.shields.io/badge/kotlin-1.9.10-278ec7.svg?logo=kotlin)](http://kotlinlang.org)
-[![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](https://koalaplot.github.io/koalaplot-core/api/0.4.0/)
+[![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](https://koalaplot.github.io/koalaplot-core/api/0.5.0/)
 [![License MIT](https://img.shields.io/badge/license-MIT-278ec7.svg)](https://github.com/KoalaPlot/koalaplot-core/tree/main/LICENSE.txt)
 
 # Koala Plot
@@ -69,7 +69,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("io.github.koalaplot:koalaplot-core:0.4.0")
+    implementation("io.github.koalaplot:koalaplot-core:0.5.0")
 }
 ```
 
@@ -104,8 +104,8 @@ the [samples](https://koalaplot.github.io/koalaplot-samples).
 
 # Documentation
 
-- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.5.0-dev1)
-- [Release 0.4.0](https://koalaplot.github.io/koalaplot-core/api/0.4.0)
+- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.5.0)
+- [Release 0.5.0](https://koalaplot.github.io/koalaplot-core/api/0.5.0)
 
 Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples) for code examples.
 
