@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+
 buildscript {
     dependencies {
         classpath("org.jetbrains.dokka:dokka-base:_") // needed for dokka custom format config
@@ -28,16 +30,25 @@ version = "0.5.0-dev2"
 
 kotlin {
     explicitApi()
-    jvm()
-    js(IR) {
-        browser()
-    }
+
     androidTarget {
         publishLibraryVariants("release")
     }
-    iosX64()
+
     iosArm64()
     iosSimulatorArm64()
+    iosX64()
+
+    js(IR) {
+        browser()
+    }
+
+    jvm()
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+    }
 
     sourceSets {
         val commonMain by getting {
@@ -117,9 +128,7 @@ tasks.register<org.jetbrains.dokka.gradle.DokkaTask>("dokkaCustomFormat") {
 
     pluginConfiguration<org.jetbrains.dokka.base.DokkaBase, org.jetbrains.dokka.base.DokkaBaseConfiguration> {
         customStyleSheets = listOf(file("src/docs/dokka/logo-styles.css"))
-        customAssets = listOf(
-            file("src/docs/assets/images/logo-icon.svg")
-        )
+        customAssets = listOf(file("src/docs/assets/images/logo-icon.svg"))
     }
 }
 
@@ -127,9 +136,7 @@ tasks["build"].dependsOn.add("dokkaCustomFormat")
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs = freeCompilerArgs + listOf(
-            "-opt-in=kotlin.RequiresOptIn"
-        )
+        freeCompilerArgs = freeCompilerArgs + listOf("-opt-in=kotlin.RequiresOptIn")
         jvmTarget = "11"
     }
 
@@ -141,16 +148,16 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     }
 }
 
-afterEvaluate {
-    // https://discuss.kotlinlang.org/t/disabling-androidandroidtestrelease-source-set-in-gradle-kotlin-dsl-script/21448
-    project.extensions.findByType<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension>()?.let { ext ->
-        ext.sourceSets.removeAll { sourceSet ->
-            setOf(
-                // "androidAndroidTestRelease",
-                "androidTestFixtures",
-                "androidTestFixturesDebug",
-                "androidTestFixturesRelease",
-            ).contains(sourceSet.name)
+afterEvaluate { // https://discuss.kotlinlang.org/t/disabling-androidandroidtestrelease-source-set-in-gradle-kotlin-dsl-script/21448
+    project.extensions.findByType<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension>()
+        ?.let { ext ->
+            ext.sourceSets.removeAll { sourceSet ->
+                setOf(
+                    // "androidAndroidTestRelease",
+                    "androidTestFixtures",
+                    "androidTestFixturesDebug",
+                    "androidTestFixturesRelease",
+                ).contains(sourceSet.name)
+            }
         }
-    }
 }

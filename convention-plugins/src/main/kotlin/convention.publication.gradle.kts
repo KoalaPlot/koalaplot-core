@@ -50,6 +50,7 @@ tasks.withType<AbstractPublishToMaven>().configureEach {
     dependsOn.add("signJsPublication")
     dependsOn.add("signJvmPublication")
     dependsOn.add("signKotlinMultiplatformPublication")
+    dependsOn.add("signWasmJsPublication")
 
     if (name.contains("ios", ignoreCase = true)) {
         dependsOn.add("signIosArm64Publication")
@@ -66,7 +67,8 @@ publishing {
         // Provide artifacts information required by Maven Central
         pom {
             name.set("koalaplot-core")
-            description.set("Koala Plot is a Compose Multiplatform based charting and plotting library written in Kotlin")
+            description.set("Koala Plot is a Compose Multiplatform based charting and " +
+                    "plotting library written in Kotlin")
             url.set("https://github.com/KoalaPlot/koalaplot-core")
 
             licenses {

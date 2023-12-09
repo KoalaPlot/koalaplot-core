@@ -9,8 +9,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Update to Compose version 1.5.10
-- Update Kotlin version to 1.9.20
+- Update to Compose version 1.6.0-alpha01
+- Update Kotlin version to 1.9.21
+- Add wasm target
 - Moved package for AreaStyle, LineStyle, Point, DefaultPoint, and KoalaPlotTheme
 - Line/Area chart scaling applied to paths instead of canvas so PathEffects scale the same as drawing on an unscaled
   Canvas
