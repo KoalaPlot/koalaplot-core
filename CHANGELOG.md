@@ -7,6 +7,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.1]
+
+### Fixed
+- @Deprecated ReplaceWith using incorrect replacement names
+
 ## [0.5.0]
 
 ### Changed

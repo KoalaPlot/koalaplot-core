@@ -31,14 +31,14 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-@Deprecated("Use DefaultBarPlotEntry", ReplaceWith("DefaultBarPlotEntry"))
+@Deprecated("Use DefaultVerticalBarPlotEntry", ReplaceWith("DefaultVerticalBarPlotEntry"))
 public data class DefaultBarChartEntry<X, Y>(
     public override val xValue: X,
     public override val yMin: Y,
     public override val yMax: Y,
 ) : BarChartEntry<X, Y>
 
-@Deprecated("Use BarPlotEntry", ReplaceWith("BarPlotEntry"))
+@Deprecated("Use VerticalBarPlotEntry", ReplaceWith("VerticalBarPlotEntry"))
 public interface BarChartEntry<X, Y> {
     /**
      * X-axis value at which the bar should be plotted
@@ -87,7 +87,7 @@ public typealias VerticalBarComposable<E> = @Composable BarScope.(series: Int, i
  * @param maxBarGroupWidth The fraction of space between adjacent x-axis bars or bar groups that
  * may be used. Must be between 0 and 1, defaults to 0.9.
  */
-@Deprecated("Replace with either GroupedVerticalBarPlot, VerticalBarPlot, or VerticalBarStackPlot")
+@Deprecated("Replace with either GroupedVerticalBarPlot, VerticalBarPlot, or StackedVerticalBarPlot")
 @Composable
 public fun <X, Y, E : BarChartEntry<X, Y>> XYChartScope<X, Y>.VerticalBarChart(
     series: List<List<E>>,
