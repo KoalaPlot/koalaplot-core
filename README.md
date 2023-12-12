@@ -116,3 +116,13 @@ Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples)
 
 Contributions are welcome. Further details can be found in the
 [Contributing Guidelines](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTRIBUTING.md)
+
+# Examples
+
+<img src="images/pie.png" style="width:10cm;height:auto;" alt="">
+<img src="images/Polar.png" style="width:10cm;height:auto;" alt="">
+<img src="images/Polar6.png" style="width:10cm;height:auto;" alt="">
+<img src="images/Scatter2.png" style="width:12cm;height:auto;" alt="">
+<img src="images/StackedArea.png" style="width:12cm;height:auto;" alt="">
+<img src="images/StackedBar.png" style="width:12cm;height:auto;" alt="">
+<img src="images/BulletGraph2.png" style="width:12cm;height:auto;" alt="">
