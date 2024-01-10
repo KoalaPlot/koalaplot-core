@@ -259,6 +259,106 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     }
 }
 
+@Composable
+public fun <X, Y> XYGraphScope<X, Y>.ColoredStairstepPlot(
+    data: List<Point<X, Y>>,
+    lineStyle: LineStyle,
+    levelLineStyle: (Y) -> LineStyle,
+    modifier: Modifier = Modifier,
+    symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    areaStyle: AreaStyle? = null,
+    areaBaseline: AreaBaseline<X, Y>? = null,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+) {
+    if (data.isEmpty()) return
+
+    if (areaStyle != null) {
+        require(areaBaseline != null) { "areaBaseline must be provided for area charts" }
+        if (areaBaseline is AreaBaseline.ArbitraryLine) {
+            require(areaBaseline.values.size == data.size) {
+                "baseline values must be the same size as the data"
+            }
+        }
+    }
+
+    // TODO: Just inlined [GeneralLinePlot], change it signature to support this plot?!
+    // TODO: unify with drawLevelLines?
+    val drawConnectorLine: Path.(points: List<Point<X, Y>>, size: Size) -> Unit = { points: List<Point<X, Y>>, size: Size ->
+        var lastPoint = points[0]
+        var scaledLastPoint = scale(lastPoint, size)
+
+        moveTo(scaledLastPoint)
+        for (index in 1..points.lastIndex) {
+            val midPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
+            lineTo(midPoint)
+            lastPoint = points[index]
+            scaledLastPoint = scale(lastPoint, size)
+            lineTo(scaledLastPoint)
+        }
+    }
+    if (data.isEmpty()) return
+
+    // Animation scale factor
+    val beta = remember { Animatable(0f) }
+    LaunchedEffect(null) { beta.animateTo(1f, animationSpec = animationSpec) }
+
+    Layout(
+        modifier = modifier.drawWithContent {
+            clipRect(right = size.width * beta.value) { (this@drawWithContent).drawContent() }
+        },
+        content = {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val mainLinePath = Path().apply {
+                    drawConnectorLine(data, size)
+                }
+
+                if (areaBaseline != null && areaStyle != null) {
+                    val areaPath = generateArea(areaBaseline, data, mainLinePath, size, drawConnectorLine)
+                    drawPath(
+                        areaPath,
+                        brush = areaStyle.brush,
+                        alpha = areaStyle.alpha,
+                        style = Fill,
+                        colorFilter = areaStyle.colorFilter,
+                        blendMode = areaStyle.blendMode
+                    )
+                }
+
+                lineStyle?.let {
+                    drawPath(
+                        mainLinePath,
+                        brush = lineStyle.brush,
+                        alpha = lineStyle.alpha,
+                        style = Stroke(lineStyle.strokeWidth.toPx(), pathEffect = lineStyle.pathEffect),
+                        colorFilter = lineStyle.colorFilter,
+                        blendMode = lineStyle.blendMode
+                    )
+                }
+                val drawLevelLines: (points: List<Point<X, Y>>, size: Size) -> Unit = { points: List<Point<X, Y>>, size: Size ->
+                    var lastPoint = points[0]
+                    var scaledLastPoint = scale(lastPoint, size)
+
+                    for (index in 1..points.lastIndex) {
+                        val midPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
+                        val lineStyle1 = levelLineStyle(lastPoint.y)
+                        drawLine(lineStyle1.brush, scaledLastPoint, midPoint, lineStyle1.strokeWidth.toPx())
+                        lastPoint = points[index]
+                        scaledLastPoint = scale(lastPoint, size)
+                    }
+                }
+                drawLevelLines(data, size)
+            }
+            Symbols(data, symbol)
+        }
+    ) { measurables: List<Measurable>, constraints: Constraints ->
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            measurables.forEach {
+                it.measure(constraints).place(0, 0)
+            }
+        }
+    }
+}
+
 /**
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values
