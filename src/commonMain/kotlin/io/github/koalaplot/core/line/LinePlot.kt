@@ -13,6 +13,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -282,20 +283,6 @@ public fun <X, Y> XYGraphScope<X, Y>.ColoredStairstepPlot(
     }
 
     // TODO: Just inlined [GeneralLinePlot], change it signature to support this plot?!
-    // TODO: unify with drawLevelLines?
-    val drawConnectorLine: Path.(points: List<Point<X, Y>>, size: Size) -> Unit = { points: List<Point<X, Y>>, size: Size ->
-        var lastPoint = points[0]
-        var scaledLastPoint = scale(lastPoint, size)
-
-        moveTo(scaledLastPoint)
-        for (index in 1..points.lastIndex) {
-            val midPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
-            lineTo(midPoint)
-            lastPoint = points[index]
-            scaledLastPoint = scale(lastPoint, size)
-            lineTo(scaledLastPoint)
-        }
-    }
     if (data.isEmpty()) return
 
     // Animation scale factor
@@ -308,12 +295,28 @@ public fun <X, Y> XYGraphScope<X, Y>.ColoredStairstepPlot(
         },
         content = {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val mainLinePath = Path().apply {
-                    drawConnectorLine(data, size)
+                val mainLinePath = Path()
+                // TODO: Use visitor pattern.
+                val drawConnectorLineAndGeneratePath: Path.(points: List<Point<X, Y>>, size: Size) -> Unit = { points: List<Point<X, Y>>, size: Size ->
+                    var lastPoint = points[0]
+                    var scaledLastPoint = scale(lastPoint, size)
+
+                    moveTo(scaledLastPoint)
+                    for (index in 1..points.lastIndex) {
+                        val midPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
+                        lineTo(midPoint)
+                        val lvlLineStyle = levelLineStyle(lastPoint.y)
+                        drawLine(lvlLineStyle.brush, scaledLastPoint, midPoint, lvlLineStyle.strokeWidth.toPx())
+                        lastPoint = points[index]
+                        scaledLastPoint = scale(lastPoint, size)
+                        lineTo(scaledLastPoint)
+                        drawLine(lineStyle.brush, midPoint, scaledLastPoint, lineStyle.strokeWidth.toPx())
+                    }
                 }
+                mainLinePath.drawConnectorLineAndGeneratePath(data, size)
 
                 if (areaBaseline != null && areaStyle != null) {
-                    val areaPath = generateArea(areaBaseline, data, mainLinePath, size, drawConnectorLine)
+                    val areaPath = generateArea(areaBaseline, data, mainLinePath, size, drawConnectorLineAndGeneratePath)
                     drawPath(
                         areaPath,
                         brush = areaStyle.brush,
@@ -334,19 +337,6 @@ public fun <X, Y> XYGraphScope<X, Y>.ColoredStairstepPlot(
                         blendMode = lineStyle.blendMode
                     )
                 }
-                val drawLevelLines: (points: List<Point<X, Y>>, size: Size) -> Unit = { points: List<Point<X, Y>>, size: Size ->
-                    var lastPoint = points[0]
-                    var scaledLastPoint = scale(lastPoint, size)
-
-                    for (index in 1..points.lastIndex) {
-                        val midPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
-                        val lineStyle1 = levelLineStyle(lastPoint.y)
-                        drawLine(lineStyle1.brush, scaledLastPoint, midPoint, lineStyle1.strokeWidth.toPx())
-                        lastPoint = points[index]
-                        scaledLastPoint = scale(lastPoint, size)
-                    }
-                }
-                drawLevelLines(data, size)
             }
             Symbols(data, symbol)
         }
