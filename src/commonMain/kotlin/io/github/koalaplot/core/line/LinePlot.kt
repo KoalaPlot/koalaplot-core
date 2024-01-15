@@ -13,7 +13,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -283,6 +282,26 @@ public fun <X, Y> XYGraphScope<X, Y>.ColoredStairstepPlot(
     }
 
     // TODO: Just inlined [GeneralLinePlot], change it signature to support this plot?!
+    fun generateScaledPointsVisitor(
+        points: List<Point<X, Y>>, size: Size,
+        onFirstPoint: (Offset, Y) -> Unit,
+        onMidPoint: (lastPoint: Offset, Offset, Y) -> Unit,
+        onNextPoint: (midPoint: Offset, Offset, Y) -> Unit,
+    ) : (() -> Unit) {
+        return {
+            var lastPoint = points[0]
+            var scaledLastPoint = scale(lastPoint, size)
+
+            onFirstPoint(scaledLastPoint, lastPoint.y)
+            for (index in 1..points.lastIndex) {
+                val midPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
+                onMidPoint(scaledLastPoint, midPoint, lastPoint.y)
+                lastPoint = points[index]
+                scaledLastPoint = scale(lastPoint, size)
+                onNextPoint(midPoint, scaledLastPoint, lastPoint.y)
+            }
+        }
+    }
     if (data.isEmpty()) return
 
     // Animation scale factor
@@ -295,28 +314,23 @@ public fun <X, Y> XYGraphScope<X, Y>.ColoredStairstepPlot(
         },
         content = {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val mainLinePath = Path()
-                // TODO: Use visitor pattern.
-                val drawConnectorLineAndGeneratePath: Path.(points: List<Point<X, Y>>, size: Size) -> Unit = { points: List<Point<X, Y>>, size: Size ->
-                    var lastPoint = points[0]
-                    var scaledLastPoint = scale(lastPoint, size)
-
-                    moveTo(scaledLastPoint)
-                    for (index in 1..points.lastIndex) {
-                        val midPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
-                        lineTo(midPoint)
-                        val lvlLineStyle = levelLineStyle(lastPoint.y)
-                        drawLine(lvlLineStyle.brush, scaledLastPoint, midPoint, lvlLineStyle.strokeWidth.toPx())
-                        lastPoint = points[index]
-                        scaledLastPoint = scale(lastPoint, size)
-                        lineTo(scaledLastPoint)
-                        drawLine(lineStyle.brush, midPoint, scaledLastPoint, lineStyle.strokeWidth.toPx())
-                    }
+                val pathDrawer: Path.(points: List<Point<X, Y>>, size: Size) -> Unit = { points: List<Point<X, Y>>, size: Size ->
+                    generateScaledPointsVisitor(
+                        points, size,
+                        onFirstPoint = { p, y -> moveTo(p) },
+                        onMidPoint = { _, p, y -> lineTo(p) },
+                        onNextPoint = { _, p, y -> lineTo(p) }
+                    ).invoke()
                 }
-                mainLinePath.drawConnectorLineAndGeneratePath(data, size)
-
+                val mainLinePath = Path().apply {
+                    pathDrawer(data, size)
+                }
                 if (areaBaseline != null && areaStyle != null) {
-                    val areaPath = generateArea(areaBaseline, data, mainLinePath, size, drawConnectorLineAndGeneratePath)
+                    val areaPath = generateArea(
+                        areaBaseline, data, mainLinePath, size
+                    ) { points, size ->
+                        pathDrawer(points, size)
+                    }
                     drawPath(
                         areaPath,
                         brush = areaStyle.brush,
@@ -327,7 +341,7 @@ public fun <X, Y> XYGraphScope<X, Y>.ColoredStairstepPlot(
                     )
                 }
 
-                lineStyle?.let {
+                lineStyle.let {
                     drawPath(
                         mainLinePath,
                         brush = lineStyle.brush,
@@ -337,6 +351,23 @@ public fun <X, Y> XYGraphScope<X, Y>.ColoredStairstepPlot(
                         blendMode = lineStyle.blendMode
                     )
                 }
+                // drawLevelLines
+                //var scaledLastPoint: Offset = Offset.Zero
+                generateScaledPointsVisitor(
+                    data, size,
+                    onFirstPoint = { p, y ->
+                        //scaledLastPoint = p
+                    },
+                    onMidPoint = { lastPoint, p, y ->
+                        val lvlLineStyle = levelLineStyle(y)
+                        drawLine(lvlLineStyle.brush, lastPoint/*scaledLastPoint*/, p, lvlLineStyle.strokeWidth.toPx())
+                        //scaledLastPoint = p
+                    },
+                    onNextPoint = { midPoint, p, y ->
+                        drawLine(lineStyle.brush, midPoint/*scaledLastPoint*/, p, lineStyle.strokeWidth.toPx())
+                        //scaledLastPoint = p
+                    }
+                ).invoke()
             }
             Symbols(data, symbol)
         }
