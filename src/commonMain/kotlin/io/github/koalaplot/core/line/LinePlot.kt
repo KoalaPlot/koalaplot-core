@@ -13,6 +13,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -267,6 +268,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
  * @param lineStyle Style to use for the line that connects the data points.
  * @param levelLineStyle Style to use for emphasizing the y-axis values. (Used for line that connects same-level
  *  data points, data that have same value ([Y]) should have the same style).
+ * @param cap Choose the [StrokeCap] used for level lines ending.
  * @param areaStyle Style to use for filling the area between the line and the 0-cross of the y-axis, or the
  *  y-axis value closest to 0 if the axis does not include 0. If null, no area will be drawn.
  *  [lineStyle] must also be non-null for the area to be drawn.
@@ -282,8 +284,9 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     data: List<Point<X, Y>>,
     lineStyle: LineStyle,
     levelLineStyle: (Y) -> LineStyle,
+    cap: StrokeCap = StrokeCap.Square,
     modifier: Modifier = Modifier,
-    symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    symbol: @Composable (HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
     areaStyle: AreaStyle? = null,
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
@@ -365,7 +368,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                     onFirstPoint = { _, _ -> },
                     onMidPoint = { lastPoint, p, y ->
                         val lvlLineStyle = levelLineStyle(y)
-                        drawLine(lvlLineStyle.brush, lastPoint, p, lvlLineStyle.strokeWidth.toPx())
+                        drawLine(lvlLineStyle.brush, lastPoint, p, lvlLineStyle.strokeWidth.toPx(), cap)
                     },
                     onNextPoint = { midPoint, p, _ ->
                         drawLine(lineStyle.brush, midPoint, p, lineStyle.strokeWidth.toPx())
