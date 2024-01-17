@@ -303,26 +303,29 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     }
 
     // Modified version of [GeneralLinePlot].
+    data class DrawingPoint(val offset: Offset, val point: Point<X, Y>)
     fun scaledPointsVisitor(
         points: List<Point<X, Y>>,
         size: Size,
-        onFirstPoint: (Offset, Y) -> Unit,
-        onMidPoint: (lastPoint: Offset, Offset, Y) -> Unit,
-        onNextPoint: (midPoint: Offset, Offset, Y) -> Unit,
+        onFirstPoint: (DrawingPoint) -> Unit,
+        onMidPoint: (lastPoint: DrawingPoint, midPoint: DrawingPoint) -> Unit,
+        onNextPoint: (midPoint: DrawingPoint, nextPoint: DrawingPoint) -> Unit,
     ) {
         var lastPoint = points[0]
         var scaledLastPoint = scale(lastPoint, size)
+        var drawingLastPoint = DrawingPoint(scaledLastPoint, lastPoint)
 
-        onFirstPoint(scaledLastPoint, lastPoint.y)
+        onFirstPoint(drawingLastPoint)
         for (index in 1..points.lastIndex) {
-            val midPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
-            onMidPoint(scaledLastPoint, midPoint, lastPoint.y)
+            val scaledMidPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
+            val midPoint = DrawingPoint(scaledMidPoint, lastPoint)
+            onMidPoint(drawingLastPoint, midPoint)
             lastPoint = points[index]
             scaledLastPoint = scale(lastPoint, size)
-            onNextPoint(midPoint, scaledLastPoint, lastPoint.y)
+            drawingLastPoint = DrawingPoint(scaledLastPoint, lastPoint)
+            onNextPoint(midPoint, drawingLastPoint)
         }
     }
-    if (data.isEmpty()) return
 
     // Animation scale factor
     val beta = remember { Animatable(0f) }
@@ -339,9 +342,9 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                         scaledPointsVisitor(
                             points,
                             size,
-                            onFirstPoint = { p, _ -> moveTo(p) },
-                            onMidPoint = { _, p, _ -> lineTo(p) },
-                            onNextPoint = { _, p, _ -> lineTo(p) }
+                            onFirstPoint = { p -> moveTo(p.offset) },
+                            onMidPoint = { _, p -> lineTo(p.offset) },
+                            onNextPoint = { _, p -> lineTo(p.offset) }
                         )
                     }
                 val mainLinePath = Path().apply {
@@ -365,13 +368,23 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                 scaledPointsVisitor(
                     data,
                     size,
-                    onFirstPoint = { _, _ -> },
-                    onMidPoint = { lastPoint, p, y ->
-                        val lvlLineStyle = levelLineStyle(y)
-                        drawLine(lvlLineStyle.brush, lastPoint, p, lvlLineStyle.strokeWidth.toPx(), cap)
+                    onFirstPoint = { _ -> },
+                    onMidPoint = { lastPoint, p ->
+                        with(levelLineStyle(p.point.y)) {
+                            drawLine(brush, lastPoint.offset, p.offset, strokeWidth.toPx(), cap, pathEffect, alpha)
+                        }
                     },
-                    onNextPoint = { midPoint, p, _ ->
-                        drawLine(lineStyle.brush, midPoint, p, lineStyle.strokeWidth.toPx())
+                    onNextPoint = { midPoint, p ->
+                        val midStrokeWith = levelLineStyle(midPoint.point.y).strokeWidth.toPx()
+                        // Starts vertical line at half level line stroke width to avoid overlaying on level line.
+                        val startOffset = if (p.offset.y > midPoint.offset.y) +midStrokeWith / 2 else -midStrokeWith / 2
+                        val start = midPoint.offset.copy(y = midPoint.offset.y + startOffset)
+                        with(lineStyle) {
+                            drawLine(
+                                brush, start, p.offset, strokeWidth.toPx(), Stroke.DefaultCap, pathEffect, alpha,
+                                colorFilter, blendMode
+                            )
+                        }
                     }
                 )
             }
