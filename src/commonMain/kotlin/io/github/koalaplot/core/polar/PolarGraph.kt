@@ -171,8 +171,8 @@ public fun <T> PolarGraph(
 }
 
 /**
- * Transforms [inputAngle] to start at 3 O'Clock and increment counter-clockwise like
- * the normal mathematical convention.
+ * Transforms [inputAngle] based on the [AngularAxisModel] settings to be in the coordinate system of the screen where
+ * 0-degrees is at the 3 O'Clock position and angles increment clockwise.
  */
 private fun <T> AngularAxisModel<T>.toPolarAngle(inputAngle: AngularValue): AngularValue {
     val sign = if (angleDirection == AngularAxisModel.AngleDirection.CLOCKWISE) {
@@ -199,7 +199,7 @@ private fun <T> polarToCartesianPlot(
     radialAxisModel: FloatRadialAxisModel,
     size: Size
 ): Offset {
-    // Transform the angle to where 0 is at the 12 O'Clock position.
+    // Transform the angle to screen coordinates.
     val theta = angularAxisModel.toPolarAngle(angularAxisModel.computeOffset(point.theta))
 
     val r = min(size.width / 2, size.height / 2) * radialAxisModel.computeOffset(point.r)

@@ -26,7 +26,7 @@ dependencies {
 }
 
 group = "io.github.koalaplot"
-version = "0.5.1"
+version = "0.5.2"
 
 kotlin {
     explicitApi()
@@ -69,7 +69,7 @@ kotlin {
         }
 
         named("jvmMain") {
-            dependsOn(commonMain)
+            // dependsOn(commonMain)
 
             dependencies {
 
@@ -89,10 +89,10 @@ kotlin {
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
         create("iosMain") {
-            dependsOn(commonMain)
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
+            // dependsOn(commonMain)
+//            iosX64Main.dependsOn(this)
+//            iosArm64Main.dependsOn(this)
+//            iosSimulatorArm64Main.dependsOn(this)
 
             dependencies { }
         }

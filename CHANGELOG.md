@@ -7,6 +7,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.2]
+
+### Changed
+- Update Compose to version 1.6.0-beta01.
+- Update Kotlin to version 1.9.22
+
 ## [0.5.1]
 
 ### Fixed
