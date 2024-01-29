@@ -303,26 +303,29 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     }
 
     // Modified version of [GeneralLinePlot].
-    data class DrawingPoint(val offset: Offset, val point: Point<X, Y>)
+    data class OffsetPoint(val offset: Offset, val point: Point<X, Y>)
+
+    /** Order of executing: [onFirstPoint] -> [onMidPoint] -> [onNextPoint] -> [onMidPoint] ...,
+     so `nextPoint` of [onNextPoint] will becomes `lastPoint` of [onMidPoint]. */
     fun scaledPointsVisitor(
         points: List<Point<X, Y>>,
         size: Size,
-        onFirstPoint: (DrawingPoint) -> Unit,
-        onMidPoint: (lastPoint: DrawingPoint, midPoint: DrawingPoint) -> Unit,
-        onNextPoint: (midPoint: DrawingPoint, nextPoint: DrawingPoint) -> Unit,
+        onFirstPoint: (OffsetPoint) -> Unit = { _ -> },
+        onMidPoint: (lastPoint: OffsetPoint, midPoint: OffsetPoint) -> Unit = { _, _ -> },
+        onNextPoint: (midPoint: OffsetPoint, nextPoint: OffsetPoint) -> Unit = { _, _ -> },
     ) {
         var lastPoint = points[0]
         var scaledLastPoint = scale(lastPoint, size)
-        var drawingLastPoint = DrawingPoint(scaledLastPoint, lastPoint)
+        var drawingLastPoint = OffsetPoint(scaledLastPoint, lastPoint)
 
         onFirstPoint(drawingLastPoint)
         for (index in 1..points.lastIndex) {
             val scaledMidPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
-            val midPoint = DrawingPoint(scaledMidPoint, lastPoint)
+            val midPoint = OffsetPoint(scaledMidPoint, lastPoint)
             onMidPoint(drawingLastPoint, midPoint)
             lastPoint = points[index]
             scaledLastPoint = scale(lastPoint, size)
-            drawingLastPoint = DrawingPoint(scaledLastPoint, lastPoint)
+            drawingLastPoint = OffsetPoint(scaledLastPoint, lastPoint)
             onNextPoint(midPoint, drawingLastPoint)
         }
     }
@@ -364,28 +367,28 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                     )
                 }
 
-                // drawLevelLines
+                // draw vertical lines using lineStyle
                 scaledPointsVisitor(
                     data,
                     size,
-                    onFirstPoint = { _ -> },
+                    onNextPoint = { midPoint, p ->
+                        with(lineStyle) {
+                            drawLine(
+                                brush, midPoint.offset, p.offset, strokeWidth.toPx(), Stroke.DefaultCap, pathEffect,
+                                alpha, colorFilter, blendMode
+                            )
+                        }
+                    }
+                )
+                // draw horizontal lines using levelLineStyle()
+                scaledPointsVisitor(
+                    data,
+                    size,
                     onMidPoint = { lastPoint, p ->
                         with(levelLineStyle(p.point.y)) {
                             drawLine(brush, lastPoint.offset, p.offset, strokeWidth.toPx(), cap, pathEffect, alpha)
                         }
                     },
-                    onNextPoint = { midPoint, p ->
-                        val midStrokeWith = levelLineStyle(midPoint.point.y).strokeWidth.toPx()
-                        // Starts vertical line at half level line stroke width to avoid overlaying on level line.
-                        val startOffset = if (p.offset.y > midPoint.offset.y) +midStrokeWith / 2 else -midStrokeWith / 2
-                        val start = midPoint.offset.copy(y = midPoint.offset.y + startOffset)
-                        with(lineStyle) {
-                            drawLine(
-                                brush, start, p.offset, strokeWidth.toPx(), Stroke.DefaultCap, pathEffect, alpha,
-                                colorFilter, blendMode
-                            )
-                        }
-                    }
                 )
             }
             Symbols(data, symbol)
