@@ -13,6 +13,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -255,6 +256,148 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
             lastPoint = points[index]
             scaledLastPoint = scale(lastPoint, size)
             lineTo(scaledLastPoint)
+        }
+    }
+}
+
+/**
+ * A [StairstepPlot] that differentiate [lineStyle] at each [Y]-values based on [levelLineStyle].
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ * @param data Data series to plot.
+ * @param lineStyle Style to use for the line that connects the data points.
+ * @param levelLineStyle Style to use for emphasizing the y-axis values. (Used for line that connects same-level
+ *  data points, data that have same value ([Y]) should have the same style).
+ * @param cap Choose the [StrokeCap] used for level lines ending.
+ * @param areaStyle Style to use for filling the area between the line and the 0-cross of the y-axis, or the
+ *  y-axis value closest to 0 if the axis does not include 0. If null, no area will be drawn.
+ *  [lineStyle] must also be non-null for the area to be drawn.
+ * each point having the same x-axis value.
+ * @param areaBaseline Baseline location for the area. Must be not be null if areaStyle and lineStyle are also not null.
+ * If [areaBaseline] is an [AreaBaseline.ArbitraryLine] then the size of the line data must be equal to that of
+ * [data], and their x-axis values must match.
+ * @param symbol Composable for the symbol to be shown at each data point.
+ * @param modifier Modifier for the chart.
+ */
+@Composable
+public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
+    data: List<Point<X, Y>>,
+    lineStyle: LineStyle,
+    levelLineStyle: (Y) -> LineStyle,
+    cap: StrokeCap = StrokeCap.Square,
+    modifier: Modifier = Modifier,
+    symbol: @Composable (HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    areaStyle: AreaStyle? = null,
+    areaBaseline: AreaBaseline<X, Y>? = null,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+) {
+    if (data.isEmpty()) return
+
+    if (areaStyle != null) {
+        require(areaBaseline != null) { "areaBaseline must be provided for area charts" }
+        if (areaBaseline is AreaBaseline.ArbitraryLine) {
+            require(areaBaseline.values.size == data.size) {
+                "baseline values must be the same size as the data"
+            }
+        }
+    }
+
+    // Modified version of [GeneralLinePlot].
+    data class OffsetPoint(val offset: Offset, val point: Point<X, Y>)
+
+    /** Order of executing: [onFirstPoint] -> [onMidPoint] -> [onNextPoint] -> [onMidPoint] ...,
+     so `nextPoint` of [onNextPoint] will becomes `lastPoint` of [onMidPoint]. */
+    fun scaledPointsVisitor(
+        points: List<Point<X, Y>>,
+        size: Size,
+        onFirstPoint: (OffsetPoint) -> Unit = { _ -> },
+        onMidPoint: (lastPoint: OffsetPoint, midPoint: OffsetPoint) -> Unit = { _, _ -> },
+        onNextPoint: (midPoint: OffsetPoint, nextPoint: OffsetPoint) -> Unit = { _, _ -> },
+    ) {
+        var lastPoint = points[0]
+        var scaledLastPoint = scale(lastPoint, size)
+        var drawingLastPoint = OffsetPoint(scaledLastPoint, lastPoint)
+
+        onFirstPoint(drawingLastPoint)
+        for (index in 1..points.lastIndex) {
+            val scaledMidPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
+            val midPoint = OffsetPoint(scaledMidPoint, lastPoint)
+            onMidPoint(drawingLastPoint, midPoint)
+            lastPoint = points[index]
+            scaledLastPoint = scale(lastPoint, size)
+            drawingLastPoint = OffsetPoint(scaledLastPoint, lastPoint)
+            onNextPoint(midPoint, drawingLastPoint)
+        }
+    }
+
+    // Animation scale factor
+    val beta = remember { Animatable(0f) }
+    LaunchedEffect(null) { beta.animateTo(1f, animationSpec = animationSpec) }
+
+    Layout(
+        modifier = modifier.drawWithContent {
+            clipRect(right = size.width * beta.value) { (this@drawWithContent).drawContent() }
+        },
+        content = {
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val drawConnectorLine: Path.(points: List<Point<X, Y>>, size: Size) -> Unit =
+                    { points: List<Point<X, Y>>, size: Size ->
+                        scaledPointsVisitor(
+                            points,
+                            size,
+                            onFirstPoint = { p -> moveTo(p.offset) },
+                            onMidPoint = { _, p -> lineTo(p.offset) },
+                            onNextPoint = { _, p -> lineTo(p.offset) }
+                        )
+                    }
+                val mainLinePath = Path().apply {
+                    drawConnectorLine(data, size)
+                }
+                if (areaBaseline != null && areaStyle != null) {
+                    val areaPath = generateArea(areaBaseline, data, mainLinePath, size) { points, size ->
+                        drawConnectorLine(points, size)
+                    }
+                    drawPath(
+                        areaPath,
+                        brush = areaStyle.brush,
+                        alpha = areaStyle.alpha,
+                        style = Fill,
+                        colorFilter = areaStyle.colorFilter,
+                        blendMode = areaStyle.blendMode
+                    )
+                }
+
+                // draw vertical lines using lineStyle
+                scaledPointsVisitor(
+                    data,
+                    size,
+                    onNextPoint = { midPoint, p ->
+                        with(lineStyle) {
+                            drawLine(
+                                brush, midPoint.offset, p.offset, strokeWidth.toPx(), Stroke.DefaultCap, pathEffect,
+                                alpha, colorFilter, blendMode
+                            )
+                        }
+                    }
+                )
+                // draw horizontal lines using levelLineStyle()
+                scaledPointsVisitor(
+                    data,
+                    size,
+                    onMidPoint = { lastPoint, p ->
+                        with(levelLineStyle(p.point.y)) {
+                            drawLine(brush, lastPoint.offset, p.offset, strokeWidth.toPx(), cap, pathEffect, alpha)
+                        }
+                    },
+                )
+            }
+            Symbols(data, symbol)
+        }
+    ) { measurables: List<Measurable>, constraints: Constraints ->
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            measurables.forEach {
+                it.measure(constraints).place(0, 0)
+            }
         }
     }
 }
