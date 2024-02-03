@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.style.KoalaPlotTheme
+import io.github.koalaplot.core.util.AngularValue
 import io.github.koalaplot.core.util.DegreesFullCircle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.HoverableElementArea
@@ -61,17 +62,24 @@ import io.github.koalaplot.core.util.generateHueColorPalette
 import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
 import io.github.koalaplot.core.util.polarToCartesian
+import io.github.koalaplot.core.util.toDegrees
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
 private const val DefaultLabelDiameterScale = 1.1f
 
-internal data class PieSliceData(
-    val startAngle: Float,
-    val angleExtent: Float,
-    val interactionSource: MutableInteractionSource = MutableInteractionSource()
+/**
+ * Defines the angular position of a single Pie Slice in terms of the starting angle for the slice, [startAngle], and
+ * the angular size of the slice, [angle]. 0-degrees is to the right and angles increase in the clockwise
+ * direction.
+ */
+public data class PieSliceData(
+    val startAngle: AngularValue,
+    val angle: AngularValue,
 )
+
+private const val AngleCCWTop = -90f
 
 private fun makePieSliceData(
     data: List<Float>,
@@ -91,7 +99,7 @@ private fun makePieSliceData(
         var startAngle = AngleCCWTop
         for (i in data.indices) {
             val extent = data[i] / total * DegreesFullCircle * beta
-            add(PieSliceData(startAngle, extent))
+            add(PieSliceData(startAngle.deg, extent.deg))
             startAngle += extent
         }
     }
@@ -99,23 +107,20 @@ private fun makePieSliceData(
 
 /**
  * Scope for Pie slices.
- * @property startAngle The angle where the slice starts
- * @property angle The angular width of the slice
+ * @property pieSliceData [PieSliceData] describing the slice
  * @property innerRadius The inside radius of the slice, as a fraction of its constraint's width,
  * must be between 0 and 1 inclusive
  * @property outerRadius The outside radius of the slice, as a fraction of its constraint's width,
  * must be between 0 and 1 inclusive
  */
 public interface PieSliceScope : HoverableElementAreaScope {
-    public val startAngle: Float
-    public val angle: Float
+    public val pieSliceData: PieSliceData
     public val innerRadius: Float
     public val outerRadius: Float
 }
 
 private data class PieSliceScopeImpl(
-    override val startAngle: Float,
-    override val angle: Float,
+    override val pieSliceData: PieSliceData,
     override val innerRadius: Float,
     override val outerRadius: Float,
     val hoverableElementAreaScope: HoverableElementAreaScope
@@ -140,20 +145,20 @@ public interface LabelConnectorScope {
      * The angle of the graph element at the start of the connector. For a Pie chart this is
      * the angle of the slice it connects to.
      */
-    public val startAngle: MutableState<Float>
+    public val startAngle: MutableState<AngularValue>
 
     /**
      * The angle of the label at the end of the connector. This is an angle that is normal to the
      * connector's bounding box at the [endPosition]
      */
-    public val endAngle: MutableState<Float>
+    public val endAngle: MutableState<AngularValue>
 }
 
 internal data class LabelConnectorScopeImpl(
     override val startPosition: MutableState<Offset> = mutableStateOf(Offset.Zero),
     override val endPosition: MutableState<Offset> = mutableStateOf(Offset.Zero),
-    override val startAngle: MutableState<Float> = mutableStateOf(0f),
-    override val endAngle: MutableState<Float> = mutableStateOf(0f)
+    override val startAngle: MutableState<AngularValue> = mutableStateOf(0.deg),
+    override val endAngle: MutableState<AngularValue> = mutableStateOf(0.deg)
 ) : LabelConnectorScope
 
 // Initial outer radius as a fraction of size before hover expansion
@@ -168,14 +173,13 @@ private const val LabelFadeInDuration = 1000
  * of the overall pie according to its data value relative to the sum of all values.
  *
  * @param values The data values for each pie slice
+ * @param labelOffsetProvider A provider of label offsets that can be used to implement different label
+ * placement strategies. See the [PieChart] override for a version that uses labels placed around the circumference
+ * of the pie.
  * @param modifier Compose Modifiers to be applied to the overall PieChart
  * @param slice Composable for a pie slice.
  * @param label Composable for a pie slice label placed around the perimeter of the pie
  * @param labelConnector Composable for label connectors connecting the pie slice to the label
- * @param labelSpacing A value greater than 1 specifying the distance from the center of
- * the pie at which to place the labels relative to the overall diameter of the pie, where a value
- * of 1 is at the outer edge of the pie. Values between 1.05 and 1.4 tend to work well depending
- * on the size of the labels and overall pie diameter.
  * @param holeSize A relative size for an inner hole of the pie, creating a donut chart, with a
  * value between 0 and 1.
  * @param holeContent Optional content that may be placed in the space of the donut hole.
@@ -189,6 +193,7 @@ private const val LabelFadeInDuration = 1000
 @Composable
 public fun PieChart(
     values: List<Float>,
+    labelOffsetProvider: LabelOffsetProvider,
     modifier: Modifier = Modifier,
     slice: @Composable PieSliceScope.(Int) -> Unit = {
         val colors = remember(values.size) { generateHueColorPalette(values.size) }
@@ -196,7 +201,6 @@ public fun PieChart(
     },
     label: @Composable (Int) -> Unit = {},
     labelConnector: @Composable LabelConnectorScope.(Int) -> Unit = { StraightLineConnector() },
-    labelSpacing: Float = DefaultLabelDiameterScale,
     holeSize: Float = 0f,
     holeContent: @Composable () -> Unit = {},
     minPieDiameter: Dp = 100.dp,
@@ -205,7 +209,6 @@ public fun PieChart(
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
     require(holeSize in 0f..1f) { "holeSize must be between 0 and 1" }
-    require(labelSpacing >= 1f) { "labelSpacing must be greater than 1" }
     require(maxPieDiameter != Dp.Unspecified) { "maxPieDiameter cannot be Unspecified" }
 
     val beta = remember(values) { Animatable(0f) }
@@ -226,9 +229,10 @@ public fun PieChart(
     // pieSliceData when the animation is complete - used for sizing & label layout/positioning
     val finalPieSliceData = remember(values) { makePieSliceData(values, 1f) }
 
-    val pieMeasurePolicy = remember(finalPieSliceData, holeSize, labelSpacing, minPieDiameter, forceCenteredPie) {
-        PieMeasurePolicy(finalPieSliceData, labelSpacing, InitOuterRadius, forceCenteredPie)
-    }
+    val pieMeasurePolicy =
+        remember(finalPieSliceData, holeSize, labelOffsetProvider, minPieDiameter, forceCenteredPie) {
+            PieMeasurePolicy(finalPieSliceData, labelOffsetProvider, InitOuterRadius, forceCenteredPie)
+        }
 
     HoverableElementArea(modifier = modifier) {
         SubcomposeLayout(modifier = Modifier.clipToBounds()) { constraints ->
@@ -252,7 +256,7 @@ public fun PieChart(
                 maxPieDiameter.toPx()
             )
 
-            val labelOffsets = pieMeasurePolicy.computeLabelOffsets(pieDiameter, labelPlaceables)
+            val labelOffsets = labelOffsetProvider.computeLabelOffsets(pieDiameter, labelPlaceables, finalPieSliceData)
 
             val size = pieMeasurePolicy.computeSize(labelPlaceables, labelOffsets.map { it.position }, pieDiameter)
                 .run {
@@ -299,6 +303,67 @@ public fun PieChart(
     }
 }
 
+/**
+ * Creates a Pie Chart or, optionally, a Donut Chart if holeSize is nonZero, with optional
+ * hole content to place at the center of the donut hole. Pie slices are drawn starting at
+ * -90 degrees (top center), progressing clockwise around the pie. Each slice occupies a fraction
+ * of the overall pie according to its data value relative to the sum of all values. Places labels around the pie
+ * at a minimum distance set by [labelSpacing].
+ *
+ * @param values The data values for each pie slice
+ * @param modifier Compose Modifiers to be applied to the overall PieChart
+ * @param slice Composable for a pie slice.
+ * @param label Composable for a pie slice label placed around the perimeter of the pie
+ * @param labelConnector Composable for label connectors connecting the pie slice to the label
+ * @param labelSpacing A value greater than 1 specifying the distance from the center of
+ * the pie at which to place the labels relative to the overall diameter of the pie, where a value
+ * of 1 is at the outer edge of the pie. Values between 1.05 and 1.4 tend to work well depending
+ * on the size of the labels and overall pie diameter.
+ * @param holeSize A relative size for an inner hole of the pie, creating a donut chart, with a
+ * value between 0 and 1.
+ * @param holeContent Optional content that may be placed in the space of the donut hole.
+ * @param minPieDiameter Minimum diameter allowed for the pie.
+ * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
+ * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
+ * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
+ * @param animationSpec Specifies the animation to use when the pie chart is first drawn.
+ */
+@ExperimentalKoalaPlotApi
+@Composable
+public fun PieChart(
+    values: List<Float>,
+    modifier: Modifier = Modifier,
+    slice: @Composable PieSliceScope.(Int) -> Unit = {
+        val colors = remember(values.size) { generateHueColorPalette(values.size) }
+        DefaultSlice(colors[it])
+    },
+    label: @Composable (Int) -> Unit = {},
+    labelConnector: @Composable LabelConnectorScope.(Int) -> Unit = { StraightLineConnector() },
+    labelSpacing: Float = DefaultLabelDiameterScale,
+    holeSize: Float = 0f,
+    holeContent: @Composable () -> Unit = {},
+    minPieDiameter: Dp = 100.dp,
+    maxPieDiameter: Dp = 300.dp,
+    forceCenteredPie: Boolean = false,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+) {
+    require(labelSpacing >= 1f) { "labelSpacing must be greater than 1" }
+    PieChart(
+        values,
+        CircularLabelOffsetProvider(labelSpacing),
+        modifier,
+        slice,
+        label,
+        labelConnector,
+        holeSize,
+        holeContent,
+        minPieDiameter,
+        maxPieDiameter,
+        forceCenteredPie,
+        animationSpec
+    )
+}
+
 @Composable
 private fun HoverableElementAreaScope.Pie(
     internalPieData: List<PieSliceData>,
@@ -310,8 +375,7 @@ private fun HoverableElementAreaScope.Pie(
             internalPieData.forEach { sliceData ->
                 add(
                     PieSliceScopeImpl(
-                        sliceData.startAngle,
-                        sliceData.angleExtent,
+                        sliceData,
                         holeSize,
                         InitOuterRadius,
                         this@Pie
@@ -380,8 +444,8 @@ public fun PieSliceScope.DefaultSlice(
     val targetOuterRadius by animateFloatAsState(outerRadius * if (isHovered) hoverExpandFactor else 1f)
 
     val shape = Slice(
-        startAngle + gap,
-        angle - 2 * gap,
+        pieSliceData.startAngle.toDegrees().value.toFloat() + gap,
+        pieSliceData.angle.toDegrees().value.toFloat() - 2 * gap,
         innerRadius,
         targetOuterRadius
     )
@@ -553,10 +617,10 @@ public fun LabelConnectorScope.BezierLabelConnector(
         moveTo(startPosition.value)
 
         // control point 1
-        val cp1 = startPosition.value + polarToCartesian(length / 2, startAngle.value.deg)
+        val cp1 = startPosition.value + polarToCartesian(length / 2, startAngle.value)
 
         // control point 2
-        val cp2 = endPosition.value + polarToCartesian(length / 2, endAngle.value.deg)
+        val cp2 = endPosition.value + polarToCartesian(length / 2, endAngle.value)
 
         cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, endPosition.value.x, endPosition.value.y)
     }

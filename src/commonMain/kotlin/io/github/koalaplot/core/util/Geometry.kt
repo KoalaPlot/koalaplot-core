@@ -118,6 +118,20 @@ internal fun polarToCartesian(radius: Float, angle: AngularValue): Offset {
 internal fun cos(angle: AngularValue): Double = cos(angle.toRadians().value)
 internal fun sin(angle: AngularValue): Double = sin(angle.toRadians().value)
 
+internal operator fun Degrees.plus(other: Degrees): Degrees = Degrees(this.value + other.value)
+internal operator fun Degrees.minus(other: Degrees): Degrees = Degrees(this.value - other.value)
+internal operator fun Degrees.div(other: Float): Degrees = Degrees(this.value / other)
+
+internal operator fun Radians.plus(other: Radians): Radians = Radians(this.value + other.value)
+internal operator fun Radians.minus(other: Radians): Radians = Radians(this.value - other.value)
+internal operator fun Radians.div(other: Float): Radians = Radians(this.value / other)
+
+internal operator fun AngularValue.plus(other: AngularValue): AngularValue =
+    Degrees(this.toDegrees().value + other.toDegrees().value)
+internal operator fun AngularValue.minus(other: AngularValue): AngularValue =
+    Degrees(this.toDegrees().value - other.toDegrees().value)
+internal operator fun AngularValue.div(other: Float): AngularValue = Degrees(this.toDegrees().value / other)
+
 internal data class PolarCoordinate(val radius: Float, val angle: AngularValue)
 
 /**

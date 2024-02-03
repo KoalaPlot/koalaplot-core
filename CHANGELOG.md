@@ -7,6 +7,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- StairstepPlot variant that accepts a LineStyle for each y-axis value.
+- PieChart variant that takes a labelOffsetProvider to allow pluggable label placement algorithms.
+
 ## [0.5.2]
 
 ### Changed

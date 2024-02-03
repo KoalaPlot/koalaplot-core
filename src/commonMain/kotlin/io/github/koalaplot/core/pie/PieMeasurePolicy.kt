@@ -6,19 +6,14 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.unit.Constraints
-import io.github.koalaplot.core.util.DEG2RAD
-import io.github.koalaplot.core.util.deg
+import io.github.koalaplot.core.util.div
 import io.github.koalaplot.core.util.maximize
+import io.github.koalaplot.core.util.plus
 import io.github.koalaplot.core.util.polarToCartesian
-import io.github.koalaplot.core.util.y2theta
 import kotlin.math.abs
-import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.sin
-
-internal data class LabelOffsets(val position: Offset, val anchorPoint: Offset)
 
 /**
  * @param forceCenteredPie If true, will force the pie to be centered in the parent component by adjusting its size to
@@ -26,7 +21,7 @@ internal data class LabelOffsets(val position: Offset, val anchorPoint: Offset)
  */
 internal class PieMeasurePolicy constructor(
     private val pieSliceData: List<PieSliceData>,
-    private val labelSpacing: Float,
+    private val labelOffsetProvider: LabelOffsetProvider,
     private val initOuterRadius: Float,
     private val forceCenteredPie: Boolean = false
 ) {
@@ -90,19 +85,10 @@ internal class PieMeasurePolicy constructor(
             for (i in labelOffsets.indices) {
                 val labelConnectorScope = LabelConnectorScopeImpl()
                 with(labelConnectorScope) {
-                    startPosition.value = polarToCartesian(
-                        pieDiameter / 2f * initOuterRadius,
-                        (pieSliceData[i].startAngle + pieSliceData[i].angleExtent / 2f).deg
-                    )
+                    startAngle.value = pieSliceData[i].startAngle + (pieSliceData[i].angle / 2f)
+                    startPosition.value = polarToCartesian(pieDiameter / 2f * initOuterRadius, startAngle.value)
                     endPosition.value = labelOffsets[i].anchorPoint
-                    startAngle.value =
-                        pieSliceData[i].startAngle + pieSliceData[i].angleExtent / 2f
-                    @Suppress("MagicNumber")
-                    endAngle.value = if (startPosition.value.x <= endPosition.value.x) {
-                        180f
-                    } else {
-                        0f
-                    }
+                    endAngle.value = labelOffsets[i].anchorAngle
 
                     // Shift label connector coordinates to a bounding box with top left at 0, 0
                     // and compute the translation required to position it correctly.
@@ -179,7 +165,7 @@ internal class PieMeasurePolicy constructor(
         constraints: Constraints,
     ): Boolean {
         val labelOffsets: List<Offset> =
-            computeLabelOffsets(test.toFloat(), labelPlaceables).map {
+            labelOffsetProvider.computeLabelOffsets(test.toFloat(), labelPlaceables, pieSliceData).map {
                 it.position
             }
         val s = computeSize(labelPlaceables, labelOffsets, test.toFloat())
@@ -221,226 +207,4 @@ internal class PieMeasurePolicy constructor(
 
         return Size(width, height)
     }
-
-    /**
-     * Computes where labels should be placed around a pie chart based on the diameter of the pie,
-     * pieDiameter, the labels themselves as represented by placeables, and the individual pie
-     * slice angles. Returns a list of Offsets representing the x, y coordinate
-     * for each label where the center of the pie is at the origin (0, 0).
-     */
-    internal fun computeLabelOffsets(
-        pieDiameter: Float,
-        placeables: List<Placeable>
-    ): List<LabelOffsets> {
-        val labelDiameter = pieDiameter * labelSpacing
-
-        return computeLabelOffsets(
-            labelDiameter,
-            groupLabels(placeables, pieSliceData)
-        )
-    }
-}
-
-internal const val AngleCCWTop = -90f
-
-/**
- * Defines 4 quadrants of a circle, and the angle range that each occupies, in degrees going
- * clockwise.
- */
-@Suppress("MagicNumber")
-private enum class Quadrant(val angleRange: ClosedFloatingPointRange<Float>) {
-    NorthEast(-90f..0f),
-    SouthEast(0f..90f),
-    SouthWest(90f..180f),
-    NorthWest(180f..270f)
-}
-
-private fun Quadrant.isWest(): Boolean {
-    return this == Quadrant.NorthWest || this == Quadrant.SouthWest
-}
-
-private fun Quadrant.isSouth(): Boolean {
-    return this == Quadrant.SouthWest || this == Quadrant.SouthEast
-}
-
-private data class SliceLabelData(
-    val index: Int,
-    val pieSliceData: PieSliceData,
-    val labelPlaceable: Placeable,
-    val centerAngle: Float
-)
-
-// Group slice labels by their quadrant, with related data
-private fun groupLabels(
-    labelPlaceables: List<Placeable>,
-    pieSliceDatas: List<PieSliceData>,
-): Map<Quadrant, List<SliceLabelData>> {
-    val sliceGroups = HashMap<Quadrant, MutableList<SliceLabelData>>()
-
-    labelPlaceables.forEachIndexed { index, placeable ->
-        val centerAngle = pieSliceDatas[index].startAngle + pieSliceDatas[index].angleExtent / 2
-
-        val matchingQuadrant = Quadrant.values().first {
-            it.angleRange.contains(centerAngle)
-        }
-        sliceGroups[matchingQuadrant] =
-            (sliceGroups.getOrElse(matchingQuadrant) { ArrayList() }).apply {
-                add(SliceLabelData(index, pieSliceDatas[index], placeable, centerAngle))
-            }
-    }
-
-    return sliceGroups
-}
-
-private fun computeLabelOffsets(
-    labelDiameter: Float,
-    sliceGroups: Map<Quadrant, List<SliceLabelData>>
-): List<LabelOffsets> {
-    // create a mapping of slice index to label offset for sorting back to a list later
-    val sliceOffsetMap = HashMap<Int, LabelOffsets>()
-
-    var lastY = Float.POSITIVE_INFINITY
-    var maxY = Float.NEGATIVE_INFINITY
-    sliceGroups[Quadrant.NorthEast]?.reversed()?.forEach {
-        val labelOffset = computeLabelOffset(
-            it.centerAngle * DEG2RAD,
-            labelDiameter,
-            it.labelPlaceable,
-            Quadrant.NorthEast,
-            lastY
-        )
-        lastY = labelOffset.position.y
-        maxY = max(maxY, labelOffset.position.y + it.labelPlaceable.height)
-        sliceOffsetMap[it.index] = labelOffset
-    }
-
-    lastY = maxY
-    sliceGroups[Quadrant.SouthEast]?.forEach {
-        val labelOffset = computeLabelOffset(
-            it.centerAngle * DEG2RAD,
-            labelDiameter,
-            it.labelPlaceable,
-            Quadrant.SouthEast,
-            lastY
-        )
-        lastY = labelOffset.position.y + it.labelPlaceable.height
-        sliceOffsetMap[it.index] = labelOffset
-    }
-
-    lastY = Float.POSITIVE_INFINITY
-    maxY = Float.NEGATIVE_INFINITY
-    sliceGroups[Quadrant.NorthWest]?.forEach {
-        val labelOffset = computeLabelOffset(
-            it.centerAngle * DEG2RAD,
-            labelDiameter,
-            it.labelPlaceable,
-            Quadrant.NorthWest,
-            lastY
-        )
-        lastY = labelOffset.position.y
-        maxY = max(maxY, labelOffset.position.y + it.labelPlaceable.height)
-        sliceOffsetMap[it.index] = labelOffset
-    }
-
-    lastY = maxY
-    sliceGroups[Quadrant.SouthWest]?.reversed()?.forEach {
-        val labelOffset = computeLabelOffset(
-            it.centerAngle * DEG2RAD,
-            labelDiameter,
-            it.labelPlaceable,
-            Quadrant.SouthWest,
-            lastY
-        )
-        lastY = labelOffset.position.y + it.labelPlaceable.height
-        sliceOffsetMap[it.index] = labelOffset
-    }
-
-    return sliceOffsetMap.entries.sortedBy { it.key }.map { it.value }
-}
-
-/**
- * Computes the position and anchor (line connection) position for a label.
- * @param angleRad angular position for the label in radians
- * @param labelDiameter The diameter at which to place the label
- * @param placeable The Placeable for the label for which to calculate the position
- * @param quadrant Quadrant in which the label is located
- * @param lastY min or max Y-coordinate of the previous label this label cannot interfere with
- */
-private fun computeLabelOffset(
-    angleRad: Double,
-    labelDiameter: Float,
-    placeable: Placeable,
-    quadrant: Quadrant,
-    lastY: Float
-): LabelOffsets {
-    val isLeftSide = quadrant.isWest()
-    val labelTop = if (quadrant.isSouth()) {
-        max(labelDiameter / 2f * sin(angleRad).toFloat() - placeable.height / 2.0F, lastY)
-    } else {
-        min(
-            labelDiameter / 2f * sin(angleRad).toFloat() - placeable.height / 2.0F,
-            lastY - placeable.height
-        )
-    }
-    val labelBottom = labelTop + placeable.height
-
-    val thetas1 = y2theta(labelTop, labelDiameter / 2f)
-    val thetas2 = y2theta(labelBottom, labelDiameter / 2f)
-
-    // xLimit is the x-axis position closest to the center of the pie allowed
-    val xLimit = (labelDiameter / 2f) * cos(angleRad).toFloat()
-
-    // thetas1 or thetas2 could be NaN if the y-coordinate was larger than labelDiameter / 2
-    val xOffset =
-        if (isLeftSide) {
-            val xMin1 = if (thetas1.first.isNaN()) {
-                Float.POSITIVE_INFINITY
-            } else {
-                labelDiameter / 2f * min(cos(thetas1.first), cos(thetas1.second))
-            }
-
-            val xMin2 = if (thetas2.first.isNaN()) {
-                Float.POSITIVE_INFINITY
-            } else {
-                labelDiameter / 2f * min(cos(thetas2.first), cos(thetas2.second))
-            }
-
-            if (xMin1.isInfinite() && xMin2.isInfinite()) {
-                xLimit
-            } else {
-                min(min(xMin1, xMin2), xLimit)
-            }
-        } else {
-            val xMax1 = if (thetas1.first.isNaN()) {
-                Float.NEGATIVE_INFINITY
-            } else {
-                labelDiameter / 2f * max(cos(thetas1.first), cos(thetas1.second))
-            }
-
-            val xMax2 = if (thetas2.first.isNaN()) {
-                Float.NEGATIVE_INFINITY
-            } else {
-                labelDiameter / 2f * max(cos(thetas2.first), cos(thetas2.second))
-            }
-
-            if (xMax1.isInfinite() && xMax2.isInfinite()) {
-                xLimit
-            } else {
-                max(max(xMax1, xMax2), xLimit)
-            }
-        }
-
-    var offset = Offset(xOffset, labelTop)
-
-    // left side labels need x-position shifted left by their width
-    if (isLeftSide) {
-        offset += Offset(-placeable.width.toFloat(), 0f)
-    }
-
-    val anchorPoint = offset + Offset(0f, placeable.height / 2f) + if (isLeftSide) {
-        Offset(placeable.width.toFloat(), 0f)
-    } else {
-        Offset(0f, 0f)
-    }
-    return LabelOffsets(offset, anchorPoint)
 }
