@@ -14,6 +14,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -287,7 +288,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     cap: StrokeCap = StrokeCap.Square,
     modifier: Modifier = Modifier,
     symbol: @Composable (HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
-    areaStyle: AreaStyle? = null,
+    areaStyle: ((Y) -> AreaStyle)? = null,
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
@@ -303,32 +304,6 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     }
 
     // Modified version of [GeneralLinePlot].
-    data class OffsetPoint(val offset: Offset, val point: Point<X, Y>)
-
-    /** Order of executing: [onFirstPoint] -> [onMidPoint] -> [onNextPoint] -> [onMidPoint] ...,
-     so `nextPoint` of [onNextPoint] will becomes `lastPoint` of [onMidPoint]. */
-    fun scaledPointsVisitor(
-        points: List<Point<X, Y>>,
-        size: Size,
-        onFirstPoint: (OffsetPoint) -> Unit = { _ -> },
-        onMidPoint: (lastPoint: OffsetPoint, midPoint: OffsetPoint) -> Unit = { _, _ -> },
-        onNextPoint: (midPoint: OffsetPoint, nextPoint: OffsetPoint) -> Unit = { _, _ -> },
-    ) {
-        var lastPoint = points[0]
-        var scaledLastPoint = scale(lastPoint, size)
-        var drawingLastPoint = OffsetPoint(scaledLastPoint, lastPoint)
-
-        onFirstPoint(drawingLastPoint)
-        for (index in 1..points.lastIndex) {
-            val scaledMidPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
-            val midPoint = OffsetPoint(scaledMidPoint, lastPoint)
-            onMidPoint(drawingLastPoint, midPoint)
-            lastPoint = points[index]
-            scaledLastPoint = scale(lastPoint, size)
-            drawingLastPoint = OffsetPoint(scaledLastPoint, lastPoint)
-            onNextPoint(midPoint, drawingLastPoint)
-        }
-    }
 
     // Animation scale factor
     val beta = remember { Animatable(0f) }
@@ -340,37 +315,75 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
         },
         content = {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val drawConnectorLine: Path.(points: List<Point<X, Y>>, size: Size) -> Unit =
-                    { points: List<Point<X, Y>>, size: Size ->
+                data class OffsetPoint(val offset: Offset, val point: Point<X, Y>)
+
+                /** Order of executing: [onFirstPoint] -> [onMidPoint] -> [onNextPoint] -> [onMidPoint] ...,
+                so `nextPoint` of [onNextPoint] will becomes `lastPoint` of [onMidPoint]. */
+                fun scaledPointsVisitor(
+                    points: List<Point<X, Y>>,
+                    onFirstPoint: (OffsetPoint) -> Unit = { _ -> },
+                    onMidPoint: (lastPoint: OffsetPoint, midPoint: OffsetPoint) -> Unit = { _, _ -> },
+                    onNextPoint: (midPoint: OffsetPoint, nextPoint: OffsetPoint) -> Unit = { _, _ -> },
+                ) {
+                    var lastPoint = points[0]
+                    var scaledLastPoint = scale(lastPoint, size)
+                    var offsetLastPoint = OffsetPoint(scaledLastPoint, lastPoint)
+
+                    onFirstPoint(offsetLastPoint)
+                    for (index in 1..points.lastIndex) {
+                        val scaledMidPoint = scale(Point(x = points[index].x, y = lastPoint.y), size)
+                        val midPoint = OffsetPoint(scaledMidPoint, lastPoint)
+                        onMidPoint(offsetLastPoint, midPoint)
+                        lastPoint = points[index]
+                        scaledLastPoint = scale(lastPoint, size)
+                        offsetLastPoint = OffsetPoint(scaledLastPoint, lastPoint)
+                        onNextPoint(midPoint, offsetLastPoint)
+                    }
+                }
+                val drawConnectorLine: Path.(points: List<Point<X, Y>>) -> Unit =
+                    { points: List<Point<X, Y>> ->
                         scaledPointsVisitor(
                             points,
-                            size,
                             onFirstPoint = { p -> moveTo(p.offset) },
                             onMidPoint = { _, p -> lineTo(p.offset) },
                             onNextPoint = { _, p -> lineTo(p.offset) }
                         )
                     }
                 val mainLinePath = Path().apply {
-                    drawConnectorLine(data, size)
+                    drawConnectorLine(data)
                 }
                 if (areaBaseline != null && areaStyle != null) {
-                    val areaPath = generateArea(areaBaseline, data, mainLinePath, size) { points, size ->
-                        drawConnectorLine(points, size)
-                    }
-                    drawPath(
-                        areaPath,
-                        brush = areaStyle.brush,
-                        alpha = areaStyle.alpha,
-                        style = Fill,
-                        colorFilter = areaStyle.colorFilter,
-                        blendMode = areaStyle.blendMode
+                    var i = 0
+                    var lastPoint: OffsetPoint? = null
+                    scaledPointsVisitor(
+                        data,
+                        onMidPoint = { lastPoint_, midPoint ->
+                            lastPoint = lastPoint_
+                        },
+                        onNextPoint = { midPoint, nextPoint ->
+                            fillRectangle(
+                                lastPoint!!.offset,
+                                scale(
+                                    Point(
+                                        nextPoint.point.x,
+                                        when (areaBaseline) {
+                                            is AreaBaseline.ConstantLine -> areaBaseline.value
+
+                                            is AreaBaseline.ArbitraryLine -> areaBaseline.values[i].y
+                                        },
+                                    ),
+                                    size
+                                ),
+                                areaStyle(midPoint.point.y)
+                            )
+                            i++
+                        }
                     )
                 }
 
                 // draw vertical lines using lineStyle
                 scaledPointsVisitor(
                     data,
-                    size,
                     onNextPoint = { midPoint, p ->
                         with(lineStyle) {
                             drawLine(
@@ -383,7 +396,6 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                 // draw horizontal lines using levelLineStyle()
                 scaledPointsVisitor(
                     data,
-                    size,
                     onMidPoint = { lastPoint, p ->
                         with(levelLineStyle(p.point.y)) {
                             drawLine(brush, lastPoint.offset, p.offset, strokeWidth.toPx(), cap, pathEffect, alpha)
@@ -512,6 +524,29 @@ private fun <X, Y> XYGraphScope<X, Y>.generateArea(
             }
         }
     }
+}
+
+private fun DrawScope.fillRectangle(
+    leftTop: Offset,
+    rightBottom: Offset,
+    areaStyle: AreaStyle
+) {
+    val rectangle = Path().apply {
+        fillType = PathFillType.EvenOdd
+        moveTo(leftTop)
+        lineTo(rightBottom.x, leftTop.y)
+        lineTo(leftTop.x, rightBottom.y)
+        lineTo(leftTop)
+        close()
+    }
+    drawPath(
+        rectangle,
+        brush = areaStyle.brush,
+        alpha = areaStyle.alpha,
+        style = Fill,
+        colorFilter = areaStyle.colorFilter,
+        blendMode = areaStyle.blendMode
+    )
 }
 
 @Composable
