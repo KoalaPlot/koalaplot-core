@@ -262,7 +262,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
 }
 
 /**
- * A [StairstepPlot] that differentiate [lineStyle] at each [Y]-values based on [levelLineStyle].
+ * A [StairstepPlot] that differentiate [lineStyle] & [areaBaseline] at each [Y]-values based on [levelLineStyle].
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values
  * @param data Data series to plot.
@@ -318,7 +318,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                 data class OffsetPoint(val offset: Offset, val point: Point<X, Y>)
 
                 /** Order of executing: [onFirstPoint] -> [onMidPoint] -> [onNextPoint] -> [onMidPoint] ...,
-                so `nextPoint` of [onNextPoint] will becomes `lastPoint` of [onMidPoint]. */
+                 so `nextPoint` of [onNextPoint] will becomes `lastPoint` of [onMidPoint]. */
                 fun scaledPointsVisitor(
                     points: List<Point<X, Y>>,
                     onFirstPoint: (OffsetPoint) -> Unit = { _ -> },
@@ -340,30 +340,16 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                         onNextPoint(midPoint, offsetLastPoint)
                     }
                 }
-                val drawConnectorLine: Path.(points: List<Point<X, Y>>) -> Unit =
-                    { points: List<Point<X, Y>> ->
-                        scaledPointsVisitor(
-                            points,
-                            onFirstPoint = { p -> moveTo(p.offset) },
-                            onMidPoint = { _, p -> lineTo(p.offset) },
-                            onNextPoint = { _, p -> lineTo(p.offset) }
-                        )
-                    }
-                val mainLinePath = Path().apply {
-                    drawConnectorLine(data)
-                }
                 if (areaBaseline != null && areaStyle != null) {
                     var i = 0
                     var lastPoint: OffsetPoint? = null
                     scaledPointsVisitor(
                         data,
-                        onMidPoint = { lastPoint_, midPoint ->
-                            lastPoint = lastPoint_
-                        },
+                        onMidPoint = { lp, _ -> lastPoint = lp },
                         onNextPoint = { midPoint, nextPoint ->
                             fillRectangle(
-                                lastPoint!!.offset,
-                                scale(
+                                leftTop = lastPoint!!.offset,
+                                rightBottom = scale(
                                     Point(
                                         nextPoint.point.x,
                                         when (areaBaseline) {
@@ -374,7 +360,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                                     ),
                                     size
                                 ),
-                                areaStyle(midPoint.point.y)
+                                areaStyle = areaStyle(midPoint.point.y)
                             )
                             i++
                         }
@@ -535,6 +521,7 @@ private fun DrawScope.fillRectangle(
         fillType = PathFillType.EvenOdd
         moveTo(leftTop)
         lineTo(rightBottom.x, leftTop.y)
+        lineTo(rightBottom)
         lineTo(leftTop.x, rightBottom.y)
         lineTo(leftTop)
         close()
