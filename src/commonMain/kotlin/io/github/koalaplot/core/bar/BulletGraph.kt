@@ -288,28 +288,11 @@ private fun computeFeatureBarOrigin(featuredMeasureValue: Float, axisRange: Clos
 }
 
 /**
- * Implementation of a bullet graph as defined in
- * http://www.perceptualedge.com/articles/misc/Bullet_Graph_Design_Spec.pdf.
- *
- * See [BulletBuilderScope] for how to configure the bullet graph.
- *
- * @param animationSpec Animation to use for animating feature bar growth
- */
-@ExperimentalKoalaPlotApi
-@Composable
-public fun BulletGraph(
-    modifier: Modifier = Modifier,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
-    builder: BulletBuilderScope.() -> Unit
-) {
-    BulletGraphs(modifier, animationSpec = animationSpec) {
-        bullet(builder)
-    }
-}
-
-/**
  * A vertical layout of multiple bullet graphs. Each bullet will equally share the vertical space and be the same
  * height. The left and right edges of all bullets will be aligned horizontally.
+ *
+ * Bullet graphs are implemented as defined in
+ *  * http://www.perceptualedge.com/articles/misc/Bullet_Graph_Design_Spec.pdf.
  *
  * See [BulletGraphScope] and [BulletBuilderScope] for how to configure the bullet graphs.
  *
@@ -377,11 +360,7 @@ public fun BulletGraphs(
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 private fun Density.calculateLabelWidthMaxConstraint(graphScope: BulletGraphScope, constraints: Constraints): Int {
-    val labelWidth = if (graphScope.scopes.size == 1) {
-        graphScope.scopes.first().labelWidth
-    } else {
-        graphScope.labelWidth
-    }
+    val labelWidth = graphScope.labelWidth
     val labelWidthMaxConstraint = when (labelWidth) {
         is FixedFraction -> {
             (constraints.maxWidth * labelWidth.fraction).roundToInt()
@@ -404,11 +383,7 @@ private fun calculateLabelWidth(
     labelWidthMaxConstraint: Int,
     labelPlaceable: List<Placeable>
 ): Int {
-    val labelWidth = if (graphScope.scopes.size == 1) {
-        graphScope.scopes.first().labelWidth
-    } else {
-        graphScope.labelWidth
-    }
+    val labelWidth = graphScope.labelWidth
 
     return if (labelWidth is VariableFraction) {
         labelPlaceable.maxOf { it.width }

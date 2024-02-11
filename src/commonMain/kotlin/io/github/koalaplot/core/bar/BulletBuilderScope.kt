@@ -82,12 +82,6 @@ public class BulletBuilderScope {
     public val label: Slot<@Composable () -> Unit> = Slot {}
 
     /**
-     * Sets the label's width. If the BulletGraph is in a layout of multiple bullet graphs this value will be
-     * ignored and instead will take the value specified in [BulletGraphScope.labelWidth].
-     */
-    public var labelWidth: LabelWidth = FixedFraction(0.25f)
-
-    /**
      * Specifies the axis settings and content. See [AxisSettings].
      */
     public val axis: Slot<AxisSettings.() -> Unit> = Slot {}
@@ -171,7 +165,6 @@ public class BulletBuilderScope {
         if (featuredMeasure != other.featuredMeasure) return false
         if (rangesScope != other.rangesScope) return false
         if (label != other.label) return false
-        if (labelWidth != other.labelWidth) return false
         if (axis != other.axis) return false
 
         return true
@@ -182,7 +175,6 @@ public class BulletBuilderScope {
         result = 31 * result + featuredMeasure.hashCode()
         result = 31 * result + rangesScope.hashCode()
         result = 31 * result + label.hashCode()
-        result = 31 * result + labelWidth.hashCode()
         result = 31 * result + axis.hashCode()
         return result
     }

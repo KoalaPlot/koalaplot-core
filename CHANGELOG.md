@@ -8,18 +8,26 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+
 - StairstepPlot variant that accepts a LineStyle for each y-axis value.
 - PieChart variant that takes a labelOffsetProvider to allow pluggable label placement algorithms.
+
+### Removed
+
+- BulletGraph function that deferred to BulletGraphs
+- labelWidth from BulletBuilderScope, use BulletGraphScope.labelWidth instead
 
 ## [0.5.2]
 
 ### Changed
+
 - Update Compose to version 1.6.0-beta01.
 - Update Kotlin to version 1.9.22
 
 ## [0.5.1]
 
 ### Fixed
+
 - @Deprecated ReplaceWith using incorrect replacement names
 
 ## [0.5.0]
