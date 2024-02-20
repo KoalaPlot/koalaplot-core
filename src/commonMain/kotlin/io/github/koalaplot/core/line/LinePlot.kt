@@ -517,18 +517,10 @@ private fun DrawScope.fillRectangle(
     rightBottom: Offset,
     areaStyle: AreaStyle
 ) {
-    val rectangle = Path().apply {
-        fillType = PathFillType.EvenOdd
-        moveTo(leftTop)
-        lineTo(rightBottom.x, leftTop.y)
-        lineTo(rightBottom)
-        lineTo(leftTop.x, rightBottom.y)
-        lineTo(leftTop)
-        close()
-    }
-    drawPath(
-        rectangle,
+    drawRect(
         brush = areaStyle.brush,
+        topLeft = leftTop,
+        size = (rightBottom - leftTop).run { Size(x, y) },
         alpha = areaStyle.alpha,
         style = Fill,
         colorFilter = areaStyle.colorFilter,
