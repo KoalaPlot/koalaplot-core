@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
  */
 public class CategoryAxisModel<T>(
     private val categories: List<T>,
+    private val firstCategoryIsZero: Boolean = false,
     override val minimumMajorTickSpacing: Dp = 50.dp,
 ) : AxisModel<T> {
     /**
@@ -24,7 +25,11 @@ public class CategoryAxisModel<T>(
     override fun computeOffset(point: T): Float {
         val index = categories.indexOf(point)
         require(index != -1) { "The provided category '$point' is not a valid value for this axis." }
-        return ((index + 1).toFloat() / (categories.size + 1).toFloat())
+        return if (firstCategoryIsZero) {
+            index.toFloat() / categories.size
+        } else {
+            ((index + 1).toFloat() / (categories.size + 1).toFloat())
+        }
     }
 
     override fun computeTickValues(axisLength: Dp): io.github.koalaplot.core.xygraph.TickValues<T> {
