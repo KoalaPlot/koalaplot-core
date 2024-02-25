@@ -7,6 +7,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+-  VerticalBarPlot can't be updated (#40)
+
 ### Added
 
 - StairstepPlot variant that accepts a LineStyle for each y-axis value.
