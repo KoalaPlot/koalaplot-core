@@ -32,10 +32,10 @@ import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.DiamondShape
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.xychart.AxisStyle
-import io.github.koalaplot.core.xychart.LinearAxisModel
-import io.github.koalaplot.core.xychart.autoScaleRange
-import io.github.koalaplot.core.xychart.rememberAxisStyle
+import io.github.koalaplot.core.xygraph.AxisStyle
+import io.github.koalaplot.core.xygraph.LinearAxisModel
+import io.github.koalaplot.core.xygraph.autoScaleRange
+import io.github.koalaplot.core.xygraph.rememberAxisStyle
 
 private const val DefaultSizeFraction = 0.75f
 private const val FeaturedMeasureDefaultSize = 0.33f

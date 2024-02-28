@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.legend.LegendLocation
-import io.github.koalaplot.core.xychart.TickPosition
+import io.github.koalaplot.core.xygraph.TickPosition
 
 /**
  * KiwkCharts components use values provided here when retrieving default values.
@@ -109,8 +109,7 @@ public data class Axis(
     val lineThickness: Dp = 0.dp,
     @Deprecated("Migrate from XYChart to XYGraph")
     val tickPosition: TickPosition = TickPosition.Outside,
-    val xyGraphTickPosition: io.github.koalaplot.core.xygraph.TickPosition =
-        io.github.koalaplot.core.xygraph.TickPosition.Outside,
+    val xyGraphTickPosition: TickPosition = TickPosition.Outside,
     val majorGridlineStyle: LineStyle? = LineStyle(
         SolidColor(Color.LightGray),
         strokeWidth = 0.dp

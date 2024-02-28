@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.xychart.Axis
-import io.github.koalaplot.core.xychart.AxisDelegate
+import io.github.koalaplot.core.xygraph.Axis
+import io.github.koalaplot.core.xygraph.AxisDelegate
 import kotlin.math.abs
 import kotlin.math.absoluteValue
 import kotlin.math.max

@@ -1,11 +1,22 @@
 package io.github.koalaplot.core.bar
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
 import io.github.koalaplot.core.style.KoalaPlotTheme
+import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.xygraph.XYGraphScope
 
 /**
@@ -65,6 +76,19 @@ public interface VerticalBarPosition<Y> {
      */
     public val yMax: Y
 }
+
+public interface BarScope : HoverableElementAreaScope
+
+internal class BarScopeImpl(val hoverableElementAreaScope: HoverableElementAreaScope) :
+    BarScope, HoverableElementAreaScope by hoverableElementAreaScope
+
+/**
+ * Defines a Composable function used to emit a vertical bar.
+ * The parameter series is the chart data series index.
+ * The parameter index is the element index within the series.
+ * The parameter value is the value of the element.
+ */
+public typealias VerticalBarComposable<E> = @Composable BarScope.(series: Int, index: Int, value: E) -> Unit
 
 /**
  * A VerticalBarPlot to be used in an XYGraph and that plots a single series of data points as vertical bars.
@@ -207,4 +231,52 @@ internal class VerticalBarPlotScopeImpl<X, Y>(private val defaultBar: @Composabl
     override fun item(x: X, yMin: Y, yMax: Y, bar: (@Composable BarScope.() -> Unit)?) {
         data[x] = Pair(verticalBarPlotEntry(x, yMin, yMax), bar ?: defaultBar)
     }
+}
+
+/**
+ * A default implementation of a bar for bar charts.
+ * @param brush The brush to paint the bar with
+ * @param shape An optional shape for the bar.
+ * @param border An optional border for the bar.
+ * @param hoverElement An optional Composable to be displayed over the bar when hovered over by the
+ * mouse or pointer.
+ */
+@Composable
+public fun BarScope.DefaultVerticalBar(
+    brush: Brush,
+    modifier: Modifier = Modifier,
+    shape: Shape = RectangleShape,
+    border: BorderStroke? = null,
+    hoverElement: @Composable () -> Unit = {},
+) {
+    Box(
+        modifier = modifier.fillMaxSize()
+            .then(if (border != null) Modifier.border(border, shape) else Modifier)
+            .background(brush = brush, shape = shape)
+            .clip(shape)
+            .hoverableElement(hoverElement)
+    )
+}
+
+/**
+ * A simplified DefaultVerticalBar that uses a Solid Color [color] and default [RectangleShape].
+ */
+@Composable
+public fun BarScope.DefaultVerticalBar(
+    color: Color,
+    shape: Shape = RectangleShape,
+    border: BorderStroke? = null,
+) {
+    DefaultVerticalBar(SolidColor(color), shape = shape, border = border)
+}
+
+/**
+ * Factory function to create a Composable that emits a solid colored bar.
+ */
+public fun solidBar(
+    color: Color,
+    shape: Shape = RectangleShape,
+    border: BorderStroke? = null,
+): @Composable BarScope.() -> Unit = {
+    DefaultVerticalBar(SolidColor(color), shape = shape, border = border)
 }
