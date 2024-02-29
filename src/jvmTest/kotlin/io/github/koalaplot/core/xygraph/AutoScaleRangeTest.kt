@@ -57,4 +57,10 @@ class AutoScaleRangeTest {
             assertEquals(it.second.second, range.endInclusive, (it.first.second - it.first.first).toFloat() * 0.001f)
         }
     }
+
+    @Test
+    fun testWithEmptyList() {
+        val range = listOf<Float>().autoScaleRange()
+        assertEquals(0f..1f, range)
+    }
 }

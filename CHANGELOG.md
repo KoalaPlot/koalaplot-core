@@ -9,7 +9,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
--  VerticalBarPlot can't be updated (#40)
+- VerticalBarPlot can't be updated (#40)
+- autoScaleRange throws Exception if provide an empty list
 
 ### Added
 

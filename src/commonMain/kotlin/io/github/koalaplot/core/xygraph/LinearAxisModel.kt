@@ -17,10 +17,10 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sign
 
-private val TickRatios = listOf(0.1f, 0.2f, 0.5f, 1f, 2f)
+internal val TickRatios = listOf(0.1f, 0.2f, 0.5f, 1f, 2f)
 
-private const val ZoomRangeLimitDefault = 0.2f
-private const val MinimumMajorTickIncrementDefault = 0.1f
+internal const val ZoomRangeLimitDefault = 0.2f
+internal const val MinimumMajorTickIncrementDefault = 0.1f
 
 /**
  * An [AxisModel] that uses Float values and is linear.
@@ -36,10 +36,9 @@ private const val MinimumMajorTickIncrementDefault = 0.1f
  * @param allowZooming If the axis should allow zooming
  * @param allowPanning If the axis should allow panning.
  */
-public class LinearAxisModel constructor(
+public class LinearAxisModel(
     public val range: ClosedFloatingPointRange<Float>,
-    private val zoomRangeLimit: Float =
-        (range.endInclusive - range.start) * ZoomRangeLimitDefault,
+    private val zoomRangeLimit: Float = (range.endInclusive - range.start) * ZoomRangeLimitDefault,
     private val minimumMajorTickIncrement: Float =
         (range.endInclusive - range.start) * MinimumMajorTickIncrementDefault,
     override val minimumMajorTickSpacing: Dp = 50.dp,
@@ -165,25 +164,16 @@ public class LinearAxisModel constructor(
         val pivotAxisScale =
             (currentRange.start) + (currentRange.endInclusive - currentRange.start) * pivot
 
-        val newLow =
-            (
-                pivotAxisScale - (pivotAxisScale - currentRange.start) / zoomFactor
-                ).coerceIn(range)
-        val newHi =
-            (
-                pivotAxisScale +
-                    (currentRange.endInclusive - pivotAxisScale) / zoomFactor
-                ).coerceIn(range)
+        val newLow = (pivotAxisScale - (pivotAxisScale - currentRange.start) / zoomFactor).coerceIn(range)
+        val newHi = (pivotAxisScale + (currentRange.endInclusive - pivotAxisScale) / zoomFactor).coerceIn(range)
 
         if (newHi - newLow < zoomRangeLimit) {
             val delta = zoomRangeLimit - (newHi - newLow)
-            currentRange =
-                (newLow - delta / 2f)..(newHi + delta / 2f)
+            currentRange = (newLow - delta / 2f)..(newHi + delta / 2f)
             if (currentRange.start < range.start) {
                 currentRange = range.start..(range.start + zoomRangeLimit)
             } else if (currentRange.endInclusive > range.endInclusive) {
-                currentRange =
-                    (range.endInclusive - zoomRangeLimit)..range.endInclusive
+                currentRange = (range.endInclusive - zoomRangeLimit)..range.endInclusive
             }
         } else {
             currentRange = newLow..newHi
@@ -218,9 +208,7 @@ public class LinearAxisModel constructor(
         if (minimumMajorTickSpacing != other.minimumMajorTickSpacing) return false
         if (minorTickCount != other.minorTickCount) return false
         if (allowZooming != other.allowZooming) return false
-        if (allowPanning != other.allowPanning) return false
-
-        return true
+        return allowPanning == other.allowPanning
     }
 
     override fun hashCode(): Int {
@@ -273,6 +261,9 @@ public fun rememberLinearAxisModel(
  */
 @JvmName("autoScaleFloatRange")
 public fun List<Float>.autoScaleRange(): ClosedFloatingPointRange<Float> {
+    if (isEmpty()) {
+        return 0f..1f
+    }
     val max = this.max()
     val min = this.min()
     val range = if (max - min == 0f) {
