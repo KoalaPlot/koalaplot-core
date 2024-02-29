@@ -10,6 +10,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - Replaced LinearAxisModel (deprecated) with FloatLinearAxisModel
 - BulletGraphs can use any linear axis model type
+- Updgrade to Compose 1.6.0
 
 ### Fixed
 
