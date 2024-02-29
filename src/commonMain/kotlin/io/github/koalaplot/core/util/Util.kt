@@ -195,3 +195,41 @@ internal fun lineDistance(p1: Vector, p2: Vector, p0: Vector): Pair<Float, Vecto
 
     return Pair(distance, point)
 }
+
+/**
+ * Returns the sign of the given value [x]:
+ *   - `-1.0` if the value is negative,
+ *   - zero if the value is zero,
+ *   - `1.0` if the value is positive
+ *
+ * Special case:
+ *   - `sign(NaN)` is `NaN`
+ */
+internal fun sign(x: Long): Long {
+    return if (x < 0L) {
+        -1L
+    } else if (x > 0L) {
+        1L
+    } else {
+        0L
+    }
+}
+
+/**
+ * Returns the sign of the given value [x]:
+ *   - `-1.0` if the value is negative,
+ *   - zero if the value is zero,
+ *   - `1.0` if the value is positive
+ *
+ * Special case:
+ *   - `sign(NaN)` is `NaN`
+ */
+internal fun sign(x: Int): Int {
+    return if (x < 0) {
+        -1
+    } else if (x > 0) {
+        1
+    } else {
+        0
+    }
+}

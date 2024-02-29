@@ -150,7 +150,7 @@ private fun testLinearAxisMajorTicks(
     axisLength: Dp,
     expected: List<Float>
 ) {
-    val axis = LinearAxisModel(range, minimumMajorTickSpacing = minTickSpacing)
+    val axis = FloatLinearAxisModel(range, minimumMajorTickSpacing = minTickSpacing)
     val ticks = axis.computeTickValues(axisLength).majorTickValues
 
     // assertEquals on arrays of Floats does not factor in precision of the float
@@ -169,7 +169,7 @@ private fun testLinearAxisMinorTicks(
     minTickSpacing: Dp = 50.dp,
     expected: List<Float>,
 ) {
-    val axis = LinearAxisModel(range, minimumMajorTickSpacing = minTickSpacing)
+    val axis = FloatLinearAxisModel(range, minimumMajorTickSpacing = minTickSpacing)
     val ticks = axis.computeTickValues(axisLength).minorTickValues
 
     // assertEquals on arrays of Floats does not factor in precision of the float

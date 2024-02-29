@@ -7,6 +7,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Replaced LinearAxisModel (deprecated) with FloatLinearAxisModel
+- BulletGraphs can use any linear axis model type
+
 ### Fixed
 
 - VerticalBarPlot can't be updated (#40)
@@ -16,6 +20,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - StairstepPlot variant that accepts a LineStyle for each y-axis value.
 - PieChart variant that takes a labelOffsetProvider to allow pluggable label placement algorithms.
+- LongLinearAxisModel, DoubleLinearAxisModel, & IntLinearAxisModel
 
 ### Removed
 

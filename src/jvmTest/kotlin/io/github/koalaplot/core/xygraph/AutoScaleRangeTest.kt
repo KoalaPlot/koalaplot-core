@@ -25,19 +25,19 @@ class AutoScaleRangeTest {
         (0f to 0f) to (0.0f to 1f)
     )
 
-    private val intTestConditions: List<Pair<Pair<Int, Int>, Pair<Float, Float>>> = listOf(
-        (0 to 50) to (0f to 50f),
-        (0 to 73) to (0f to 80f),
-        (-5 to 106) to (-100f to 200f),
-        (1024 to 4096) to (1000f to 5000f),
-        (15 to 123) to (0f to 200f),
-        (150000 to 1200000) to (0f to 2E6f),
-        (-523 to 126) to (-600f to 200f),
-        (-12345 to -5076) to (-13000f to -5000f),
-        (-1024 to 1024) to (-2000f to 2000f),
-        (-1200000 to -150000) to (-2E6f to 0f),
-        (1 to 1) to (0.5f to 2f),
-        (0 to 0) to (0.0f to 1f)
+    private val intTestConditions: List<Pair<Pair<Int, Int>, Pair<Int, Int>>> = listOf(
+        (0 to 50) to (0 to 50),
+        (0 to 73) to (0 to 80),
+        (-5 to 106) to (-100 to 200),
+        (1024 to 4096) to (1000 to 5000),
+        (15 to 123) to (0 to 200),
+        (150000 to 1200000) to (0 to 2000000),
+        (-523 to 126) to (-600 to 200),
+        (-12345 to -5076) to (-13000 to -5000),
+        (-1024 to 1024) to (-2000 to 2000),
+        (-1200000 to -150000) to (-2000000 to 0),
+        (1 to 1) to (0 to 2),
+        (0 to 0) to (0 to 1)
     )
 
     @Test
@@ -53,8 +53,8 @@ class AutoScaleRangeTest {
     fun testWithInt() {
         intTestConditions.forEach {
             val range = listOf(it.first.first, it.first.second).autoScaleRange()
-            assertEquals(it.second.first, range.start, (it.first.second - it.first.first).toFloat() * 0.001f)
-            assertEquals(it.second.second, range.endInclusive, (it.first.second - it.first.first).toFloat() * 0.001f)
+            assertEquals(it.second.first, range.first)
+            assertEquals(it.second.second, range.last)
         }
     }
 
