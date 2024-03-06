@@ -7,6 +7,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.3]
+
+### Changed
+- Update Compose to version 1.6.0.
+
 ## [0.5.2]
 
 ### Changed
