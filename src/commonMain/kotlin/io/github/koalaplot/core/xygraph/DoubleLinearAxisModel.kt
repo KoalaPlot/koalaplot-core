@@ -23,7 +23,8 @@ import kotlin.math.sign
  * scroll modifications may not exceed this range.
  * @param zoomRangeLimit Specifies the minimum allowed range after zooming. Must
  * be greater than 0 and less than the difference between the start and end of [range].
- * @param minimumMajorTickIncrement The minimum value between adjacent major ticks.
+ * @param minimumMajorTickIncrement The minimum value between adjacent major ticks. Must be less than or equal to
+ * the extent of the range.
  * @param minimumMajorTickSpacing Specifies the minimum physical spacing for major ticks, in
  * Dp units. Must be greater than 0.
  * @param minorTickCount The number of minor ticks per major tick interval.
