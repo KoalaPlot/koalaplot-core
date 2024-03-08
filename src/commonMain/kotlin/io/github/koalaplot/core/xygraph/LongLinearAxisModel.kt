@@ -23,7 +23,7 @@ import kotlin.math.roundToLong
  * @param range  The minimum to maximum values allowed to be represented on this Axis. Zoom and
  * scroll modifications may not exceed this range.
  * @param zoomRangeLimit Specifies the minimum allowed range after zooming. Must
- * be greater than 0 and less than the difference between the start and end of [range].
+ * be greater than 0 and less than or equal to the difference between the start and end of [range].
  * @param minimumMajorTickIncrement The minimum value between adjacent major ticks.
  * @param minimumMajorTickSpacing Specifies the minimum physical spacing for major ticks, in
  * Dp units. Must be greater than 0.
@@ -33,7 +33,7 @@ import kotlin.math.roundToLong
  */
 public class LongLinearAxisModel(
     public override val range: LongRange,
-    private val zoomRangeLimit: Long = ((range.last - range.first) * ZoomRangeLimitDefault).toLong(),
+    private val zoomRangeLimit: Long = range.last - range.first,
     private val minimumMajorTickIncrement: Long = (
         (range.last - range.first) * MinimumMajorTickIncrementDefault
         ).toLong(),
@@ -50,7 +50,10 @@ public class LongLinearAxisModel(
         require(zoomRangeLimit > 0f) {
             "Zoom range limit must be greater than 0"
         }
-        require(zoomRangeLimit < range.last - range.first) { "Zoom range limit must be less than range" }
+        require(zoomRangeLimit <= range.last - range.first) { "Zoom range limit must be less than or equal to range" }
+        require(minimumMajorTickIncrement <= range.first - range.last) {
+            "minimumMajorTickIncrement must be less than or equal to the axis range"
+        }
     }
 
     private var currentRange by mutableStateOf(range)
@@ -115,6 +118,8 @@ public class LongLinearAxisModel(
     private fun computeMinorTickValues(majorTickValues: List<Long>, majorTickSpacing: Long): List<Long> = buildList {
         if (minorTickCount > 0 && majorTickValues.isNotEmpty()) {
             val minorIncrement = majorTickSpacing / (minorTickCount + 1)
+
+            if (minorIncrement == 0L) return@buildList
 
             // Create ticks between first and last major ticks
             for (major in 0 until majorTickValues.lastIndex) {

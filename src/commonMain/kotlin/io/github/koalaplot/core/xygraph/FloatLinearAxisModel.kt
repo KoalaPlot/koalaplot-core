@@ -50,6 +50,9 @@ public class FloatLinearAxisModel(
             "Zoom range limit must be greater than 0"
         }
         require(zoomRangeLimit < range.endInclusive - range.start) { "Zoom range limit must be less than range" }
+        require(minimumMajorTickIncrement <= range.start - range.endInclusive) {
+            "minimumMajorTickIncrement must be less than or equal to the axis range"
+        }
     }
 
     private var currentRange by mutableStateOf(range)
