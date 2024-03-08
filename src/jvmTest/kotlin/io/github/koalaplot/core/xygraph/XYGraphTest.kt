@@ -148,7 +148,7 @@ class XYGraphTest {
                 xAxisModel = LongLinearAxisModel(
                     0L..10L,
                     minorTickCount = 0,
-                    minimumMajorTickIncrement = 100L
+                    minimumMajorTickIncrement = 2L
                 ),
                 // yAxis doesn't have room for 4 minor ticks (default value)
                 yAxisModel = LongLinearAxisModel(
@@ -167,7 +167,7 @@ class XYGraphTest {
                 xAxisModel = LongLinearAxisModel(
                     0L..1L,
                     minorTickCount = 0,
-                    minimumMajorTickIncrement = 10L
+                    minimumMajorTickIncrement = 1L
                 ),
                 yAxisModel = LongLinearAxisModel(
                     0L..10L,
