@@ -50,7 +50,7 @@ public class DoubleLinearAxisModel(
             "Zoom range limit must be greater than 0"
         }
         require(zoomRangeLimit < range.endInclusive - range.start) { "Zoom range limit must be less than range" }
-        require(minimumMajorTickIncrement <= range.start - range.endInclusive) {
+        require(minimumMajorTickIncrement <= range.endInclusive - range.start) {
             "minimumMajorTickIncrement must be less than or equal to the axis range"
         }
     }

@@ -52,7 +52,7 @@ public class IntLinearAxisModel(
             "Zoom range limit must be greater than 0"
         }
         require(zoomRangeLimit <= range.last - range.first) { "Zoom range limit must be less than or equal to range" }
-        require(minimumMajorTickIncrement <= range.first - range.last) {
+        require(minimumMajorTickIncrement <= range.last - range.first) {
             "minimumMajorTickIncrement must be less than or equal to the axis range"
         }
     }
@@ -120,7 +120,7 @@ public class IntLinearAxisModel(
         if (minorTickCount > 0 && majorTickValues.isNotEmpty()) {
             val minorIncrement = majorTickSpacing / (minorTickCount + 1)
 
-            if(minorIncrement == 0) return@buildList
+            if (minorIncrement == 0) return@buildList
 
             // Create ticks between first and last major ticks
             for (major in 0 until majorTickValues.lastIndex) {

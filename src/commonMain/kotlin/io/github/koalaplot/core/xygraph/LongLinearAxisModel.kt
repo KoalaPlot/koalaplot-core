@@ -52,7 +52,7 @@ public class LongLinearAxisModel(
             "Zoom range limit must be greater than 0"
         }
         require(zoomRangeLimit <= range.last - range.first) { "Zoom range limit must be less than or equal to range" }
-        require(minimumMajorTickIncrement <= range.first - range.last) {
+        require(minimumMajorTickIncrement <= range.last - range.first) {
             "minimumMajorTickIncrement must be less than or equal to the axis range"
         }
     }

@@ -12,6 +12,67 @@ class XYGraphTest {
 
     @OptIn(ExperimentalKoalaPlotApi::class)
     @Test
+    fun testTickIncrementLessThanRangeSucceeds() {
+        val x = 1709868843600L
+        val points = listOf(DefaultPoint(x - 2000, 0.0), DefaultPoint(x, 0.0))
+
+        composeTestRule.setContent {
+            XYGraph(
+                xAxisModel = LongLinearAxisModel(
+                    0L..2000L,
+                    minorTickCount = 0,
+                    minimumMajorTickIncrement = 1000
+                ),
+                yAxisModel = DoubleLinearAxisModel(
+                    points.autoScaleYRange(),
+                    minorTickCount = 2
+                )
+            ) {
+            }
+
+            XYGraph(
+                xAxisModel = IntLinearAxisModel(
+                    0..2000,
+                    minorTickCount = 0,
+                    minimumMajorTickIncrement = 1000
+                ),
+                yAxisModel = DoubleLinearAxisModel(
+                    points.autoScaleYRange(),
+                    minorTickCount = 2
+                )
+            ) {
+            }
+
+            XYGraph(
+                xAxisModel = FloatLinearAxisModel(
+                    0f..2000f,
+                    minorTickCount = 0,
+                    minimumMajorTickIncrement = 1000f
+                ),
+                yAxisModel = DoubleLinearAxisModel(
+                    points.autoScaleYRange(),
+                    minorTickCount = 2
+                )
+            ) {
+            }
+
+            XYGraph(
+                xAxisModel = DoubleLinearAxisModel(
+                    0.0..2000.0,
+                    minorTickCount = 0,
+                    minimumMajorTickIncrement = 1000.0
+                ),
+                yAxisModel = DoubleLinearAxisModel(
+                    points.autoScaleYRange(),
+                    minorTickCount = 2
+                )
+            ) {
+            }
+        }
+    }
+
+    @OptIn(ExperimentalKoalaPlotApi::class)
+    @Test
     fun testTickIncrementGreaterThanRangeThrowsIllegalArgumentException() {
         val x = 1709868843600L
         val points = listOf(DefaultPoint(x - 2000, 0.0), DefaultPoint(x, 0.0))
@@ -23,6 +84,51 @@ class XYGraphTest {
                         0L..2000L,
                         minorTickCount = 0,
                         minimumMajorTickIncrement = 5000
+                    ),
+                    yAxisModel = DoubleLinearAxisModel(
+                        points.autoScaleYRange(),
+                        minorTickCount = 2
+                    )
+                ) {
+                }
+            }
+
+            assertFailsWith<IllegalArgumentException> {
+                XYGraph(
+                    xAxisModel = IntLinearAxisModel(
+                        0..2000,
+                        minorTickCount = 0,
+                        minimumMajorTickIncrement = 5000
+                    ),
+                    yAxisModel = DoubleLinearAxisModel(
+                        points.autoScaleYRange(),
+                        minorTickCount = 2
+                    )
+                ) {
+                }
+            }
+
+            assertFailsWith<IllegalArgumentException> {
+                XYGraph(
+                    xAxisModel = FloatLinearAxisModel(
+                        0f..2000f,
+                        minorTickCount = 0,
+                        minimumMajorTickIncrement = 5000f
+                    ),
+                    yAxisModel = DoubleLinearAxisModel(
+                        points.autoScaleYRange(),
+                        minorTickCount = 2
+                    )
+                ) {
+                }
+            }
+
+            assertFailsWith<IllegalArgumentException> {
+                XYGraph(
+                    xAxisModel = DoubleLinearAxisModel(
+                        0.0..2000.0,
+                        minorTickCount = 0,
+                        minimumMajorTickIncrement = 5000.0
                     ),
                     yAxisModel = DoubleLinearAxisModel(
                         points.autoScaleYRange(),
