@@ -10,7 +10,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - Replaced LinearAxisModel (deprecated) with FloatLinearAxisModel
 - BulletGraphs can use any linear axis model type
-- Updgrade to Compose 1.6.0
 
 ### Fixed
 
@@ -29,6 +28,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - BulletGraph function that deferred to BulletGraphs
 - labelWidth from BulletBuilderScope, use BulletGraphScope.labelWidth instead
 - io.github.koalaplot.core.xychart.* classes and functions which were deprecated in 0.5.0
+
+## [0.5.3]
+
+### Changed
+
+- Update Compose to version 1.6.0
 
 ## [0.5.2]
 
