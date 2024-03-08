@@ -42,7 +42,7 @@ val isMac = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.ge
 // When on MacOS, only publish ios artifacts
 tasks.withType<AbstractPublishToMaven>().configureEach {
     onlyIf {
-        (isMac && name.contains("ios", ignoreCase = true)) || !isMac
+        (isMac && name.contains("ios", ignoreCase = true)) || !isMac || name.endsWith("ToMavenLocal")
     }
 
     // Fix errors related to declared dependencies between publishing tasks and signing tasks

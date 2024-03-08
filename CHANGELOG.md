@@ -16,6 +16,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - VerticalBarPlot can't be updated (#40)
 - autoScaleRange throws Exception if provide an empty list
 - ArithmeticException if linear axis minimumMajorTickIncrement is less than the range extent.
+- publishToMavenLocal on Mac will publish all artifacts, not just iOS
 
 ### Added
 
