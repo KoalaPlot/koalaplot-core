@@ -255,8 +255,8 @@ public fun rememberFloatLinearAxisModel(
 }
 
 /**
- * Calculates a [ClosedFloatingPointRange] that can be used with a [LinearAxisModel] based on the
- * min/max values of the provided list of Floats.
+ * Calculates an [ClosedFloatingPointRange] that can be used with a [FloatLinearAxisModel] based on the
+ * min/max values of the provided list of Floats. If the list is empty, returns a range of 0..1.
  */
 @JvmName("autoScaleFloatRange")
 public fun List<Float>.autoScaleRange(): ClosedFloatingPointRange<Float> {

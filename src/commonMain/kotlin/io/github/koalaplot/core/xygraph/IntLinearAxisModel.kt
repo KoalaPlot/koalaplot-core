@@ -253,7 +253,14 @@ public fun rememberIntLinearAxisModel(
     )
 }
 
+/**
+ * Calculates an [IntRange] that can be used with a [IntLinearAxisModel] based on the
+ * min/max values of the provided list of Ints. If the list is empty, returns a range of 0..1.
+ */
 public fun List<Int>.autoScaleRange(): IntRange {
+    if (isEmpty()) {
+        return 0..1
+    }
     val max = this.max()
     val min = this.min()
     val range = if (max - min == 0) {

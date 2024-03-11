@@ -60,7 +60,20 @@ class AutoScaleRangeTest {
 
     @Test
     fun testWithEmptyList() {
-        val range = listOf<Float>().autoScaleRange()
-        assertEquals(0f..1f, range)
+        assertEquals(0f..1f, listOf<Float>().autoScaleRange())
+        assertEquals(0f..1f, listOf<Point<Float, Float>>().autoScaleXRange())
+        assertEquals(0f..1f, listOf<Point<Float, Float>>().autoScaleYRange())
+
+        assertEquals(0.0..1.0, listOf<Double>().autoScaleRange())
+        assertEquals(0.0..1.0, listOf<Point<Double, Double>>().autoScaleXRange())
+        assertEquals(0.0..1.0, listOf<Point<Double, Double>>().autoScaleYRange())
+
+        assertEquals(0..1, listOf<Int>().autoScaleRange())
+        assertEquals(0..1, listOf<Point<Int, Int>>().autoScaleXRange())
+        assertEquals(0..1, listOf<Point<Int, Int>>().autoScaleYRange())
+
+        assertEquals(0L..1L, listOf<Long>().autoScaleRange())
+        assertEquals(0L..1L, listOf<Point<Long, Long>>().autoScaleXRange())
+        assertEquals(0L..1L, listOf<Point<Long, Long>>().autoScaleYRange())
     }
 }

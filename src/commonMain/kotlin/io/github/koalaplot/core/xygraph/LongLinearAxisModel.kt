@@ -258,7 +258,14 @@ public fun rememberLongLinearAxisModel(
     )
 }
 
+/**
+ * Calculates a [LongRange] that can be used with a [LongLinearAxisModel] based on the
+ * min/max values of the provided list of Longs. If the list is empty, returns a range of 0..1.
+ */
 public fun List<Long>.autoScaleRange(): LongRange {
+    if (isEmpty()) {
+        return 0L..1L
+    }
     val max = this.max()
     val min = this.min()
     val range = if (max - min == 0L) {

@@ -254,8 +254,8 @@ public fun rememberDoubleLinearAxisModel(
 }
 
 /**
- * Calculates a [ClosedFloatingPointRange] that can be used with a [LinearAxisModel] based on the
- * min/max values of the provided list of Floats.
+ * Calculates an [ClosedFloatingPointRange] that can be used with a [DoubleLinearAxisModel] based on the
+ * min/max values of the provided list of Doubles. If the list is empty, returns a range of 0..1.
  */
 public fun List<Double>.autoScaleRange(): ClosedFloatingPointRange<Double> {
     if (isEmpty()) {
