@@ -223,7 +223,7 @@ public class FloatLinearAxisModel(
 }
 
 /**
- * Create and remember a FloatLinearAxisModel.
+ * Create and remember a FloatLinearAxisModel. See [FloatLinearAxisModel] for parameter descriptions.
  */
 @Composable
 public fun rememberFloatLinearAxisModel(

@@ -227,7 +227,7 @@ public class LongLinearAxisModel(
 }
 
 /**
- * Create and remember a LongLinearAxisModel.
+ * Create and remember a LongLinearAxisModel. See [LongLinearAxisModel] for parameter descriptions.
  */
 @Composable
 public fun rememberLongLinearAxisModel(

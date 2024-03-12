@@ -222,7 +222,7 @@ public class DoubleLinearAxisModel(
 }
 
 /**
- * Create and remember a DoubleLinearAxisModel.
+ * Create and remember a DoubleLinearAxisModel. See [DoubleLinearAxisModel] for parameter descriptions.
  */
 @Composable
 public fun rememberDoubleLinearAxisModel(

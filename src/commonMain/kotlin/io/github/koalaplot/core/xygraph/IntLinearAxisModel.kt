@@ -222,7 +222,7 @@ public class IntLinearAxisModel(
 }
 
 /**
- * Create and remember a LongLinearAxisModel.
+ * Create and remember an IntLinearAxisModel. See [IntLinearAxisModel] for parameter descriptions.
  */
 @Composable
 public fun rememberIntLinearAxisModel(
