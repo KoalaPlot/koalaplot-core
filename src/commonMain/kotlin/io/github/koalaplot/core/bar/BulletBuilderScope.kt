@@ -271,21 +271,21 @@ public class BulletBuilderScope<T>(private val axisModel: ILinearAxisModel<T>) w
         var labelPlaceable: Placeable? = null
         var axis: AxisDelegate<T>? = null
         var axisLabelPlaceables: List<Placeable>? = null
-        var axisHeight: Int? = null
-        var axisPlaceable: Placeable? = null
-        val axisLabelsHeight: Int by lazy {
+        private var axisHeight: Int? = null
+        private var axisPlaceable: Placeable? = null
+        private val axisLabelsHeight: Int by lazy {
             requireNotNull(axisLabelPlaceables)
             axisLabelPlaceables?.let { placeables ->
                 placeables.maxOfOrNull { it.height }
             } ?: 0
         }
-        val rangeHeight: Int by lazy {
+        private val rangeHeight: Int by lazy {
             requireNotNull(axisHeight) { "axisHeight must not be null in order to calculate rangeHeight" }
             (bulletHeight - axisHeight!! - axisLabelsHeight).coerceAtLeast(0)
         }
-        var rangePlaceables: List<Placeable>? = null
-        var featurePlaceable: Placeable? = null
-        var comparativeMeasurePlaceables: List<Placeable>? = null
+        private var rangePlaceables: List<Placeable>? = null
+        private var featurePlaceable: Placeable? = null
+        private var comparativeMeasurePlaceables: List<Placeable>? = null
 
         @OptIn(ExperimentalKoalaPlotApi::class)
         fun measureLabel(scope: SubcomposeMeasureScope, labelWidthMaxConstraint: Int) {
@@ -377,38 +377,38 @@ public class BulletBuilderScope<T>(private val axisModel: ILinearAxisModel<T>) w
 
         @OptIn(ExperimentalKoalaPlotApi::class)
         fun measureFeature(scope: SubcomposeMeasureScope, rangeWidth: Int, animationSpec: AnimationSpec<Float>) {
-            requireNotNull(this@BulletBuilderScope.featuredMeasure) { "featuredMeasure must not be null" }
-
-            val origin = computeFeatureBarOrigin(this@BulletBuilderScope.featuredMeasure!!.value, axisModel.range)
-            val featureWidth = rangeWidth * abs(
-                axisModel.computeOffset(this@BulletBuilderScope.featuredMeasure!!.value) - axisModel.computeOffset(
-                    origin
+            this@BulletBuilderScope.featuredMeasure?.let { featuredMeasure ->
+                val origin = computeFeatureBarOrigin(featuredMeasure.value, axisModel.range)
+                val featureWidth = rangeWidth * abs(
+                    axisModel.computeOffset(featuredMeasure.value) - axisModel.computeOffset(
+                        origin
+                    )
                 )
-            )
 
-            val measurable = scope.subcompose(slotId(Slots.FEATURE)) {
-                // Animation scale factor
-                val beta = remember(this@BulletBuilderScope.featuredMeasure) { Animatable(0f) }
-                LaunchedEffect(this@BulletBuilderScope.featuredMeasure) {
-                    beta.animateTo(1f, animationSpec = animationSpec)
-                }
+                val measurable = scope.subcompose(slotId(Slots.FEATURE)) {
+                    // Animation scale factor
+                    val beta = remember(featuredMeasure) { Animatable(0f) }
+                    LaunchedEffect(featuredMeasure) {
+                        beta.animateTo(1f, animationSpec = animationSpec)
+                    }
 
-                with(scope) {
-                    val sizeModifier =
-                        if (this@BulletBuilderScope.featuredMeasure!!.type == FeaturedMeasureType.BAR) {
-                            Modifier.size((beta.value * featureWidth).toDp(), rangeHeight.toDp())
-                        } else {
-                            Modifier.size(rangeHeight.toDp(), rangeHeight.toDp())
-                        }
+                    with(scope) {
+                        val sizeModifier =
+                            if (featuredMeasure.type == FeaturedMeasureType.BAR) {
+                                Modifier.size((beta.value * featureWidth).toDp(), rangeHeight.toDp())
+                            } else {
+                                Modifier.size(rangeHeight.toDp(), rangeHeight.toDp())
+                            }
 
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = sizeModifier
-                    ) { this@BulletBuilderScope.featuredMeasure!!.indicator() }
-                }
-            }[0]
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = sizeModifier
+                        ) { featuredMeasure.indicator() }
+                    }
+                }[0]
 
-            featurePlaceable = measurable.measure(Constraints(maxWidth = rangeWidth, maxHeight = rangeHeight))
+                featurePlaceable = measurable.measure(Constraints(maxWidth = rangeWidth, maxHeight = rangeHeight))
+            }
         }
 
         @OptIn(ExperimentalKoalaPlotApi::class)
@@ -440,7 +440,6 @@ public class BulletBuilderScope<T>(private val axisModel: ILinearAxisModel<T>) w
             requireNotNull(comparativeMeasurePlaceables) {
                 "comparativeMeasurePlaceables must not be null during layout"
             }
-            requireNotNull(featurePlaceable) { "featurePlaceable must not be null during layout" }
 
             val axis = axis!!
             val axisLabelPlaceables = axisLabelPlaceables!!
@@ -448,7 +447,6 @@ public class BulletBuilderScope<T>(private val axisModel: ILinearAxisModel<T>) w
             val axisPlaceable = axisPlaceable!!
             val rangePlaceables = rangePlaceables!!
             val comparativeMeasurePlaceables = comparativeMeasurePlaceables!!
-            val featurePlaceable = featurePlaceable!!
 
             val rangeStart = labelWidth + firstAxisLabelWidth / 2
 
@@ -487,27 +485,20 @@ public class BulletBuilderScope<T>(private val axisModel: ILinearAxisModel<T>) w
             }
 
             // place feature
-            val xPos =
-                rangeStart + if (this@BulletBuilderScope.featuredMeasure!!.type == FeaturedMeasureType.BAR) {
-                    val value = this@BulletBuilderScope.featuredMeasure!!.value
-                    val origin =
-                        computeFeatureBarOrigin(
-                            this@BulletBuilderScope.featuredMeasure!!.value,
-                            axisModel.range
-                        )
+            featurePlaceable?.let {
+                val value = this@BulletBuilderScope.featuredMeasure!!.value
+                val xPos = rangeStart + if (this@BulletBuilderScope.featuredMeasure!!.type == FeaturedMeasureType.BAR) {
+                    val origin = computeFeatureBarOrigin(value, axisModel.range)
                     if (value.toDouble() < 0) {
-                        rangeWidth * axisModel.computeOffset(origin) - featurePlaceable.width
+                        rangeWidth * axisModel.computeOffset(origin) - it.width
                     } else {
                         rangeWidth * axisModel.computeOffset(origin)
                     }
                 } else {
-                    rangeWidth * axisModel.computeOffset(this@BulletBuilderScope.featuredMeasure!!.value) -
-                        featurePlaceable.width / 2
+                    rangeWidth * axisModel.computeOffset(value) - it.width / 2
                 }
-            featurePlaceable.place(
-                xPos.roundToInt(),
-                yPos + rangeHeight / 2 - featurePlaceable.height / 2
-            )
+                it.place(xPos.roundToInt(), yPos + rangeHeight / 2 - it.height / 2)
+            }
         }
 
         /**
