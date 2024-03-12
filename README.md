@@ -80,7 +80,7 @@ dependencies {
 ```
 
 You can also see a complete example of a build.gradle.kts in
-the [samples](https://koalaplot.github.io/koalaplot-samples).
+the [samples](https://github.com/KoalaPlot/koalaplot-samples).
 
 3. Start coding
 
