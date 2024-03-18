@@ -173,7 +173,7 @@ private const val LabelFadeInDuration = 1000
  * of the overall pie according to its data value relative to the sum of all values.
  *
  * @param values The data values for each pie slice
- * @param labelOffsetProvider A provider of label offsets that can be used to implement different label
+ * @param labelPositionProvider A provider of label offsets that can be used to implement different label
  * placement strategies. See the [PieChart] override for a version that uses labels placed around the circumference
  * of the pie.
  * @param modifier Compose Modifiers to be applied to the overall PieChart
@@ -193,7 +193,7 @@ private const val LabelFadeInDuration = 1000
 @Composable
 public fun PieChart(
     values: List<Float>,
-    labelOffsetProvider: LabelOffsetProvider,
+    labelPositionProvider: LabelPositionProvider,
     modifier: Modifier = Modifier,
     slice: @Composable PieSliceScope.(Int) -> Unit = {
         val colors = remember(values.size) { generateHueColorPalette(values.size) }
@@ -217,10 +217,7 @@ public fun PieChart(
     LaunchedEffect(values) {
         beta.animateTo(1f, animationSpec = animationSpec)
         // fade in labels after pie animation is complete
-        labelAlpha.animateTo(
-            1f,
-            animationSpec = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
-        )
+        labelAlpha.animateTo(1f, animationSpec = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing))
     }
 
     // pieSliceData that gets animated - used for drawing the pie
@@ -230,8 +227,14 @@ public fun PieChart(
     val finalPieSliceData = remember(values) { makePieSliceData(values, 1f) }
 
     val pieMeasurePolicy =
-        remember(finalPieSliceData, holeSize, labelOffsetProvider, minPieDiameter, forceCenteredPie) {
-            PieMeasurePolicy(finalPieSliceData, labelOffsetProvider, InitOuterRadius, forceCenteredPie)
+        remember(finalPieSliceData, holeSize, labelPositionProvider, minPieDiameter, forceCenteredPie) {
+            PieMeasurePolicy(
+                finalPieSliceData,
+                holeSize,
+                labelPositionProvider,
+                InitOuterRadius,
+                forceCenteredPie
+            )
         }
 
     HoverableElementArea(modifier = modifier) {
@@ -242,9 +245,7 @@ public fun PieChart(
                 pieSliceData.indices.forEach {
                     // Wrapping in box ensures there is 1 measurable element
                     // emitted per label & applies fade animation
-                    Box(modifier = Modifier.alpha(labelAlpha.value)) {
-                        label(it)
-                    }
+                    Box(modifier = Modifier.alpha(labelAlpha.value)) { label(it) }
                 }
             }
 
@@ -256,30 +257,35 @@ public fun PieChart(
                 maxPieDiameter.toPx()
             )
 
-            val labelOffsets = labelOffsetProvider.computeLabelOffsets(pieDiameter, labelPlaceables, finalPieSliceData)
+            val labelPositions = labelPositionProvider.computeLabelPositions(
+                pieDiameter * InitOuterRadius,
+                holeSize,
+                labelPlaceables,
+                finalPieSliceData
+            )
 
-            val size = pieMeasurePolicy.computeSize(labelPlaceables, labelOffsets.map { it.position }, pieDiameter)
-                .run {
-                    // add one due to later float to int conversion dropping the fraction part
-                    copy(
-                        (width + 1).coerceAtMost(constraints.maxWidth.toFloat()),
-                        (height + 1).coerceAtMost(constraints.maxHeight.toFloat())
-                    )
-                }
+            val size = pieMeasurePolicy.computeSize(labelPlaceables, labelPositions, pieDiameter).run {
+                // add one due to later float to int conversion dropping the fraction part
+                copy(
+                    (width + 1).coerceAtMost(constraints.maxWidth.toFloat()),
+                    (height + 1).coerceAtMost(constraints.maxHeight.toFloat())
+                )
+            }
 
-            val labelConnectorTranslations = pieMeasurePolicy.computeLabelConnectorScopes(labelOffsets, pieDiameter)
+            val labelConnectorTranslations = pieMeasurePolicy.computeLabelConnectorScopes(labelPositions, pieDiameter)
 
-            val holeEdgeLength =
-                circumscribedSquareSize(pieDiameter * holeSize.toDouble()).toInt()
+            val holeEdgeLength = circumscribedSquareSize(pieDiameter * holeSize.toDouble()).toInt()
             val holePlaceable = subcompose("hole") {
                 Box { holeContent() } // wrap in box to ensure 1 and only 1 element emitted
             }[0].measure(Constraints.fixed(holeEdgeLength, holeEdgeLength))
 
             val connectorPlaceables = subcompose("connectors") {
-                pieSliceData.indices.forEach {
+                for (element in pieSliceData.indices) {
                     Box(modifier = Modifier.fillMaxSize().alpha(labelAlpha.value)) {
-                        with(labelConnectorTranslations[it].second) {
-                            labelConnector(it)
+                        labelConnectorTranslations[element]?.let {
+                            with(it.second) {
+                                labelConnector(element)
+                            }
                         }
                     }
                 }
@@ -288,15 +294,10 @@ public fun PieChart(
             with(pieMeasurePolicy) {
                 layoutPie(
                     size,
-                    labelOffsets,
-                    labelConnectorTranslations.map { it.first },
+                    labelPositions,
+                    labelConnectorTranslations.map { it?.first },
                     pieDiameter,
-                    PieMeasurePolicy.PiePlaceables(
-                        piePlaceable,
-                        holePlaceable,
-                        labelPlaceables,
-                        connectorPlaceables
-                    )
+                    PieMeasurePolicy.PiePlaceables(piePlaceable, holePlaceable, labelPlaceables, connectorPlaceables)
                 )
             }
         }
@@ -350,7 +351,7 @@ public fun PieChart(
     require(labelSpacing >= 1f) { "labelSpacing must be greater than 1" }
     PieChart(
         values,
-        CircularLabelOffsetProvider(labelSpacing),
+        CircularLabelPositionProvider(labelSpacing),
         modifier,
         slice,
         label,
@@ -493,6 +494,7 @@ public fun PieSliceScope.DefaultSlice(
                         }
                     }
                 }
+                drawContent()
             }.clip(shape)
             .then(
                 if (clickable) {

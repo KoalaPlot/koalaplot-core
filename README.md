@@ -107,8 +107,8 @@ the [samples](https://github.com/KoalaPlot/koalaplot-samples).
 
 # Documentation
 
-- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.5.2)
-- [Release 0.5.2](https://koalaplot.github.io/koalaplot-core/api/0.5.2)
+- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.5.3)
+- [Release 0.5.3](https://koalaplot.github.io/koalaplot-core/api/0.5.3)
 
 Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples) for code examples.
 

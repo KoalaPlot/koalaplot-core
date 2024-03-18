@@ -21,39 +21,46 @@ import kotlin.math.min
  */
 internal class PieMeasurePolicy constructor(
     private val pieSliceData: List<PieSliceData>,
-    private val labelOffsetProvider: LabelOffsetProvider,
+    private val holeSize: Float,
+    private val labelPositionProvider: LabelPositionProvider,
     private val initOuterRadius: Float,
     private val forceCenteredPie: Boolean = false
 ) {
     internal fun MeasureScope.layoutPie(
         size: Size,
-        labelOffsets: List<LabelOffsets>,
-        labelConnectorTranslations: List<Offset>,
+        labelPositions: List<LabelPosition>,
+        labelConnectorTranslations: List<Offset?>,
         pieDiameter: Float,
         piePlaceables: PiePlaceables
     ) = layout(size.width.toInt(), size.height.toInt()) {
         val translation = if (forceCenteredPie) {
             Offset(size.width / 2, size.height / 2)
         } else {
+            val positions = labelPositions.mapNotNull { it.getPositionOrNull() }
             Offset(
-                max(-(labelOffsets.minOfOrNull { it.position.x } ?: 0f), pieDiameter / 2),
-                max(-(labelOffsets.minOfOrNull { it.position.y } ?: 0f), pieDiameter / 2)
+                max(-(positions.minOfOrNull { it.x } ?: 0f), pieDiameter / 2),
+                max(-(positions.minOfOrNull { it.y } ?: 0f), pieDiameter / 2)
             )
-        }
-        piePlaceables.labels.forEachIndexed { index, placeable ->
-            val position: Offset = labelOffsets[index].position + translation
-            placeable.place(position.x.toInt(), position.y.toInt())
         }
 
         piePlaceables.labelConnectors.forEachIndexed { index, placeable ->
-            val position = translation - labelConnectorTranslations[index]
-            placeable.place(position.x.toInt(), position.y.toInt())
+            labelConnectorTranslations[index]?.let {
+                val position = translation - it
+                placeable.place(position.x.toInt(), position.y.toInt())
+            }
         }
 
         piePlaceables.pie.place(
             (translation.x - pieDiameter / 2).toInt(),
             (translation.y - pieDiameter / 2).toInt()
         )
+
+        piePlaceables.labels.forEachIndexed { index, placeable ->
+            labelPositions[index].getPositionOrNull()?.let {
+                val position: Offset = it + translation
+                placeable.place(position.x.toInt(), position.y.toInt())
+            }
+        }
 
         val position: Offset = translation - Offset(
             piePlaceables.hole.width / 2f,
@@ -72,39 +79,44 @@ internal class PieMeasurePolicy constructor(
     /**
      * Calculates offsets and LabelConnectorScopes for label connectors.
      *
-     * @param labelOffsets The label positions
+     * @param labelPositions The label positions
      * @param pieDiameter The pie chart diameter
      * @return The translation required to be applied to each label connector so the computed
-     * labelConnectorScope values result in the connector being correctly positioned.
+     * labelConnectorScope values result in the connector being correctly positioned. A null entry indicates
+     * that the label does not require a connector.
      */
     internal fun computeLabelConnectorScopes(
-        labelOffsets: List<LabelOffsets>,
+        labelPositions: List<LabelPosition>,
         pieDiameter: Float
-    ): List<Pair<Offset, LabelConnectorScope>> {
+    ): List<Pair<Offset, LabelConnectorScope>?> {
         return buildList {
-            for (i in labelOffsets.indices) {
-                val labelConnectorScope = LabelConnectorScopeImpl()
-                with(labelConnectorScope) {
-                    startAngle.value = pieSliceData[i].startAngle + (pieSliceData[i].angle / 2f)
-                    startPosition.value = polarToCartesian(pieDiameter / 2f * initOuterRadius, startAngle.value)
-                    endPosition.value = labelOffsets[i].anchorPoint
-                    endAngle.value = labelOffsets[i].anchorAngle
+            for (i in labelPositions.indices) {
+                if (labelPositions[i] is ExternalLabelPosition) {
+                    val labelConnectorScope = LabelConnectorScopeImpl()
+                    with(labelConnectorScope) {
+                        startAngle.value = pieSliceData[i].startAngle + (pieSliceData[i].angle / 2f)
+                        startPosition.value = polarToCartesian(pieDiameter / 2f * initOuterRadius, startAngle.value)
+                        endPosition.value = (labelPositions[i] as ExternalLabelPosition).anchorPoint
+                        endAngle.value = (labelPositions[i] as ExternalLabelPosition).anchorAngle
 
-                    // Shift label connector coordinates to a bounding box with top left at 0, 0
-                    // and compute the translation required to position it correctly.
-                    // Position connector right/down within the bounding box (by pieDiameter/2)
-                    // to prevent clipping of
-                    // curves bending to negative coordinates when using modifier.alpha().
-                    // From the Modifier.alpha documentation:
-                    // "Note when an alpha less than 1.0f is provided, contents are implicitly
-                    // clipped to their bounds."
-                    val left = min(startPosition.value.x, endPosition.value.x)
-                    val top = min(startPosition.value.y, endPosition.value.y)
-                    val translate = Offset(-left + pieDiameter / 2, -top + pieDiameter / 2)
-                    startPosition.value += translate
-                    endPosition.value += translate
+                        // Shift label connector coordinates to a bounding box with top left at 0, 0
+                        // and compute the translation required to position it correctly.
+                        // Position connector right/down within the bounding box (by pieDiameter/2)
+                        // to prevent clipping of
+                        // curves bending to negative coordinates when using modifier.alpha().
+                        // From the Modifier.alpha documentation:
+                        // "Note when an alpha less than 1.0f is provided, contents are implicitly
+                        // clipped to their bounds."
+                        val left = min(startPosition.value.x, endPosition.value.x)
+                        val top = min(startPosition.value.y, endPosition.value.y)
+                        val translate = Offset(-left + pieDiameter / 2, -top + pieDiameter / 2)
+                        startPosition.value += translate
+                        endPosition.value += translate
 
-                    add(Pair(translate, labelConnectorScope))
+                        add(Pair(translate, labelConnectorScope))
+                    }
+                } else {
+                    add(null)
                 }
             }
         }
@@ -117,17 +129,16 @@ internal class PieMeasurePolicy constructor(
         minPieDiameterPx: Float,
         maxPieDiameterPx: Float
     ): Triple<Float, Placeable, List<Placeable>> {
+        val labelConstraint = constraints.copy(
+            maxWidth = ((constraints.maxWidth - minPieDiameterPx) / 2).toInt()
+                .coerceAtLeast(constraints.minWidth)
+        )
+
         val labelPlaceables = labels.map {
-            it.measure(
-                constraints.copy(
-                    maxWidth = ((constraints.maxWidth - minPieDiameterPx) / 2).toInt()
-                        .coerceAtLeast(constraints.minWidth)
-                )
-            )
+            it.measure(labelConstraint)
         }
 
-        // use floor for PieDiameter because below the size is set via constraints
-        // which is an integer
+        // use floor for PieDiameter because below the size is set via constraints which is an integer
         val pieDiameter = floor(
             findMaxDiameter(constraints, labelPlaceables, minPieDiameterPx).coerceIn(minPieDiameterPx, maxPieDiameterPx)
         )
@@ -164,10 +175,12 @@ internal class PieMeasurePolicy constructor(
         labelPlaceables: List<Placeable>,
         constraints: Constraints,
     ): Boolean {
-        val labelOffsets: List<Offset> =
-            labelOffsetProvider.computeLabelOffsets(test.toFloat(), labelPlaceables, pieSliceData).map {
-                it.position
-            }
+        val labelOffsets = labelPositionProvider.computeLabelPositions(
+            test.toFloat(),
+            holeSize,
+            labelPlaceables,
+            pieSliceData
+        )
         val s = computeSize(labelPlaceables, labelOffsets, test.toFloat())
         return (s.width < constraints.maxWidth && s.height < constraints.maxHeight)
     }
@@ -178,7 +191,7 @@ internal class PieMeasurePolicy constructor(
      */
     internal fun computeSize(
         placeables: List<Placeable>,
-        labelOffsets: List<Offset>,
+        labelPositions: List<LabelPosition>,
         pieDiameter: Float
     ): Size {
         // Compute height/width required for the pie plus all labels
@@ -188,10 +201,12 @@ internal class PieMeasurePolicy constructor(
         var minY = -pieDiameter / 2f // minimum y-coordinate of all objects
         var maxY = pieDiameter / 2f // max y-coordinate of all objects
         placeables.forEachIndexed { index, placeable ->
-            minX = min(minX, labelOffsets[index].x)
-            maxX = max(maxX, labelOffsets[index].x + placeable.width)
-            minY = min(minY, labelOffsets[index].y)
-            maxY = max(maxY, labelOffsets[index].y + placeable.height)
+            labelPositions[index].getPositionOrNull()?.let {
+                minX = min(minX, it.x)
+                maxX = max(maxX, it.x + placeable.width)
+                minY = min(minY, it.y)
+                maxY = max(maxY, it.y + placeable.height)
+            }
         }
 
         val width = if (forceCenteredPie) {
