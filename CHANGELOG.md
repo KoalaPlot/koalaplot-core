@@ -13,7 +13,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- VerticalBarPlot can't be updated (#40)
 - autoScaleRange throws Exception if provide an empty list
 - ArithmeticException if linear axis minimumMajorTickIncrement is less than the range extent.
 - publishToMavenLocal on Mac will publish all artifacts, not just iOS
@@ -30,6 +29,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - BulletGraph function that deferred to BulletGraphs
 - labelWidth from BulletBuilderScope, use BulletGraphScope.labelWidth instead
 - io.github.koalaplot.core.xychart.* classes and functions which were deprecated in 0.5.0
+
+## [0.5.4]
+
+### Fixed
+
+- VerticalBarPlot can't be updated (#40, #52)
 
 ## [0.5.3]
 
