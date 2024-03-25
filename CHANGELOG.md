@@ -7,6 +7,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.4]
+
+### Fixed
+- VerticalBarPlot can't be updated (#40, #52)
+
 ## [0.5.3]
 
 ### Changed

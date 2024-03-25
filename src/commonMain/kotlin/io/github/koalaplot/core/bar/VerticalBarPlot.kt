@@ -117,7 +117,7 @@ public fun <X, Y, E : VerticalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.VerticalBar
     barWidth: Float = 0.9f,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
-    val dataAdapter = remember {
+    val dataAdapter = remember(data) {
         EntryToGroupedEntryListAdapter(data)
     }
 
