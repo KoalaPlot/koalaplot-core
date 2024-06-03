@@ -174,7 +174,7 @@ private fun <E : VerticalBarPlotGroupedPointEntry<X, Y>, X, Y> XYGraphScope<X, Y
 ): Float {
     return if (index == 0) {
         if (data.size == 1) {
-            1f
+            1f / xAxisState.majorTickOffsets.size
         } else {
             val center = xAxisModel.computeOffset(data[index].x)
             val right = xAxisModel.computeOffset(data[index + 1].x)
