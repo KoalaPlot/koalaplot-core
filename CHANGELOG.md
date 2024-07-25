@@ -5,12 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Changed
-
-- Upgrade versions: Kotlin to 2.0.0, coroutines to 1.8.1, compose to 1.6.11, dokka to 1.9.20, detekt to 1.23.6
-
 ## [0.6.2]
 
 ### Fixed
@@ -19,6 +13,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Upgrade versions: Kotlin to 2.0.0, coroutines to 1.8.1, compose to 1.6.11, dokka to 1.9.20, detekt to 1.23.6
 - ZoomRangeLimitDefault applied to Int and Long linear axis models to be consistent with the original
   FloatLinearAxisModel
 
