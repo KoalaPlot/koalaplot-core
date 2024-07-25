@@ -1,17 +1,20 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 buildscript {
     dependencies {
-        classpath("org.jetbrains.dokka:dokka-base:_") // needed for dokka custom format config
+        classpath(libs.dokka.base) // needed for dokka custom format config
     }
 }
 
 plugins {
-    kotlin("multiplatform")
-    id("com.android.library")
-    id("org.jetbrains.compose")
-    id("org.jetbrains.dokka")
-    id("io.gitlab.arturbosch.detekt")
+    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.detekt)
     id("convention.publication")
 }
 
@@ -22,17 +25,22 @@ repositories {
 }
 
 dependencies {
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:_")
+    detektPlugins(libs.detekt.formatting)
 }
 
 group = "io.github.koalaplot"
-version = "0.6.2"
+
+version = "0.7.0-dev1"
 
 kotlin {
     explicitApi()
 
     androidTarget {
         publishLibraryVariants("release")
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
     }
 
     iosArm64()
@@ -43,7 +51,12 @@ kotlin {
         browser()
     }
 
-    jvm()
+    jvm {
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
@@ -51,51 +64,39 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material3)
-                api(compose.ui)
-                api(compose.animation)
-                implementation(KotlinX.coroutines.core)
-            }
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            api(compose.ui)
+            api(compose.animation)
+            implementation(libs.kotlinx.coroutines)
         }
 
-        named("commonTest") {
-            dependencies {
-                implementation(kotlin("test"))
-            }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
 
-        named("jvmMain") {
-            // dependsOn(commonMain)
+        jvmMain.dependencies {}
 
-            dependencies {
-
-            }
-        }
-
-        named("jvmTest") {
-            dependencies {
-                implementation(kotlin("test"))
-                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                implementation(compose.desktop.uiTestJUnit4)
-                implementation(compose.desktop.currentOs)
-            }
+        jvmTest.dependencies {
+            implementation(kotlin("test"))
+            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+            implementation(compose.desktop.uiTestJUnit4)
+            implementation(compose.desktop.currentOs)
         }
 
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
         create("iosMain") {
-            // dependsOn(commonMain)
-//            iosX64Main.dependsOn(this)
-//            iosArm64Main.dependsOn(this)
-//            iosSimulatorArm64Main.dependsOn(this)
-
             dependencies { }
         }
+    }
+
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
 }
 
@@ -135,11 +136,6 @@ tasks.register<org.jetbrains.dokka.gradle.DokkaTask>("dokkaCustomFormat") {
 tasks["build"].dependsOn.add("dokkaCustomFormat")
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs = freeCompilerArgs + listOf("-opt-in=kotlin.RequiresOptIn")
-        jvmTarget = "11"
-    }
-
     detekt {
         source.setFrom("src")
         parallel = true
