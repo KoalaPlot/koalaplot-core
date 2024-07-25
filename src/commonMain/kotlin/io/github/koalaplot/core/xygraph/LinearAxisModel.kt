@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 
 internal val TickRatios = listOf(0.1f, 0.2f, 0.5f, 1f, 2f)
 
-internal const val ZoomRangeLimitDefault = 0.2f
+internal const val ZoomRangeLimitDefault = 0.2
 internal const val MinimumMajorTickIncrementDefault = 0.1f
 
 /**
@@ -27,7 +27,7 @@ internal const val MinimumMajorTickIncrementDefault = 0.1f
 @Deprecated("Use FloatLinearAxisModel instead", replaceWith = ReplaceWith("FloatLinearAxisModel"))
 public class LinearAxisModel(
     public val range: ClosedFloatingPointRange<Float>,
-    private val zoomRangeLimit: Float = (range.endInclusive - range.start) * ZoomRangeLimitDefault,
+    private val zoomRangeLimit: Float = (range.endInclusive - range.start) * ZoomRangeLimitDefault.toFloat(),
     private val minimumMajorTickIncrement: Float =
         (range.endInclusive - range.start) * MinimumMajorTickIncrementDefault,
     override val minimumMajorTickSpacing: Dp = 50.dp,
@@ -55,7 +55,7 @@ public interface ILinearAxisModel<T> : AxisModel<T> where T : Comparable<T>, T :
 @Composable
 public fun rememberLinearAxisModel(
     range: ClosedFloatingPointRange<Float>,
-    zoomRangeLimit: Float = (range.endInclusive - range.start) * ZoomRangeLimitDefault,
+    zoomRangeLimit: Float = (range.endInclusive - range.start) * ZoomRangeLimitDefault.toFloat(),
     minimumMajorTickIncrement: Float = (range.endInclusive - range.start) * MinimumMajorTickIncrementDefault,
     minimumMajorTickSpacing: Dp = 50.dp,
     minorTickCount: Int = 4,

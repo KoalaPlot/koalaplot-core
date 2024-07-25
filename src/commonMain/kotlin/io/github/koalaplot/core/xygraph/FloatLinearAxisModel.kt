@@ -34,7 +34,7 @@ import kotlin.math.sign
  */
 public class FloatLinearAxisModel(
     public override val range: ClosedFloatingPointRange<Float>,
-    private val zoomRangeLimit: Float = (range.endInclusive - range.start) * ZoomRangeLimitDefault,
+    private val zoomRangeLimit: Float = (range.endInclusive - range.start) * ZoomRangeLimitDefault.toFloat(),
     private val minimumMajorTickIncrement: Float =
         (range.endInclusive - range.start) * MinimumMajorTickIncrementDefault,
     override val minimumMajorTickSpacing: Dp = 50.dp,
@@ -228,7 +228,7 @@ public class FloatLinearAxisModel(
 @Composable
 public fun rememberFloatLinearAxisModel(
     range: ClosedFloatingPointRange<Float>,
-    zoomRangeLimit: Float = (range.endInclusive - range.start) * ZoomRangeLimitDefault,
+    zoomRangeLimit: Float = (range.endInclusive - range.start) * ZoomRangeLimitDefault.toFloat(),
     minimumMajorTickIncrement: Float = (range.endInclusive - range.start) * MinimumMajorTickIncrementDefault,
     minimumMajorTickSpacing: Dp = 50.dp,
     minorTickCount: Int = 4,

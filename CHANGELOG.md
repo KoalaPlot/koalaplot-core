@@ -5,14 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2]
+
+### Fixed
+
+- XYGraph wouldn't zoom properly if recomposed with modified axis models.
+
+### Changed
+
+- ZoomRangeLimitDefault applied to Int and Long linear axis models to be consistent with the original
+  FloatLinearAxisModel
+
 ## [0.6.1]
 
 ### Changed
-- VerticalBarPlot scales bar width by number of x-axis major ticks when there is only 1 data point.  
+
+- VerticalBarPlot scales bar width by number of x-axis major ticks when there is only 1 data point.
 
 ## [0.6.0]
 
 ### Changed
+
 - Replaced LinearAxisModel (deprecated) with FloatLinearAxisModel
 - BulletGraphs can use any linear axis model type
 

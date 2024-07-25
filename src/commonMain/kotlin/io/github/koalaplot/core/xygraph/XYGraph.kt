@@ -84,7 +84,7 @@ public fun <X, Y> XYGraph(
     content: @Composable XYGraphScope<X, Y>.() -> Unit
 ) {
     val panZoomModifier = if (panZoomEnabled) {
-        Modifier.pointerInput(Unit) {
+        Modifier.pointerInput(xAxisModel, yAxisModel) {
             detectTransformGestures { centroid, pan, zoom, _ ->
                 transformAxis(yAxisModel, size.height, centroid.y, pan.y, zoom)
                 transformAxis(xAxisModel, size.width, centroid.x, -pan.x, zoom)
