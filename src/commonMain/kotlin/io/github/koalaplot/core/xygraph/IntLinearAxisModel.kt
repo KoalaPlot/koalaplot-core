@@ -34,7 +34,7 @@ import kotlin.math.roundToInt
  */
 public class IntLinearAxisModel(
     public override val range: IntRange,
-    private val zoomRangeLimit: Int = range.last - range.first,
+    private val zoomRangeLimit: Int = ((range.last - range.first) * ZoomRangeLimitDefault).coerceAtLeast(1.0).toInt(),
     private val minimumMajorTickIncrement: Int = (
         (range.last - range.first) * MinimumMajorTickIncrementDefault
         ).toInt(),

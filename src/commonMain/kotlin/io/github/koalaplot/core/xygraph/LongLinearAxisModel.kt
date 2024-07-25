@@ -34,7 +34,7 @@ import kotlin.math.roundToLong
  */
 public class LongLinearAxisModel(
     public override val range: LongRange,
-    private val zoomRangeLimit: Long = range.last - range.first,
+    private val zoomRangeLimit: Long = ((range.last - range.first) * ZoomRangeLimitDefault).coerceAtLeast(1.0).toLong(),
     private val minimumMajorTickIncrement: Long = (
         (range.last - range.first) * MinimumMajorTickIncrementDefault
         ).toLong(),

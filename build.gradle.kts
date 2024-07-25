@@ -29,6 +29,7 @@ dependencies {
 }
 
 group = "io.github.koalaplot"
+
 version = "0.7.0-dev1"
 
 kotlin {

@@ -8,13 +8,30 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Changed
-- VerticalBarPlot scales bar width by number of x-axis major ticks when there is only 1 data point.
+
 - Upgrade versions: Kotlin to 2.0.0, coroutines to 1.8.1, compose to 1.6.11, dokka to 1.9.20, detekt to 1.23.6
-- 
+
+## [0.6.2]
+
+### Fixed
+
+- XYGraph wouldn't zoom properly if recomposed with modified axis models.
+
+### Changed
+
+- ZoomRangeLimitDefault applied to Int and Long linear axis models to be consistent with the original
+  FloatLinearAxisModel
+
+## [0.6.1]
+
+### Changed
+
+- VerticalBarPlot scales bar width by number of x-axis major ticks when there is only 1 data point.
 
 ## [0.6.0]
 
 ### Changed
+
 - Replaced LinearAxisModel (deprecated) with FloatLinearAxisModel
 - BulletGraphs can use any linear axis model type
 
