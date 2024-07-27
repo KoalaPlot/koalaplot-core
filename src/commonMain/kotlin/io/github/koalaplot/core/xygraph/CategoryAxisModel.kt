@@ -1,7 +1,6 @@
 package io.github.koalaplot.core.xygraph
 
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 
 /**
  * An axis that uses arbitrary category objects instead of numbers as its values. It is a discrete
@@ -13,7 +12,7 @@ import androidx.compose.ui.unit.dp
 public class CategoryAxisModel<T>(
     private val categories: List<T>,
     private val firstCategoryIsZero: Boolean = false,
-    override val minimumMajorTickSpacing: Dp = 50.dp,
+    // override val minimumMajorTickSpacing: Dp = 50.dp,
 ) : AxisModel<T> {
     /**
      * Returns the offset of the provided string within this Category axis.

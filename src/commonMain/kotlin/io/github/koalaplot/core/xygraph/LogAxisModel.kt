@@ -1,7 +1,6 @@
 package io.github.koalaplot.core.xygraph
 
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import kotlin.math.log
 import kotlin.math.pow
 
@@ -15,10 +14,7 @@ private val MinorTickScale = 2..9
  * exponents with a base of 10. For example a range of -1..3 represents an axis range of 0.1 to 1000
  * (10^-1..10^3).
  */
-public class LogAxisModel constructor(
-    private val range: ClosedRange<Int>,
-    override val minimumMajorTickSpacing: Dp = 50.dp,
-) : AxisModel<Float> {
+public class LogAxisModel(private val range: ClosedRange<Int>) : AxisModel<Float> {
     init {
         require(range.endInclusive > range.start) { "Axis end must be greater than start" }
     }
