@@ -9,11 +9,16 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Upgrade versions: Kotlin to 2.0.0, coroutines to 1.8.1, compose to 1.6.11, dokka to 1.9.20, detekt to 1.23.6
 - Removed minimumMajorTickSpacing from AxisModel interface and added to ILinearAxisModel
 
 ### Removed
 - Removed deprecated LinearAxisModel class
+
+## [0.6.3]
+
+### Fixed
+
+- XYGraph didn't fill all available width when x-axis label intrinsic widths are greater than tick spacing 
 
 ## [0.6.2]
 
@@ -23,19 +28,18 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- Upgrade versions: Kotlin to 2.0.0, coroutines to 1.8.1, compose to 1.6.11, dokka to 1.9.20, detekt to 1.23.6
 - ZoomRangeLimitDefault applied to Int and Long linear axis models to be consistent with the original
   FloatLinearAxisModel
 
 ## [0.6.1]
 
 ### Changed
-
 - VerticalBarPlot scales bar width by number of x-axis major ticks when there is only 1 data point.
 
 ## [0.6.0]
 
 ### Changed
-
 - Replaced LinearAxisModel (deprecated) with FloatLinearAxisModel
 - BulletGraphs can use any linear axis model type
 
