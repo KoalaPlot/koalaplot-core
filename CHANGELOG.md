@@ -12,7 +12,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Removed minimumMajorTickSpacing from AxisModel interface and added to ILinearAxisModel
 
 ### Removed
-- Removed deprecated LinearAxisModel class
+- Removed deprecated LinearAxisModel class and rememberLinearAxisModel function
 
 ## [0.6.3]
 
