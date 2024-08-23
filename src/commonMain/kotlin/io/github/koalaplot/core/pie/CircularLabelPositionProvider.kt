@@ -89,13 +89,16 @@ public class CircularLabelPositionProvider(
         labelPlaceables.forEachIndexed { index, placeable ->
             val centerAngle = pieSliceDatas[index].startAngle + (pieSliceDatas[index].angle / 2f)
 
-            val matchingQuadrant = Quadrant.entries.first {
+            val matchingQuadrant = Quadrant.entries.find {
                 it.angleRange.contains(centerAngle.toDegrees().value)
             }
-            sliceGroups[matchingQuadrant] =
-                (sliceGroups.getOrElse(matchingQuadrant) { ArrayList() }).apply {
-                    add(SliceLabelData(index, pieSliceDatas[index], placeable, centerAngle))
-                }
+
+            if (matchingQuadrant != null) {
+                sliceGroups[matchingQuadrant] =
+                    (sliceGroups.getOrElse(matchingQuadrant) { ArrayList() }).apply {
+                        add(SliceLabelData(index, pieSliceDatas[index], placeable, centerAngle))
+                    }
+            }
         }
 
         return sliceGroups
