@@ -1,9 +1,6 @@
 package io.github.koalaplot.core.xygraph
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 
 internal val TickRatios = listOf(0.1f, 0.2f, 0.5f, 1f, 2f)
 
