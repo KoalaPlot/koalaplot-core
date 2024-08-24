@@ -11,6 +11,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Removed minimumMajorTickSpacing from AxisModel interface and added to ILinearAxisModel
 
+### Fixed
+- #81 Add coerceAtLeast to rememberIntLinearAxisModel to fix Zoom range limit when range is small
+
 ### Removed
 - Removed deprecated LinearAxisModel class and rememberLinearAxisModel function
 
