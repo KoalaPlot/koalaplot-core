@@ -85,6 +85,7 @@ private fun makePieSliceData(
     data: List<Float>,
     beta: Float,
     pieStartAngle: AngularValue,
+    pieExtendAngle: AngularValue,
 ): List<PieSliceData> {
     val total = data.sumOf {
         it.toDouble()
@@ -98,8 +99,9 @@ private fun makePieSliceData(
 
     return buildList {
         var startAngle = pieStartAngle.toDegrees().value
+        val pieExtend = pieExtendAngle.toDegrees().value
         for (i in data.indices) {
-            val extent = data[i] / total * DegreesFullCircle * beta
+            val extent = data[i] / total * pieExtend * beta
             add(PieSliceData(startAngle.deg, extent.deg))
             startAngle += extent
         }
@@ -190,6 +192,8 @@ private const val LabelFadeInDuration = 1000
  * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
  * @param animationSpec Specifies the animation to use when the pie chart is first drawn.
  * @param pieStartAngle Sets an angle for the pie data to start at. Defaults to the top of the pie.
+ * @param pieExtendAngle Sets a max angle for the pie to extend to, with a value between 1 and 360.
+ * Defaults to [DegreesFullCircle].
  */
 @ExperimentalKoalaPlotApi
 @Composable
@@ -210,9 +214,11 @@ public fun PieChart(
     forceCenteredPie: Boolean = false,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
     pieStartAngle: AngularValue = AngleCCWTop.deg,
+    pieExtendAngle: AngularValue = DegreesFullCircle.deg,
 ) {
     require(holeSize in 0f..1f) { "holeSize must be between 0 and 1" }
     require(maxPieDiameter != Dp.Unspecified) { "maxPieDiameter cannot be Unspecified" }
+    require(pieExtendAngle.toDegrees().value in 1f..360f) { "pieExtendAngle must be between 1 and 360" }
 
     val beta = remember(values) { Animatable(0f) }
     val labelAlpha = remember(values) { Animatable(0f) }
@@ -224,10 +230,12 @@ public fun PieChart(
     }
 
     // pieSliceData that gets animated - used for drawing the pie
-    val pieSliceData = remember(values, beta.value) { makePieSliceData(values, beta.value, pieStartAngle) }
+    val pieSliceData = remember(values, beta.value) {
+        makePieSliceData(values, beta.value, pieStartAngle, pieExtendAngle)
+    }
 
     // pieSliceData when the animation is complete - used for sizing & label layout/positioning
-    val finalPieSliceData = remember(values) { makePieSliceData(values, 1f, pieStartAngle) }
+    val finalPieSliceData = remember(values) { makePieSliceData(values, 1f, pieStartAngle, pieExtendAngle) }
 
     val pieMeasurePolicy =
         remember(finalPieSliceData, holeSize, labelPositionProvider, minPieDiameter, forceCenteredPie) {
