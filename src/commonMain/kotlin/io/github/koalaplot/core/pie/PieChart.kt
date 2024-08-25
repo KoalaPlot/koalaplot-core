@@ -199,10 +199,10 @@ public fun PieChart(
         val colors = remember(values.size) { generateHueColorPalette(values.size) }
         DefaultSlice(colors[it])
     },
-    label: @Composable (Int) -> Unit = {},
+    label: @Composable BoxScope.(Int) -> Unit = {},
     labelConnector: @Composable LabelConnectorScope.(Int) -> Unit = { StraightLineConnector() },
     holeSize: Float = 0f,
-    holeContent: @Composable () -> Unit = {},
+    holeContent: @Composable BoxScope.() -> Unit = {},
     minPieDiameter: Dp = 100.dp,
     maxPieDiameter: Dp = 300.dp,
     forceCenteredPie: Boolean = false,
@@ -338,11 +338,11 @@ public fun PieChart(
         val colors = remember(values.size) { generateHueColorPalette(values.size) }
         DefaultSlice(colors[it])
     },
-    label: @Composable (Int) -> Unit = {},
+    label: @Composable BoxScope.(Int) -> Unit = {},
     labelConnector: @Composable LabelConnectorScope.(Int) -> Unit = { StraightLineConnector() },
     labelSpacing: Float = DefaultLabelDiameterScale,
     holeSize: Float = 0f,
-    holeContent: @Composable () -> Unit = {},
+    holeContent: @Composable BoxScope.() -> Unit = {},
     minPieDiameter: Dp = 100.dp,
     maxPieDiameter: Dp = 300.dp,
     forceCenteredPie: Boolean = false,
