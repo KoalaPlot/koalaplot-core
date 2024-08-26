@@ -323,7 +323,7 @@ public class CircularLabelPositionProvider(
  * clockwise.
  */
 @Suppress("MagicNumber")
-private enum class Quadrant(val angleRange: ClosedFloatingPointRange<Float>) {
+internal enum class Quadrant(val angleRange: ClosedFloatingPointRange<Float>) {
     NorthEast(-90f..0f),
     SouthEast(0f..90f),
     SouthWest(90f..180f),
