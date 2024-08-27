@@ -4,19 +4,19 @@ import io.github.koalaplot.core.util.Degrees
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-private const val NE_MID_ANGLE = -45.0
-private const val SE_MID_ANGLE = 45.0
-private const val SW_MID_ANGLE = 135.0
-private const val NW_MID_ANGLE = 225.0
+private const val NeMidAngle = -45.0
+private const val SeMidAngle = 45.0
+private const val SwMidAngle = 135.0
+private const val NwMidAngle = 225.0
 
 class CircularLabelPositionProviderTest {
     //region Quadrant utility
     @Test
     fun `Quadrant#from returns the correct Quadrant for angles within standard boundaries`() {
-        assertEquals(Quadrant.NorthEast, Quadrant.from(Degrees(NE_MID_ANGLE)))
-        assertEquals(Quadrant.SouthEast, Quadrant.from(Degrees(SE_MID_ANGLE)))
-        assertEquals(Quadrant.SouthWest, Quadrant.from(Degrees(SW_MID_ANGLE)))
-        assertEquals(Quadrant.NorthWest, Quadrant.from(Degrees(NW_MID_ANGLE)))
+        assertEquals(Quadrant.NorthEast, Quadrant.from(Degrees(NeMidAngle)))
+        assertEquals(Quadrant.SouthEast, Quadrant.from(Degrees(SeMidAngle)))
+        assertEquals(Quadrant.SouthWest, Quadrant.from(Degrees(SwMidAngle)))
+        assertEquals(Quadrant.NorthWest, Quadrant.from(Degrees(NwMidAngle)))
     }
 
     /**
@@ -47,20 +47,20 @@ class CircularLabelPositionProviderTest {
     fun `Quadrant#from normalizes and returns the correct Quadrant for angles greater than 270 degrees`() {
         assertEquals(Quadrant.NorthEast, Quadrant.from(Degrees(275.0)))
 
-        assertEquals(Quadrant.NorthEast, Quadrant.from(Degrees(1 * 360f + NE_MID_ANGLE)))
-        assertEquals(Quadrant.SouthEast, Quadrant.from(Degrees(2 * 360f + SE_MID_ANGLE)))
-        assertEquals(Quadrant.SouthWest, Quadrant.from(Degrees(3 * 360f + SW_MID_ANGLE)))
-        assertEquals(Quadrant.NorthWest, Quadrant.from(Degrees(4 * 360f + NW_MID_ANGLE)))
+        assertEquals(Quadrant.NorthEast, Quadrant.from(Degrees(1 * 360f + NeMidAngle)))
+        assertEquals(Quadrant.SouthEast, Quadrant.from(Degrees(2 * 360f + SeMidAngle)))
+        assertEquals(Quadrant.SouthWest, Quadrant.from(Degrees(3 * 360f + SwMidAngle)))
+        assertEquals(Quadrant.NorthWest, Quadrant.from(Degrees(4 * 360f + NwMidAngle)))
     }
 
     @Test
     fun `Quadrant#from normalizes and returns the correct Quadrant for angles less than -90 degrees`() {
         assertEquals(Quadrant.NorthWest, Quadrant.from(Degrees(-95.0)))
 
-        assertEquals(Quadrant.NorthEast, Quadrant.from(Degrees(1 * -360f + NE_MID_ANGLE)))
-        assertEquals(Quadrant.SouthEast, Quadrant.from(Degrees(2 * -360f + SE_MID_ANGLE)))
-        assertEquals(Quadrant.SouthWest, Quadrant.from(Degrees(3 * -360f + SW_MID_ANGLE)))
-        assertEquals(Quadrant.NorthWest, Quadrant.from(Degrees(4 * -360f + NW_MID_ANGLE)))
+        assertEquals(Quadrant.NorthEast, Quadrant.from(Degrees(1 * -360f + NeMidAngle)))
+        assertEquals(Quadrant.SouthEast, Quadrant.from(Degrees(2 * -360f + SeMidAngle)))
+        assertEquals(Quadrant.SouthWest, Quadrant.from(Degrees(3 * -360f + SwMidAngle)))
+        assertEquals(Quadrant.NorthWest, Quadrant.from(Degrees(4 * -360f + NwMidAngle)))
     }
     //endregion
 }
