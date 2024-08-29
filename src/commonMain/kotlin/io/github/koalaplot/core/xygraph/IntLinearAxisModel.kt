@@ -227,7 +227,7 @@ public class IntLinearAxisModel(
 @Composable
 public fun rememberIntLinearAxisModel(
     range: IntRange,
-    zoomRangeLimit: Int = ((range.last - range.first) * ZoomRangeLimitDefault).toInt(),
+    zoomRangeLimit: Int = ((range.last - range.first) * ZoomRangeLimitDefault).coerceAtLeast(1.0).toInt(),
     minimumMajorTickIncrement: Int = ((range.last - range.first) * MinimumMajorTickIncrementDefault).toInt(),
     minimumMajorTickSpacing: Dp = 50.dp,
     minorTickCount: Int = 4,

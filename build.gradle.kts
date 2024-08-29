@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 buildscript {
     dependencies {
@@ -57,7 +56,7 @@ kotlin {
         }
     }
 
-    @OptIn(ExperimentalWasmDsl::class)
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
         browser()
     }
@@ -141,18 +140,4 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         config.setFrom("$rootDir/detekt.yml")
         buildUponDefaultConfig = true
     }
-}
-
-afterEvaluate { // https://discuss.kotlinlang.org/t/disabling-androidandroidtestrelease-source-set-in-gradle-kotlin-dsl-script/21448
-    project.extensions.findByType<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension>()
-        ?.let { ext ->
-            ext.sourceSets.removeAll { sourceSet ->
-                setOf(
-                    // "androidAndroidTestRelease",
-                    "androidTestFixtures",
-                    "androidTestFixturesDebug",
-                    "androidTestFixturesRelease",
-                ).contains(sourceSet.name)
-            }
-        }
 }
