@@ -85,7 +85,8 @@ private const val AngleCCWTop = -90f
 
 private fun makePieSliceData(
     data: List<Float>,
-    beta: Float
+    beta: Float,
+    pieStartAngle: AngularValue,
 ): List<PieSliceData> {
     val total = data.sumOf {
         it.toDouble()
@@ -98,7 +99,7 @@ private fun makePieSliceData(
     }
 
     return buildList {
-        var startAngle = AngleCCWTop
+        var startAngle = pieStartAngle.toDegrees().value
         for (i in data.indices) {
             val extent = data[i] / total * DegreesFullCircle * beta
             add(PieSliceData(startAngle.deg, extent.deg))
@@ -191,6 +192,7 @@ private const val LabelFadeInDuration = 1000
  * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
  * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
  * @param animationSpec Specifies the animation to use when the pie chart is first drawn.
+ * @param pieStartAngle Sets an angle for the pie data to start at. Defaults to the top of the pie.
  */
 @ExperimentalKoalaPlotApi
 @Composable
@@ -209,7 +211,8 @@ public fun PieChart(
     minPieDiameter: Dp = 100.dp,
     maxPieDiameter: Dp = 300.dp,
     forceCenteredPie: Boolean = false,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+    pieStartAngle: AngularValue = AngleCCWTop.deg,
 ) {
     require(holeSize in 0f..1f) { "holeSize must be between 0 and 1" }
     require(maxPieDiameter != Dp.Unspecified) { "maxPieDiameter cannot be Unspecified" }
@@ -224,10 +227,10 @@ public fun PieChart(
     }
 
     // pieSliceData that gets animated - used for drawing the pie
-    val pieSliceData = remember(values, beta.value) { makePieSliceData(values, beta.value) }
+    val pieSliceData = remember(values, beta.value) { makePieSliceData(values, beta.value, pieStartAngle) }
 
     // pieSliceData when the animation is complete - used for sizing & label layout/positioning
-    val finalPieSliceData = remember(values) { makePieSliceData(values, 1f) }
+    val finalPieSliceData = remember(values) { makePieSliceData(values, 1f, pieStartAngle) }
 
     val pieMeasurePolicy =
         remember(finalPieSliceData, holeSize, labelPositionProvider, minPieDiameter, forceCenteredPie) {

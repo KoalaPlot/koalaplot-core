@@ -89,9 +89,8 @@ public class CircularLabelPositionProvider(
         labelPlaceables.forEachIndexed { index, placeable ->
             val centerAngle = pieSliceDatas[index].startAngle + (pieSliceDatas[index].angle / 2f)
 
-            val matchingQuadrant = Quadrant.entries.first {
-                it.angleRange.contains(centerAngle.toDegrees().value)
-            }
+            val matchingQuadrant = Quadrant.from(centerAngle)
+
             sliceGroups[matchingQuadrant] =
                 (sliceGroups.getOrElse(matchingQuadrant) { ArrayList() }).apply {
                     add(SliceLabelData(index, pieSliceDatas[index], placeable, centerAngle))
@@ -324,11 +323,25 @@ public class CircularLabelPositionProvider(
  * clockwise.
  */
 @Suppress("MagicNumber")
-private enum class Quadrant(val angleRange: ClosedFloatingPointRange<Float>) {
+internal enum class Quadrant(val angleRange: ClosedFloatingPointRange<Float>) {
     NorthEast(-90f..0f),
     SouthEast(0f..90f),
     SouthWest(90f..180f),
-    NorthWest(180f..270f)
+    NorthWest(180f..270f);
+
+    companion object {
+        /**
+         * Returns the [Quadrant] the given [angle] falls into.
+         */
+        fun from(angle: AngularValue): Quadrant {
+            val normalizedAngle = ((angle.toDegrees().value % 360f) + 360f) % 360f
+            val rangeAdjustedAngle = when {
+                normalizedAngle <= 270f -> normalizedAngle
+                else -> normalizedAngle - 360f
+            }
+            return entries.first { it.angleRange.contains(rangeAdjustedAngle) }
+        }
+    }
 }
 
 private fun Quadrant.isWest(): Boolean {

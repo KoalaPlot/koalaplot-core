@@ -10,9 +10,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Removed minimumMajorTickSpacing from AxisModel interface and added to ILinearAxisModel
+- Upgrade Kotlin to 2.0.20
+- Upgrade com.android.library to 8.5.2
+- Upgrade gradle wrapper to 8.10
+
+### Fixed
+- #81 Add coerceAtLeast to rememberIntLinearAxisModel to fix Zoom range limit when range is small
 
 ### Removed
-- Removed deprecated LinearAxisModel class
+- Removed deprecated LinearAxisModel class and rememberLinearAxisModel function
 
 ## [0.6.3]
 
