@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -283,7 +284,9 @@ public fun PieChart(
             val holeDiameter = pieDiameter * holeSize.toDouble()
             val holeSafeEdgeLength = circumscribedSquareSize(holeDiameter)
             val holePlaceable = subcompose("hole") {
-                Box { holeContent(PaddingValues((holeDiameter - holeSafeEdgeLength).toInt().dp)) }
+                Box(modifier = Modifier.clip(CircleShape)) {
+                    holeContent(PaddingValues((holeDiameter - holeSafeEdgeLength).toInt().dp))
+                }
             }[0].measure(Constraints.fixed(holeDiameter.toInt(), holeDiameter.toInt()))
 
             val connectorPlaceables = subcompose("connectors") {
