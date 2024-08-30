@@ -11,9 +11,12 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -183,7 +186,8 @@ private const val LabelFadeInDuration = 1000
  * @param labelConnector Composable for label connectors connecting the pie slice to the label
  * @param holeSize A relative size for an inner hole of the pie, creating a donut chart, with a
  * value between 0 and 1.
- * @param holeContent Optional content that may be placed in the space of the donut hole.
+ * @param holeContent Optional content that may be placed in the space of the donut hole. To safely draw the content
+ * within the hole without intersecting with the chart, apply the passed `contentPadding` to your content composable.
  * @param minPieDiameter Minimum diameter allowed for the pie.
  * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
  * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
@@ -204,7 +208,7 @@ public fun PieChart(
     label: @Composable (Int) -> Unit = {},
     labelConnector: @Composable LabelConnectorScope.(Int) -> Unit = { StraightLineConnector() },
     holeSize: Float = 0f,
-    holeContent: @Composable () -> Unit = {},
+    holeContent: @Composable BoxScope.(contentPadding: PaddingValues) -> Unit = {},
     minPieDiameter: Dp = 100.dp,
     maxPieDiameter: Dp = 300.dp,
     forceCenteredPie: Boolean = false,
@@ -277,10 +281,13 @@ public fun PieChart(
 
             val labelConnectorTranslations = pieMeasurePolicy.computeLabelConnectorScopes(labelPositions, pieDiameter)
 
-            val holeEdgeLength = circumscribedSquareSize(pieDiameter * holeSize.toDouble()).toInt()
+            val holeDiameter = pieDiameter * holeSize.toDouble()
+            val holeSafeEdgeLength = circumscribedSquareSize(holeDiameter)
             val holePlaceable = subcompose("hole") {
-                Box { holeContent() } // wrap in box to ensure 1 and only 1 element emitted
-            }[0].measure(Constraints.fixed(holeEdgeLength, holeEdgeLength))
+                Box(modifier = Modifier.clip(CircleShape)) {
+                    holeContent(PaddingValues((holeDiameter - holeSafeEdgeLength).toInt().dp))
+                }
+            }[0].measure(Constraints.fixed(holeDiameter.toInt(), holeDiameter.toInt()))
 
             val connectorPlaceables = subcompose("connectors") {
                 for (element in pieSliceData.indices) {
@@ -345,7 +352,7 @@ public fun PieChart(
     labelConnector: @Composable LabelConnectorScope.(Int) -> Unit = { StraightLineConnector() },
     labelSpacing: Float = DefaultLabelDiameterScale,
     holeSize: Float = 0f,
-    holeContent: @Composable () -> Unit = {},
+    holeContent: @Composable BoxScope.(contentPadding: PaddingValues) -> Unit = {},
     minPieDiameter: Dp = 100.dp,
     maxPieDiameter: Dp = 300.dp,
     forceCenteredPie: Boolean = false,
