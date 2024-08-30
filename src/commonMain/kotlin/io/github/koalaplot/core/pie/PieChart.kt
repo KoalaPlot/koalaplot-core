@@ -222,7 +222,9 @@ public fun PieChart(
 ) {
     require(holeSize in 0f..1f) { "holeSize must be between 0 and 1" }
     require(maxPieDiameter != Dp.Unspecified) { "maxPieDiameter cannot be Unspecified" }
-    require(pieExtendAngle.toDegrees().value in 1f..360f) { "pieExtendAngle must be between 1 and 360" }
+    require(pieExtendAngle.toDegrees().value > 0f && pieExtendAngle.toDegrees().value <= DegreesFullCircle) {
+        "pieExtendAngle must be between 0 and 360, exclusive of 0"
+    }
 
     val beta = remember(values) { Animatable(0f) }
     val labelAlpha = remember(values) { Animatable(0f) }
@@ -243,13 +245,7 @@ public fun PieChart(
 
     val pieMeasurePolicy =
         remember(finalPieSliceData, holeSize, labelPositionProvider, minPieDiameter, forceCenteredPie) {
-            PieMeasurePolicy(
-                finalPieSliceData,
-                holeSize,
-                labelPositionProvider,
-                InitOuterRadius,
-                forceCenteredPie
-            )
+            PieMeasurePolicy(finalPieSliceData, holeSize, labelPositionProvider, InitOuterRadius, forceCenteredPie)
         }
 
     HoverableElementArea(modifier = modifier) {
