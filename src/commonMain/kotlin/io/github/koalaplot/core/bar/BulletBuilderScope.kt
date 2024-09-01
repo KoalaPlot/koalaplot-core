@@ -42,7 +42,7 @@ import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.Axis
 import io.github.koalaplot.core.xygraph.AxisDelegate
 import io.github.koalaplot.core.xygraph.AxisStyle
-import io.github.koalaplot.core.xygraph.ILinearAxisModel
+import io.github.koalaplot.core.xygraph.LinearAxisModel
 import io.github.koalaplot.core.xygraph.rememberAxisStyle
 import kotlin.math.abs
 import kotlin.math.absoluteValue
@@ -71,7 +71,7 @@ private const val MinRangeShade = 0.99f
  */
 @ExperimentalKoalaPlotApi
 @BulletGraphDslMarker
-public class BulletBuilderScope<T>(private val axisModel: ILinearAxisModel<T>) where T : Comparable<T>, T : Number {
+public class BulletBuilderScope<T>(private val axisModel: LinearAxisModel<T>) where T : Comparable<T>, T : Number {
     internal class ComparativeMeasure<T>(val value: T, val indicator: @Composable () -> Unit) {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true

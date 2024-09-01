@@ -26,11 +26,6 @@ public interface TickValues<T> {
  */
 public interface AxisModel<T> {
     /**
-     * Specifies the minimum spacing for major ticks, in Dp units. Must be greater than 0.
-     */
-    // public val minimumMajorTickSpacing: Dp
-
-    /**
      * Computes major and minor tick values based on the minimum tick spacing and the overall
      * [axisLength].
      */

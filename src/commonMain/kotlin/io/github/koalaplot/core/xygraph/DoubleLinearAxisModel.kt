@@ -40,7 +40,7 @@ public class DoubleLinearAxisModel(
     private val minorTickCount: Int = 4,
     private val allowZooming: Boolean = true,
     private val allowPanning: Boolean = true,
-) : ILinearAxisModel<Double> {
+) : LinearAxisModel<Double> {
     init {
         require(range.endInclusive > range.start) {
             "Axis range end (${range.endInclusive}) must be greater than start (${range.start})"
@@ -192,6 +192,18 @@ public class DoubleLinearAxisModel(
         val newHi = (currentRange.endInclusive + panLimited)
 
         currentRange = newLow..newHi
+    }
+
+    override fun setViewRange(newRange: ClosedRange<Double>) {
+        if (newRange.endInclusive - newRange.start < zoomRangeLimit) {
+            val mid = (newRange.endInclusive - newRange.start) / 2.0
+            currentRange =
+                (newRange.start - mid).coerceAtLeast(range.start)..(newRange.endInclusive + mid)
+                    .coerceAtMost(range.endInclusive)
+        } else {
+            currentRange =
+                newRange.start.coerceAtLeast(range.start)..newRange.endInclusive.coerceAtMost(range.endInclusive)
+        }
     }
 
     override fun equals(other: Any?): Boolean {

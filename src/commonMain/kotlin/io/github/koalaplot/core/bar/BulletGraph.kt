@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.xygraph.ILinearAxisModel
+import io.github.koalaplot.core.xygraph.LinearAxisModel
 import kotlin.math.roundToInt
 
 /**
@@ -136,7 +136,7 @@ constructor(
      */
     @OptIn(ExperimentalKoalaPlotApi::class)
     public fun <T> bullet(
-        axisModel: ILinearAxisModel<T>,
+        axisModel: LinearAxisModel<T>,
         builder: BulletBuilderScope<T>.() -> Unit
     ) where T : Comparable<T>, T : Number {
         val scope = BulletBuilderScope(axisModel)

@@ -42,7 +42,7 @@ public class IntLinearAxisModel(
     private val minorTickCount: Int = 4,
     private val allowZooming: Boolean = true,
     private val allowPanning: Boolean = true,
-) : ILinearAxisModel<Int> {
+) : LinearAxisModel<Int> {
     init {
         require(range.last > range.first) {
             "Axis range end (${range.last}) must be greater than start (${range.first})"
@@ -192,6 +192,17 @@ public class IntLinearAxisModel(
         val newHi = (currentRange.last + panLimited)
 
         currentRange = newLow..newHi
+    }
+
+    override fun setViewRange(newRange: ClosedRange<Int>) {
+        if (newRange.endInclusive - newRange.start < zoomRangeLimit) {
+            val mid = (newRange.endInclusive - newRange.start) / 2
+            currentRange =
+                (newRange.start - mid).coerceAtLeast(range.first)..(newRange.endInclusive + mid)
+                    .coerceAtMost(range.last)
+        } else {
+            currentRange = newRange.start.coerceAtLeast(range.first)..newRange.endInclusive.coerceAtMost(range.last)
+        }
     }
 
     override fun equals(other: Any?): Boolean {

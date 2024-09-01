@@ -7,24 +7,31 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- setViewRange function on LinearAxisModel interface.
+
 ### Changed
 
-- Removed minimumMajorTickSpacing from AxisModel interface and added to ILinearAxisModel
+- Renamed ILinearAxisModel to LinearAxisModel
+- Removed minimumMajorTickSpacing from AxisModel interface and added to LinearAxisModel
 - Upgrade Kotlin to 2.0.20
 - Upgrade com.android.library to 8.5.2
 - Upgrade gradle wrapper to 8.10
 
 ### Fixed
+
 - #81 Add coerceAtLeast to rememberIntLinearAxisModel to fix Zoom range limit when range is small
 
 ### Removed
+
 - Removed deprecated LinearAxisModel class and rememberLinearAxisModel function
 
 ## [0.6.3]
 
 ### Fixed
 
-- XYGraph didn't fill all available width when x-axis label intrinsic widths are greater than tick spacing 
+- XYGraph didn't fill all available width when x-axis label intrinsic widths are greater than tick spacing
 
 ## [0.6.2]
 
@@ -41,11 +48,13 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.6.1]
 
 ### Changed
+
 - VerticalBarPlot scales bar width by number of x-axis major ticks when there is only 1 data point.
 
 ## [0.6.0]
 
 ### Changed
+
 - Replaced LinearAxisModel (deprecated) with FloatLinearAxisModel
 - BulletGraphs can use any linear axis model type
 

@@ -41,7 +41,7 @@ public class FloatLinearAxisModel(
     private val minorTickCount: Int = 4,
     private val allowZooming: Boolean = true,
     private val allowPanning: Boolean = true,
-) : AxisModel<Float>, ILinearAxisModel<Float> {
+) : AxisModel<Float>, LinearAxisModel<Float> {
     init {
         require(range.endInclusive > range.start) {
             "Axis range end (${range.endInclusive}) must be greater than start (${range.start})"
@@ -193,6 +193,18 @@ public class FloatLinearAxisModel(
         val newHi = (currentRange.endInclusive + panLimited)
 
         currentRange = newLow..newHi
+    }
+
+    override fun setViewRange(newRange: ClosedRange<Float>) {
+        if (newRange.endInclusive - newRange.start < zoomRangeLimit) {
+            val mid = (newRange.endInclusive - newRange.start) / 2f
+            currentRange =
+                (newRange.start - mid).coerceAtLeast(range.start)..(newRange.endInclusive + mid)
+                    .coerceAtMost(range.endInclusive)
+        } else {
+            currentRange =
+                newRange.start.coerceAtLeast(range.start)..newRange.endInclusive.coerceAtMost(range.endInclusive)
+        }
     }
 
     override fun equals(other: Any?): Boolean {
