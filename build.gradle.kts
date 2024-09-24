@@ -49,7 +49,7 @@ kotlin {
         browser()
     }
 
-    jvm {
+    jvm("desktop") {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
@@ -75,20 +75,29 @@ kotlin {
             implementation(kotlin("test"))
         }
 
-        jvmMain.dependencies {}
+        val desktopMain by getting {
+            dependsOn(commonMain.get())
+            dependencies {}
+        }
 
-        jvmTest.dependencies {
-            implementation(kotlin("test"))
-            @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-            implementation(compose.desktop.uiTestJUnit4)
-            implementation(compose.desktop.currentOs)
+        val desktopTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
+                implementation(compose.desktop.uiTestJUnit4)
+                implementation(compose.desktop.currentOs)
+            }
         }
 
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
-        create("iosMain") {
+        val iosMain by creating {
+            dependsOn(commonMain.get())
             dependencies { }
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
         }
     }
 
@@ -140,4 +149,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         config.setFrom("$rootDir/detekt.yml")
         buildUponDefaultConfig = true
     }
+}
+
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    exclude("**/desktopTest/**")
 }

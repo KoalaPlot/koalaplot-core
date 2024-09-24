@@ -36,7 +36,7 @@ borders, shapes, user interaction, etc. Web support is provided by the Compose-w
     * Composable axis titles and value labels
     * Optional Composable symbols for data points
     * Optional Composable symbols at each data point with default implementations
-    * Zoom and pan one or both axes (Android only, for now)
+    * Zoom and pan one or both axes (except for mobile platforms within js and wasmJs)
     * Optional shaded areas (area chart)
 * Stacked area graphs
     * Plots multiple lines with shaded areas between them and accumulated values
@@ -48,12 +48,12 @@ borders, shapes, user interaction, etc. Web support is provided by the Compose-w
     * Support for clustered and stacked bars
     * Support for negative values and bars that don't start at 0
     * Customizable first-draw animation
-    * Zoom and pan one or both axes (Android only, for now)
+    * Zoom and pan one or both axes (except for mobile platforms within js and wasmJs)
 * Bullet Graph
     * Individual or multiple vertically aligned bullet graphs
 * Radar/Polar/Spider plots
-  * Lines, areas, symbols, or a combination
-  * Configurable origin position and angle orientation (clockwise/counter-clockwise)
+    * Lines, areas, symbols, or a combination
+    * Configurable origin position and angle orientation (clockwise/counter-clockwise)
 * Chart layout
     * Combines an optional Composable title, plot, and legend with any of 4 positions
 * Legends

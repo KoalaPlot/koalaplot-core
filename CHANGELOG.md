@@ -10,6 +10,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - setViewRange function on LinearAxisModel interface.
+- zoom and pan support for all platforms within XYGraph
 
 ### Changed
 
