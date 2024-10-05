@@ -22,6 +22,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - #81 Add coerceAtLeast to rememberIntLinearAxisModel to fix Zoom range limit when range is small
+- BulletGraph vertical centering of ranges
 
 ### Removed
 

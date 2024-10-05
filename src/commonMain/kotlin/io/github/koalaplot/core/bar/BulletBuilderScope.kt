@@ -370,7 +370,9 @@ public class BulletBuilderScope<T>(private val axisModel: LinearAxisModel<T>) wh
                     }
                     HorizontalBarIndicator(SolidColor(Color(shade, shade, shade)))
                 } else {
-                    Box(modifier = Modifier.fillMaxSize()) { range.indicator.invoke() }
+                    Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.fillMaxSize()) {
+                        range.indicator.invoke()
+                    }
                 }
             }
         }
@@ -400,10 +402,9 @@ public class BulletBuilderScope<T>(private val axisModel: LinearAxisModel<T>) wh
                                 Modifier.size(rangeHeight.toDp(), rangeHeight.toDp())
                             }
 
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = sizeModifier
-                        ) { featuredMeasure.indicator() }
+                        Box(contentAlignment = Alignment.Center, modifier = sizeModifier) {
+                            featuredMeasure.indicator()
+                        }
                     }
                 }[0]
 
@@ -497,7 +498,7 @@ public class BulletBuilderScope<T>(private val axisModel: LinearAxisModel<T>) wh
                 } else {
                     rangeWidth * axisModel.computeOffset(value) - it.width / 2
                 }
-                it.place(xPos.roundToInt(), yPos + rangeHeight / 2 - it.height / 2)
+                it.place(xPos.roundToInt(), yPos)
             }
         }
 
