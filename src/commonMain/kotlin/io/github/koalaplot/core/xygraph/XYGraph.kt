@@ -1,7 +1,8 @@
+@file:Suppress("TooManyFunctions") // expected
+
 package io.github.koalaplot.core.xygraph
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +19,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
@@ -39,6 +39,7 @@ import io.github.koalaplot.core.util.Vector
 import io.github.koalaplot.core.util.VerticalRotation
 import io.github.koalaplot.core.util.length
 import io.github.koalaplot.core.util.lineDistance
+import io.github.koalaplot.core.util.onGestureInput
 import io.github.koalaplot.core.util.rotate
 import io.github.koalaplot.core.util.rotateVertically
 import kotlin.math.abs
@@ -60,11 +61,41 @@ import kotlin.math.sin
  * @param yAxisStyle Style for the y-axis
  * @param yAxisLabels Composable to display labels for specific y-axis values
  * @param yAxisTitle Title for the y-axis
- * @param panZoomEnabled True if the plot can be panned and zoomed, false to disable. Enabling panning and zooming may
+ * @param panEnabled True if the plot can be panned, false to disable. Enabling panning may
  * interfere with scrolling a parent container if the drag point is on the plot.
+ * @param zoomEnabled True if the plot can be zoomed, false to disable. Enabling zooming may
+ * interfere with scrolling a parent container if the drag point is on the plot.
+ * @param allowIndependentZoom True if the zoom can be either only on the X axis, or only on the Y axis,
+ * or independently on the X and Y axes at the same time (the behavior depends on the target platform),
+ * False if the total zoom factor must be used.
+ *
+ * Behavior for Android and iOS:
+ * True does not mean getting independent zoom coefficients simultaneously for each axis,
+ * if the zoom was initiated:
+ * - horizontally - the zoom coefficient will change only for the X axis,
+ * - vertically - the zoom coefficient will change only for the Y axis.
+ *
+ * Behavior for Desktop platforms: (EXPERIMENTAL!)
+ * True means getting independent zoom coefficients simultaneously or separately for each axis,
+ * if the zoom was initiated:
+ * - horizontally - the zoom coefficient will change only for the X axis,
+ * - vertically - the zoom coefficient will change only for the Y axis,
+ * - diagonally - the zoom coefficient will change along the axes X and Y at the same time
+ *
+ * Behavior for JS and wasmJS: (EXPERIMENTAL!)
+ * True means getting independent zoom coefficients simultaneously or separately for each axis,
+ * if the zoom was initiated:
+ * - horizontally - the zoom coefficient will change only for the X axis,
+ * - vertically - the zoom coefficient will change only for the Y axis,
+ * - diagonally - the zoom coefficient will change along the axes X and Y at the same time.
+ *
+ * JS and wasmJS have slight differences in response behavior (for example, zoom coefficients for the same gesture
+ * will be interpreted with a difference of several tenths or hundredths), and zoom handling with the mouse wheel
+ * scroll while pressing Ctrl/Cmd is not supported (a problem with browser scaling)
  * @param content The content to be displayed, which should include one plot for each series to be
  * plotted on this XYGraph.
  */
+@Suppress("LongMethod") // expected
 @Composable
 public fun <X, Y> XYGraph(
     xAxisModel: AxisModel<X>,
@@ -80,20 +111,11 @@ public fun <X, Y> XYGraph(
     horizontalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
     verticalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
     verticalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
-    panZoomEnabled: Boolean = true,
+    panEnabled: Boolean = false,
+    zoomEnabled: Boolean = false,
+    allowIndependentZoom: Boolean = false,
     content: @Composable XYGraphScope<X, Y>.() -> Unit
 ) {
-    val panZoomModifier = if (panZoomEnabled) {
-        Modifier.pointerInput(xAxisModel, yAxisModel) {
-            detectTransformGestures { centroid, pan, zoom, _ ->
-                transformAxis(yAxisModel, size.height, centroid.y, pan.y, zoom)
-                transformAxis(xAxisModel, size.width, centroid.x, -pan.x, zoom)
-            }
-        }
-    } else {
-        Modifier
-    }
-
     HoverableElementArea(modifier = modifier) {
         SubcomposeLayout { constraints ->
             val xAxisTitleMeasurable = subcompose("xaxistitle") {
@@ -125,12 +147,35 @@ public fun <X, Y> XYGraph(
             val xAxisMeasurable = subcompose("xaxis") { Axis(xAxis) }[0]
             val yAxisMeasurable = subcompose("yaxis") { Axis(yAxis) }[0]
 
-            val chartScope = XYGraphScopeImpl(xAxisModel, yAxisModel, xAxis, yAxis, this@HoverableElementArea)
-
             val chartMeasurable = subcompose("chart") {
+                val panZoomModifier = if (panEnabled || zoomEnabled) {
+                    Modifier.onGestureInput(
+                        key1 = xAxisModel,
+                        key2 = yAxisModel,
+                        panLock = !panEnabled,
+                        zoomLock = !zoomEnabled,
+                        lockZoomRatio = !allowIndependentZoom,
+                        onZoomChange = { size, centroid, zoomX, zoomY ->
+                            val normalizedCentroid = centroid.normalizeCentroid(size)
+                            zoomAxis(xAxisModel, size.width, normalizedCentroid.x, zoomX)
+                            zoomAxis(yAxisModel, size.height, normalizedCentroid.y, zoomY)
+                        },
+                        onPanChange = { size, pan ->
+                            val normalizedPan = pan.normalizePan()
+                            panAxis(xAxisModel, size.width, normalizedPan.x)
+                            panAxis(yAxisModel, size.height, normalizedPan.y)
+                        }
+                    )
+                } else {
+                    Modifier
+                }
+
                 Box(
                     modifier = Modifier.clip(RectangleShape).then(panZoomModifier)
-                ) { chartScope.content() }
+                ) {
+                    val chartScope = XYGraphScopeImpl(xAxisModel, yAxisModel, xAxis, yAxis, this@HoverableElementArea)
+                    chartScope.content()
+                }
             }[0]
 
             val measurables = subcompose(Unit) {
@@ -172,17 +217,36 @@ public fun <X, Y> XYGraph(
     }
 }
 
-private fun <T> transformAxis(
+private fun <T> zoomAxis(
     axis: AxisModel<T>,
     length: Int,
     centroid: Float,
-    pan: Float,
     zoom: Float
 ) {
-    val pivot = (length.toFloat() - centroid) / length.toFloat()
+    val pivot = centroid / length.toFloat()
     axis.zoom(zoom, pivot.coerceIn(0f, 1f))
+}
+
+private fun <T> panAxis(
+    axis: AxisModel<T>,
+    length: Int,
+    pan: Float
+) {
     axis.pan(pan / length.toFloat())
 }
+
+/**
+ * Normalization of coordinates to the lower left point
+ * Normalization is necessary because the scaling calculation is based on the fact that the origin point
+ * of the coordinates is in the lower left corner
+ */
+private fun Offset.normalizeCentroid(size: IntSize): Offset = copy(
+    y = abs(y - size.height),
+)
+
+private fun Offset.normalizePan(): Offset = copy(
+    x = -x,
+)
 
 private data class Measurables(
     val grid: Measurable,
@@ -687,8 +751,15 @@ private fun DrawScope.drawGridLine(gridLineStyle: LineStyle?, start: Offset, end
  * @param yAxisStyle Style for the y-axis
  * @param yAxisLabels String factory of y-axis label Strings
  * @param yAxisTitle Title for the y-axis
- * @param panZoomEnabled True if the plot can be panned and zoomed, false to disable. Enabling panning and zooming may
+ * @param panEnabled True if the plot can be panned, false to disable. Enabling panning may
  * interfere with scrolling a parent container if the drag point is on the plot.
+ * @param zoomEnabled True if the plot can be zoomed, false to disable. Enabling zooming may
+ * interfere with scrolling a parent container if the drag point is on the plot.
+ * @param allowIndependentZoom `true` if the zoom can be either X-axis only or Y-axis only,
+ * `false` if the total zoom factor must be used.
+ * `true` does not mean that independent zoom coefficients are obtained simultaneously for each axis,
+ * if the zoom was initiated horizontally - the zoom coefficient will change only for the X axis,
+ * if the zoom was initiated vertically - the zoom coefficient will change only for the Y axis.
  * @param content The content to be displayed within this graph, which should include one plot for each
  * data series to be plotted.
  */
@@ -708,7 +779,9 @@ public fun <X, Y> XYGraph(
     horizontalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
     verticalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
     verticalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
-    panZoomEnabled: Boolean = true,
+    panEnabled: Boolean = false,
+    zoomEnabled: Boolean = false,
+    allowIndependentZoom: Boolean = false,
     content: @Composable XYGraphScope<X, Y>.() -> Unit
 ) {
     XYGraph(
@@ -761,7 +834,9 @@ public fun <X, Y> XYGraph(
         horizontalMinorGridLineStyle,
         verticalMajorGridLineStyle,
         verticalMinorGridLineStyle,
-        panZoomEnabled,
+        panEnabled,
+        zoomEnabled,
+        allowIndependentZoom,
         content
     )
 }
