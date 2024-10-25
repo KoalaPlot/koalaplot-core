@@ -48,7 +48,7 @@ tasks.withType<AbstractPublishToMaven>().configureEach {
     // Fix errors related to declared dependencies between publishing tasks and signing tasks
     dependsOn.add("signAndroidReleasePublication")
     dependsOn.add("signJsPublication")
-    dependsOn.add("signJvmPublication")
+    dependsOn.add("signDesktopPublication")
     dependsOn.add("signKotlinMultiplatformPublication")
     dependsOn.add("signWasmJsPublication")
 
