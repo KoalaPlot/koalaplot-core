@@ -16,9 +16,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Renamed ILinearAxisModel to LinearAxisModel
 - Removed minimumMajorTickSpacing from AxisModel interface and added to LinearAxisModel
-- Upgrade Kotlin to 2.0.20
+- Upgrade Kotlin to 2.0.21
 - Upgrade com.android.library to 8.5.2
 - Upgrade gradle wrapper to 8.10
+- Upgrade Compose to 1.7.0
+- Upgrade coroutines to 1.9.0
 
 ### Fixed
 
