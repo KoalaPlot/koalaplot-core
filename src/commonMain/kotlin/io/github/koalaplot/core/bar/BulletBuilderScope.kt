@@ -319,7 +319,7 @@ public class BulletBuilderScope<T>(private val axisModel: LinearAxisModel<T>) wh
                     it.measure(
                         Constraints(
                             maxWidth =
-                            (width / axis.majorTickValues.size).coerceAtLeast(0),
+                            (width / axis.majorTickValues.size.coerceAtLeast(1)).coerceAtLeast(0),
                             maxHeight = bulletHeight,
                         )
                     )

@@ -75,7 +75,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("io.github.koalaplot:koalaplot-core:0.6.0")
+    implementation("io.github.koalaplot:koalaplot-core:0.6.4")
 }
 ```
 
@@ -106,8 +106,8 @@ BulletGraphs {
 
 # Documentation
 
-- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.6.3)
-- [Release 0.6.3](https://koalaplot.github.io/koalaplot-core/api/0.6.3)
+- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.6.4)
+- [Release 0.6.4](https://koalaplot.github.io/koalaplot-core/api/0.6.4)
 
 Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples) for code examples.
 

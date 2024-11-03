@@ -31,6 +31,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Removed deprecated LinearAxisModel class and rememberLinearAxisModel function
 
+## [0.6.4]
+
+### Fixed
+
+- Added guards to avoid division by 0 in multiple places.
+
 ## [0.6.3]
 
 ### Fixed
