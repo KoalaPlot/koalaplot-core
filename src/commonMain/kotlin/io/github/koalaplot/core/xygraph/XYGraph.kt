@@ -302,7 +302,7 @@ private data class ChartAreas(
      * Calculates the x-axis tick spacing based on the width of the graph size and the provided [number] of ticks.
      */
     fun xTickSpacing(number: Int): Int {
-        return graphSize.width / number
+        return graphSize.width / number.coerceAtLeast(1)
     }
 
     private fun maxFirstLabelWidth(majorTickOffsets: List<Float>): Int {

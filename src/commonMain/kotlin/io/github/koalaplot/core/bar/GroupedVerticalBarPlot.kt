@@ -107,7 +107,8 @@ public fun <X, Y, E : VerticalBarPlotGroupedPointEntry<X, Y>> XYGraphScope<X, Y>
 
             val scaledBarWidth =
                 (
-                    computeNeighborDistance(index, data) * constraints.maxWidth * maxBarGroupWidth / element.y.size
+                    computeNeighborDistance(index, data) *
+                        constraints.maxWidth * maxBarGroupWidth / element.y.size.coerceAtLeast(1)
                     ).toInt()
 
             element.y.forEachIndexed { i, verticalBarPosition ->
@@ -134,7 +135,7 @@ public fun <X, Y, E : VerticalBarPlotGroupedPointEntry<X, Y>> XYGraphScope<X, Y>
                 val barGroupCenter = xAxisModel.computeOffset(data[groupIndex].x) * constraints.maxWidth
                 val scaledBarWidth = (
                     computeNeighborDistance(groupIndex, data) *
-                        constraints.maxWidth * maxBarGroupWidth / elementPlaceables.size
+                        constraints.maxWidth * maxBarGroupWidth / elementPlaceables.size.coerceAtLeast(1)
                     ).toInt()
                 val barGroupWidth = scaledBarWidth * elementPlaceables.size
 
@@ -174,7 +175,7 @@ private fun <E : VerticalBarPlotGroupedPointEntry<X, Y>, X, Y> XYGraphScope<X, Y
 ): Float {
     return if (index == 0) {
         if (data.size == 1) {
-            1f / xAxisState.majorTickOffsets.size
+            1f / xAxisState.majorTickOffsets.size.coerceAtLeast(1)
         } else {
             val center = xAxisModel.computeOffset(data[index].x)
             val right = xAxisModel.computeOffset(data[index + 1].x)

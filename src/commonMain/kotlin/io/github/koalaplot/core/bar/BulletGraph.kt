@@ -46,8 +46,10 @@ public fun BulletGraphs(
 
     SubcomposeLayout(modifier = modifier) { constraints ->
         val bulletHeight =
-            ((constraints.maxHeight - gap.roundToPx() * graphScope.scopes.size - 1) / graphScope.scopes.size)
-                .coerceAtLeast(0)
+            (
+                (constraints.maxHeight - gap.roundToPx() * graphScope.scopes.size - 1) /
+                    graphScope.scopes.size.coerceAtLeast(1)
+                ).coerceAtLeast(0)
 
         builders.forEach { it.bulletHeight = bulletHeight }
 

@@ -85,7 +85,11 @@ public class DoubleLinearAxisModel(
     }
 
     override fun computeTickValues(axisLength: Dp): TickValues<Double> {
-        val minTickSpacing = (minimumMajorTickSpacing / axisLength).coerceIn(0f..1f)
+        val minTickSpacing = if (axisLength == 0.dp) {
+            1f
+        } else {
+            (minimumMajorTickSpacing / axisLength).coerceIn(0f..1f)
+        }
         val majorTickValues = computeMajorTickValues(minTickSpacing)
         val minorTickValues = computeMinorTickValues(
             majorTickValues,
