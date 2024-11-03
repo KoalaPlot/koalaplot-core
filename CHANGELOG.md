@@ -11,6 +11,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - setViewRange function on LinearAxisModel interface.
 - zoom and pan support for all platforms within XYGraph
+- labelAnimationSpec parameter for PieCharts
 
 ### Changed
 
@@ -21,6 +22,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Upgrade gradle wrapper to 8.10
 - Upgrade Compose to 1.7.0
 - Upgrade coroutines to 1.9.0
+- Rename PieChart's animationSpec parameter to pieAnimationSpec
 
 ### Fixed
 

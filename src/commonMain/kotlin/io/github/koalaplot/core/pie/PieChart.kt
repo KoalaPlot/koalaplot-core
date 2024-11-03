@@ -194,7 +194,9 @@ private const val LabelFadeInDuration = 1000
  * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
  * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
  * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
- * @param animationSpec Specifies the animation to use when the pie chart is first drawn.
+ * @param pieAnimationSpec Specifies the animation to use when the pie chart is first drawn.
+ * @param labelAnimationSpec Specifies the animation to use when the labels are drawn. Drawing of the labels begins
+ * after the pie animation is complete.
  * @param pieStartAngle Sets an angle for the pie data to start at. Defaults to the top of the pie.
  * @param pieExtendAngle Sets a max angle for the pie to extend to, with a value between 1 and 360.
  * Defaults to [DegreesFullCircle].
@@ -216,7 +218,8 @@ public fun PieChart(
     minPieDiameter: Dp = 100.dp,
     maxPieDiameter: Dp = 300.dp,
     forceCenteredPie: Boolean = false,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+    pieAnimationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+    labelAnimationSpec: AnimationSpec<Float> = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing),
     pieStartAngle: AngularValue = AngleCCWTop.deg,
     pieExtendAngle: AngularValue = DegreesFullCircle.deg,
 ) {
@@ -230,9 +233,9 @@ public fun PieChart(
     val labelAlpha = remember(values) { Animatable(0f) }
 
     LaunchedEffect(values) {
-        beta.animateTo(1f, animationSpec = animationSpec)
+        beta.animateTo(1f, animationSpec = pieAnimationSpec)
         // fade in labels after pie animation is complete
-        labelAlpha.animateTo(1f, animationSpec = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing))
+        labelAlpha.animateTo(1f, labelAnimationSpec)
     }
 
     // pieSliceData that gets animated - used for drawing the pie
@@ -341,7 +344,9 @@ public fun PieChart(
  * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
  * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
  * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
- * @param animationSpec Specifies the animation to use when the pie chart is first drawn.
+ * @param pieAnimationSpec Specifies the animation to use when the pie chart is first drawn.
+ * @param labelAnimationSpec Specifies the animation to use when the labels are drawn. Drawing of the labels begins
+ * after the pie animation is complete.
  */
 @ExperimentalKoalaPlotApi
 @Composable
@@ -360,7 +365,8 @@ public fun PieChart(
     minPieDiameter: Dp = 100.dp,
     maxPieDiameter: Dp = 300.dp,
     forceCenteredPie: Boolean = false,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+    pieAnimationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+    labelAnimationSpec: AnimationSpec<Float> = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing),
 ) {
     require(labelSpacing >= 1f) { "labelSpacing must be greater than 1" }
     PieChart(
@@ -375,7 +381,8 @@ public fun PieChart(
         minPieDiameter,
         maxPieDiameter,
         forceCenteredPie,
-        animationSpec
+        pieAnimationSpec,
+        labelAnimationSpec
     )
 }
 
