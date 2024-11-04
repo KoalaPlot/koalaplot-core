@@ -1,3 +1,4 @@
+@file:Suppress("MagicNumber")
 package io.github.koalaplot.core.xygraph
 
 import androidx.compose.ui.unit.Dp
@@ -6,7 +7,7 @@ import org.junit.Test
 import kotlin.math.abs
 import kotlin.test.assertEquals
 
-class LinearAxisStateTest {
+class FloatLinearAxisModelTest {
     @Test
     fun testComputeMajorTickValues0to10() {
         testLinearAxisMajorTicks(
@@ -141,6 +142,30 @@ class LinearAxisStateTest {
                 18.4f, 18.8f, 19.2f, 19.6f
             )
         )
+    }
+
+    @Test
+    fun testSetRangeWithinAllowedRangeAndExtents() {
+        val axis = FloatLinearAxisModel(0f..100f, minViewExtent = 10f, maxViewExtent = 50f)
+        axis.setViewRange(0f..20f)
+        assertEquals(0f, axis.currentRange.start)
+        assertEquals(20f, axis.currentRange.endInclusive)
+    }
+
+    @Test
+    fun testSetRangeWithTooSmallExtent() {
+        val axis = FloatLinearAxisModel(0f..100f, minViewExtent = 10f, maxViewExtent = 50f)
+        axis.setViewRange(1f..5f)
+        assertEquals(0f, axis.currentRange.start)
+        assertEquals(10f, axis.currentRange.endInclusive)
+    }
+
+    @Test
+    fun testSetRangeWithTooLargeExtent() {
+        val axis = FloatLinearAxisModel(0f..100f, minViewExtent = 10f, maxViewExtent = 50f)
+        axis.setViewRange(0f..60f)
+        assertEquals(5f, axis.currentRange.start)
+        assertEquals(55f, axis.currentRange.endInclusive)
     }
 }
 

@@ -23,6 +23,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Upgrade Compose to 1.7.0
 - Upgrade coroutines to 1.9.0
 - Rename PieChart's animationSpec parameter to pieAnimationSpec
+- zoomRangeLimit in LinearAxisModel implementations replaced with minViewExtent and maxViewExtent to control both the
+allowed upper and lower bounds of the visible range
 
 ### Fixed
 

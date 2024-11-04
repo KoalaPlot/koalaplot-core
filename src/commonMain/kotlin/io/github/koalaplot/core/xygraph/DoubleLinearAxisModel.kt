@@ -21,8 +21,10 @@ import kotlin.math.sign
  *
  * @param range  The minimum to maximum values allowed to be represented on this Axis. Zoom and
  * scroll modifications may not exceed this range.
- * @param zoomRangeLimit Specifies the minimum allowed range after zooming. Must
+ * @param minViewExtent Specifies the minimum allowed range after zooming. Must
  * be greater than 0 and less than the difference between the start and end of [range].
+ * @param maxViewExtent Specifies the maximum allowed viewable range. Must be greater than 0, greater
+ * than or equal to minViewExtent, and less than or equal to the difference between the start and end of [range].
  * @param minimumMajorTickIncrement The minimum value between adjacent major ticks. Must be less than or equal to
  * the extent of the range.
  * @param minimumMajorTickSpacing Specifies the minimum physical spacing for major ticks, in
@@ -33,7 +35,8 @@ import kotlin.math.sign
  */
 public class DoubleLinearAxisModel(
     public override val range: ClosedFloatingPointRange<Double>,
-    private val zoomRangeLimit: Double = (range.endInclusive - range.start) * ZoomRangeLimitDefault,
+    private val minViewExtent: Double = (range.endInclusive - range.start) * ZoomRangeLimitDefault,
+    private val maxViewExtent: Double = ((range.endInclusive - range.start)),
     private val minimumMajorTickIncrement: Double =
         (range.endInclusive - range.start) * MinimumMajorTickIncrementDefault,
     override val minimumMajorTickSpacing: Dp = 50.dp,
@@ -46,10 +49,10 @@ public class DoubleLinearAxisModel(
             "Axis range end (${range.endInclusive}) must be greater than start (${range.start})"
         }
         require(minimumMajorTickSpacing > 0.dp) { "Minimum major tick spacing must be greater than 0 dp" }
-        require(zoomRangeLimit > 0f) {
+        require(minViewExtent > 0f) {
             "Zoom range limit must be greater than 0"
         }
-        require(zoomRangeLimit < range.endInclusive - range.start) { "Zoom range limit must be less than range" }
+        require(minViewExtent < range.endInclusive - range.start) { "Zoom range limit must be less than range" }
         require(minimumMajorTickIncrement <= range.endInclusive - range.start) {
             "minimumMajorTickIncrement must be less than or equal to the axis range"
         }
@@ -169,17 +172,7 @@ public class DoubleLinearAxisModel(
         val newLow = (pivotAxisScale - (pivotAxisScale - currentRange.start) / zoomFactor).coerceIn(range)
         val newHi = (pivotAxisScale + (currentRange.endInclusive - pivotAxisScale) / zoomFactor).coerceIn(range)
 
-        if (newHi - newLow < zoomRangeLimit) {
-            val delta = zoomRangeLimit - (newHi - newLow)
-            currentRange = (newLow - delta / 2f)..(newHi + delta / 2f)
-            if (currentRange.start < range.start) {
-                currentRange = range.start..(range.start + zoomRangeLimit)
-            } else if (currentRange.endInclusive > range.endInclusive) {
-                currentRange = (range.endInclusive - zoomRangeLimit)..range.endInclusive
-            }
-        } else {
-            currentRange = newLow..newHi
-        }
+        setViewRange(newLow..newHi)
     }
 
     override fun pan(amount: Float) {
@@ -199,14 +192,27 @@ public class DoubleLinearAxisModel(
     }
 
     override fun setViewRange(newRange: ClosedRange<Double>) {
-        if (newRange.endInclusive - newRange.start < zoomRangeLimit) {
-            val mid = (newRange.endInclusive - newRange.start) / 2.0
-            currentRange =
-                (newRange.start - mid).coerceAtLeast(range.start)..(newRange.endInclusive + mid)
-                    .coerceAtMost(range.endInclusive)
+        val newHi = newRange.endInclusive
+        val newLow = newRange.start
+
+        if (newHi - newLow < minViewExtent) {
+            val delta = (minViewExtent - (newHi - newLow)) / 2
+            currentRange = (newLow - delta)..(newHi + delta)
+            if (currentRange.start < range.start) {
+                currentRange = range.start..(range.start + minViewExtent)
+            } else if (currentRange.endInclusive > range.endInclusive) {
+                currentRange = (range.endInclusive - minViewExtent)..range.endInclusive
+            }
+        } else if (newHi - newLow > maxViewExtent) {
+            val delta = (newHi - newLow - maxViewExtent) / 2
+            currentRange = (newLow + delta)..(newHi - delta)
+            if (currentRange.start < range.start) {
+                currentRange = range.start..(range.start + maxViewExtent)
+            } else if (currentRange.endInclusive > range.endInclusive) {
+                currentRange = (range.endInclusive - maxViewExtent)..range.endInclusive
+            }
         } else {
-            currentRange =
-                newRange.start.coerceAtLeast(range.start)..newRange.endInclusive.coerceAtMost(range.endInclusive)
+            currentRange = newLow..newHi
         }
     }
 
@@ -217,7 +223,7 @@ public class DoubleLinearAxisModel(
         other as DoubleLinearAxisModel
 
         if (range != other.range) return false
-        if (zoomRangeLimit != other.zoomRangeLimit) return false
+        if (minViewExtent != other.minViewExtent) return false
         if (minimumMajorTickIncrement != other.minimumMajorTickIncrement) return false
         if (minimumMajorTickSpacing != other.minimumMajorTickSpacing) return false
         if (minorTickCount != other.minorTickCount) return false
@@ -227,7 +233,7 @@ public class DoubleLinearAxisModel(
 
     override fun hashCode(): Int {
         var result = range.hashCode()
-        result = 31 * result + zoomRangeLimit.hashCode()
+        result = 31 * result + minViewExtent.hashCode()
         result = 31 * result + minimumMajorTickIncrement.hashCode()
         result = 31 * result + minimumMajorTickSpacing.hashCode()
         result = 31 * result + minorTickCount
@@ -243,7 +249,8 @@ public class DoubleLinearAxisModel(
 @Composable
 public fun rememberDoubleLinearAxisModel(
     range: ClosedFloatingPointRange<Double>,
-    zoomRangeLimit: Double = (range.endInclusive - range.start) * ZoomRangeLimitDefault,
+    minViewExtent: Double = (range.endInclusive - range.start) * ZoomRangeLimitDefault,
+    maxViewExtent: Double = ((range.endInclusive - range.start)),
     minimumMajorTickIncrement: Double = (range.endInclusive - range.start) * MinimumMajorTickIncrementDefault,
     minimumMajorTickSpacing: Dp = 50.dp,
     minorTickCount: Int = 4,
@@ -251,7 +258,7 @@ public fun rememberDoubleLinearAxisModel(
     allowPanning: Boolean = true,
 ): DoubleLinearAxisModel = remember(
     range,
-    zoomRangeLimit,
+    minViewExtent,
     minimumMajorTickIncrement,
     minimumMajorTickSpacing,
     minorTickCount,
@@ -260,7 +267,8 @@ public fun rememberDoubleLinearAxisModel(
 ) {
     DoubleLinearAxisModel(
         range,
-        zoomRangeLimit,
+        minViewExtent,
+        maxViewExtent,
         minimumMajorTickIncrement,
         minimumMajorTickSpacing,
         minorTickCount,

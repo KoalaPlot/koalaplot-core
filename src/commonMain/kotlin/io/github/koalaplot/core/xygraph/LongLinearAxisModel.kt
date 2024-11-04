@@ -22,8 +22,10 @@ import kotlin.math.roundToLong
  *
  * @param range  The minimum to maximum values allowed to be represented on this Axis. Zoom and
  * scroll modifications may not exceed this range.
- * @param zoomRangeLimit Specifies the minimum allowed range after zooming. Must
+ * @param minViewExtent Specifies the minimum allowed range after zooming. Must
  * be greater than 0 and less than or equal to the difference between the start and end of [range].
+ * @param maxViewExtent Specifies the maximum allowed viewable range. Must be greater than 0, greater
+ * than or equal to minViewExtent, and less than or equal to the difference between the start and end of [range].
  * @param minimumMajorTickIncrement The minimum value between adjacent major ticks. Must be less than or equal to
  * the extent of the range.
  * @param minimumMajorTickSpacing Specifies the minimum physical spacing for major ticks, in
@@ -34,7 +36,8 @@ import kotlin.math.roundToLong
  */
 public class LongLinearAxisModel(
     public override val range: LongRange,
-    private val zoomRangeLimit: Long = ((range.last - range.first) * ZoomRangeLimitDefault).coerceAtLeast(1.0).toLong(),
+    private val minViewExtent: Long = ((range.last - range.first) * ZoomRangeLimitDefault).coerceAtLeast(1.0).toLong(),
+    private val maxViewExtent: Long = ((range.last - range.first)),
     private val minimumMajorTickIncrement: Long = (
         (range.last - range.first) * MinimumMajorTickIncrementDefault
         ).toLong(),
@@ -48,10 +51,10 @@ public class LongLinearAxisModel(
             "Axis range end (${range.last}) must be greater than start (${range.first})"
         }
         require(minimumMajorTickSpacing > 0.dp) { "Minimum major tick spacing must be greater than 0 dp" }
-        require(zoomRangeLimit > 0f) {
+        require(minViewExtent > 0f) {
             "Zoom range limit must be greater than 0"
         }
-        require(zoomRangeLimit <= range.last - range.first) { "Zoom range limit must be less than or equal to range" }
+        require(minViewExtent <= range.last - range.first) { "Zoom range limit must be less than or equal to range" }
         require(minimumMajorTickIncrement <= range.last - range.first) {
             "minimumMajorTickIncrement must be less than or equal to the axis range"
         }
@@ -174,17 +177,7 @@ public class LongLinearAxisModel(
             (pivotAxisScale + (currentRange.last - pivotAxisScale) / zoomFactor.toDouble()).roundToLong()
                 .coerceIn(range)
 
-        if (newHi - newLow < zoomRangeLimit) {
-            val delta = zoomRangeLimit - (newHi - newLow)
-            currentRange = (newLow - delta / 2L)..(newHi + delta / 2L)
-            if (currentRange.first < range.first) {
-                currentRange = range.first..(range.first + zoomRangeLimit)
-            } else if (currentRange.last > range.last) {
-                currentRange = (range.last - zoomRangeLimit)..range.last
-            }
-        } else {
-            currentRange = newLow..newHi
-        }
+        setViewRange(newLow..newHi)
     }
 
     override fun pan(amount: Float) {
@@ -204,13 +197,27 @@ public class LongLinearAxisModel(
     }
 
     override fun setViewRange(newRange: ClosedRange<Long>) {
-        if (newRange.endInclusive - newRange.start < zoomRangeLimit) {
-            val mid = (newRange.endInclusive - newRange.start) / 2L
-            currentRange =
-                (newRange.start - mid).coerceAtLeast(range.first)..(newRange.endInclusive + mid)
-                    .coerceAtMost(range.last)
+        val newHi = newRange.endInclusive
+        val newLow = newRange.start
+
+        if (newHi - newLow < minViewExtent) {
+            val delta = (minViewExtent - (newHi - newLow)) / 2
+            currentRange = (newLow - delta)..(newHi + delta)
+            if (currentRange.start < range.start) {
+                currentRange = range.start..(range.start + minViewExtent)
+            } else if (currentRange.endInclusive > range.endInclusive) {
+                currentRange = (range.endInclusive - minViewExtent)..range.endInclusive
+            }
+        } else if (newHi - newLow > maxViewExtent) {
+            val delta = (newHi - newLow - maxViewExtent) / 2
+            currentRange = (newLow + delta)..(newHi - delta)
+            if (currentRange.start < range.start) {
+                currentRange = range.start..(range.start + maxViewExtent)
+            } else if (currentRange.endInclusive > range.endInclusive) {
+                currentRange = (range.endInclusive - maxViewExtent)..range.endInclusive
+            }
         } else {
-            currentRange = newRange.start.coerceAtLeast(range.first)..newRange.endInclusive.coerceAtMost(range.last)
+            currentRange = newLow..newHi
         }
     }
 
@@ -221,7 +228,7 @@ public class LongLinearAxisModel(
         other as LongLinearAxisModel
 
         if (range != other.range) return false
-        if (zoomRangeLimit != other.zoomRangeLimit) return false
+        if (minViewExtent != other.minViewExtent) return false
         if (minimumMajorTickIncrement != other.minimumMajorTickIncrement) return false
         if (minimumMajorTickSpacing != other.minimumMajorTickSpacing) return false
         if (minorTickCount != other.minorTickCount) return false
@@ -231,7 +238,7 @@ public class LongLinearAxisModel(
 
     override fun hashCode(): Int {
         var result = range.hashCode()
-        result = 31 * result + zoomRangeLimit.hashCode()
+        result = 31 * result + minViewExtent.hashCode()
         result = 31 * result + minimumMajorTickIncrement.hashCode()
         result = 31 * result + minimumMajorTickSpacing.hashCode()
         result = 31 * result + minorTickCount
@@ -247,7 +254,8 @@ public class LongLinearAxisModel(
 @Composable
 public fun rememberLongLinearAxisModel(
     range: LongRange,
-    zoomRangeLimit: Long = ((range.last - range.first) * ZoomRangeLimitDefault).toLong(),
+    minViewExtent: Long = ((range.last - range.first) * ZoomRangeLimitDefault).toLong(),
+    maxViewExtent: Long = ((range.last - range.first)),
     minimumMajorTickIncrement: Long = ((range.last - range.first) * MinimumMajorTickIncrementDefault).toLong(),
     minimumMajorTickSpacing: Dp = 50.dp,
     minorTickCount: Int = 4,
@@ -255,7 +263,7 @@ public fun rememberLongLinearAxisModel(
     allowPanning: Boolean = true,
 ): LongLinearAxisModel = remember(
     range,
-    zoomRangeLimit,
+    minViewExtent,
     minimumMajorTickIncrement,
     minimumMajorTickSpacing,
     minorTickCount,
@@ -264,7 +272,8 @@ public fun rememberLongLinearAxisModel(
 ) {
     LongLinearAxisModel(
         range,
-        zoomRangeLimit,
+        minViewExtent,
+        maxViewExtent,
         minimumMajorTickIncrement,
         minimumMajorTickSpacing,
         minorTickCount,
