@@ -49,16 +49,24 @@ public class DoubleLinearAxisModel(
             "Axis range end (${range.endInclusive}) must be greater than start (${range.start})"
         }
         require(minimumMajorTickSpacing > 0.dp) { "Minimum major tick spacing must be greater than 0 dp" }
-        require(minViewExtent > 0f) {
-            "Zoom range limit must be greater than 0"
+        require(minViewExtent > 0.0) {
+            "minViewExtent must be greater than 0"
         }
-        require(minViewExtent < range.endInclusive - range.start) { "Zoom range limit must be less than range" }
+        require(maxViewExtent > 0.0 && maxViewExtent >= minViewExtent) {
+            "maxViewExtent must be greater than 0 and greater than or equal to minViewExtent"
+        }
+        require(minViewExtent <= range.endInclusive - range.start) {
+            "minViewExtent must be less than or equal to range"
+        }
+        require(maxViewExtent <= range.endInclusive - range.start) {
+            "maxViewExtent must be less than or equal to range"
+        }
         require(minimumMajorTickIncrement <= range.endInclusive - range.start) {
             "minimumMajorTickIncrement must be less than or equal to the axis range"
         }
     }
 
-    private var currentRange by mutableStateOf(range)
+    private var currentRange by mutableStateOf(range.start..(range.start + maxViewExtent))
 
     override fun computeOffset(point: Double): Float {
         return ((point - currentRange.start) / (currentRange.endInclusive - currentRange.start)).toFloat()
@@ -165,14 +173,20 @@ public class DoubleLinearAxisModel(
         require(zoomFactor > 0) { "Zoom amount must be greater than 0" }
         require(pivot in 0.0..1.0) { "Zoom pivot must be between 0 and 1: $pivot" }
 
-        // convert pivot to axis range space
-        val pivotAxisScale =
-            (currentRange.start) + (currentRange.endInclusive - currentRange.start) * pivot
+        if (zoomFactor > 1f && currentRange.endInclusive - currentRange.start == minViewExtent) {
+            // Can't zoom in more
+        } else if (zoomFactor < 1f && currentRange.endInclusive - currentRange.start == maxViewExtent) {
+            // Can't zoom out more
+        } else {
+            // convert pivot to axis range space
+            val pivotAxisScale =
+                (currentRange.start) + (currentRange.endInclusive - currentRange.start) * pivot
 
-        val newLow = (pivotAxisScale - (pivotAxisScale - currentRange.start) / zoomFactor).coerceIn(range)
-        val newHi = (pivotAxisScale + (currentRange.endInclusive - pivotAxisScale) / zoomFactor).coerceIn(range)
+            val newLow = (pivotAxisScale - (pivotAxisScale - currentRange.start) / zoomFactor)
+            val newHi = (pivotAxisScale + (currentRange.endInclusive - pivotAxisScale) / zoomFactor)
 
-        setViewRange(newLow..newHi)
+            setViewRange(newLow..newHi)
+        }
     }
 
     override fun pan(amount: Float) {
@@ -192,8 +206,8 @@ public class DoubleLinearAxisModel(
     }
 
     override fun setViewRange(newRange: ClosedRange<Double>) {
-        val newHi = newRange.endInclusive
-        val newLow = newRange.start
+        val newHi = newRange.endInclusive.coerceIn(range)
+        val newLow = newRange.start.coerceIn(range)
 
         if (newHi - newLow < minViewExtent) {
             val delta = (minViewExtent - (newHi - newLow)) / 2

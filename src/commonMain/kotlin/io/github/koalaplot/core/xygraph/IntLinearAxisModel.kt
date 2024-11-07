@@ -65,7 +65,7 @@ public class IntLinearAxisModel(
     }
 
     // Internal for testing
-    internal var currentRange by mutableStateOf(range)
+    internal var currentRange by mutableStateOf(range.first..(range.first + maxViewExtent))
 
     override fun computeOffset(point: Int): Float {
         return ((point - currentRange.first).toFloat() / (currentRange.last - currentRange.first).toFloat())
@@ -171,13 +171,19 @@ public class IntLinearAxisModel(
         require(zoomFactor > 0) { "Zoom amount must be greater than 0" }
         require(pivot in 0.0..1.0) { "Zoom pivot must be between 0 and 1: $pivot" }
 
-        // convert pivot to axis range space
-        val pivotAxisScale = currentRange.first + ((currentRange.last - currentRange.first) * pivot).roundToInt()
+        if (zoomFactor > 1f && currentRange.last - currentRange.first == minViewExtent) {
+            // Can't zoom in more
+        } else if (zoomFactor < 1f && currentRange.last - currentRange.first == maxViewExtent) {
+            // Can't zoom out more
+        } else {
+            // convert pivot to axis range space
+            val pivotAxisScale = currentRange.first + ((currentRange.last - currentRange.first) * pivot).roundToInt()
 
-        val newLow = (pivotAxisScale - (pivotAxisScale - currentRange.first) / zoomFactor).roundToInt().coerceIn(range)
-        val newHi = (pivotAxisScale + (currentRange.last - pivotAxisScale) / zoomFactor).roundToInt().coerceIn(range)
+            val newLow = (pivotAxisScale - (pivotAxisScale - currentRange.first) / zoomFactor).roundToInt()
+            val newHi = (pivotAxisScale + (currentRange.last - pivotAxisScale) / zoomFactor).roundToInt()
 
-        setViewRange(newLow..newHi)
+            setViewRange(newLow..newHi)
+        }
     }
 
     override fun pan(amount: Float) {
@@ -197,8 +203,8 @@ public class IntLinearAxisModel(
     }
 
     override fun setViewRange(newRange: ClosedRange<Int>) {
-        val newHi = newRange.endInclusive
-        val newLow = newRange.start
+        val newHi = newRange.endInclusive.coerceIn(range)
+        val newLow = newRange.start.coerceIn(range)
 
         if (newHi - newLow < minViewExtent) {
             val delta = (minViewExtent - (newHi - newLow)) / 2
