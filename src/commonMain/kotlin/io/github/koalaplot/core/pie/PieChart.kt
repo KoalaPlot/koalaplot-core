@@ -21,9 +21,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -229,6 +231,7 @@ public fun PieChart(
         "pieExtendAngle must be between 0 and 360, exclusive of 0"
     }
 
+    val currentValues by rememberUpdatedState(values)
     val beta = remember(values) { Animatable(0f) }
     val labelAlpha = remember(values) { Animatable(0f) }
 
@@ -239,27 +242,27 @@ public fun PieChart(
     }
 
     // pieSliceData that gets animated - used for drawing the pie
-    val pieSliceData = remember(values, beta.value) {
-        makePieSliceData(values, beta.value, pieStartAngle, pieExtendAngle)
+    val pieSliceData by remember(beta.value) {
+        derivedStateOf { makePieSliceData(currentValues, beta.value, pieStartAngle, pieExtendAngle) }
     }
 
     // pieSliceData when the animation is complete - used for sizing & label layout/positioning
-    val finalPieSliceData = remember(values) { makePieSliceData(values, 1f, pieStartAngle, pieExtendAngle) }
-
-    val pieMeasurePolicy =
-        remember(finalPieSliceData, holeSize, labelPositionProvider, minPieDiameter, forceCenteredPie) {
-            PieMeasurePolicy(finalPieSliceData, holeSize, labelPositionProvider, InitOuterRadius, forceCenteredPie)
-        }
+    val finalPieSliceData by remember {
+        derivedStateOf { makePieSliceData(currentValues, 1f, pieStartAngle, pieExtendAngle) }
+    }
 
     HoverableElementArea(modifier = modifier) {
         SubcomposeLayout(modifier = Modifier.clipToBounds()) { constraints ->
+            val pieMeasurePolicy =
+                PieMeasurePolicy(finalPieSliceData, holeSize, labelPositionProvider, InitOuterRadius, forceCenteredPie)
+
             val pieMeasurable = subcompose("pie") { Pie(pieSliceData, slice, holeSize) }[0]
 
             val labelMeasurables = subcompose("labels") {
-                pieSliceData.indices.forEach {
+                pieSliceData.indices.forEach { index ->
                     // Wrapping in box ensures there is 1 measurable element
                     // emitted per label & applies fade animation
-                    Box(modifier = Modifier.alpha(labelAlpha.value)) { label(it) }
+                    Box(modifier = Modifier.alpha(labelAlpha.value)) { label(index) }
                 }
             }
 
@@ -272,10 +275,7 @@ public fun PieChart(
             )
 
             val labelPositions = labelPositionProvider.computeLabelPositions(
-                pieDiameter * InitOuterRadius,
-                holeSize,
-                labelPlaceables,
-                finalPieSliceData
+                pieDiameter * InitOuterRadius, holeSize, labelPlaceables, finalPieSliceData
             )
 
             val size = pieMeasurePolicy.computeSize(labelPlaceables, labelPositions, pieDiameter).run {
@@ -296,17 +296,17 @@ public fun PieChart(
                 }
             }[0].measure(Constraints.fixed(holeDiameter.toInt(), holeDiameter.toInt()))
 
-            val connectorPlaceables = subcompose("connectors") {
-                for (element in pieSliceData.indices) {
+            val connectorPlaceables = pieSliceData.mapIndexed { index, _ ->
+                subcompose("connector $index") {
                     Box(modifier = Modifier.fillMaxSize().alpha(labelAlpha.value)) {
-                        labelConnectorTranslations[element]?.let {
+                        labelConnectorTranslations[index]?.let {
                             with(it.second) {
-                                labelConnector(element)
+                                labelConnector(index)
                             }
                         }
                     }
-                }
-            }.map { it.measure(constraints) }
+                }.map { it.measure(constraints) }
+            }.flatten()
 
             with(pieMeasurePolicy) {
                 layoutPie(
