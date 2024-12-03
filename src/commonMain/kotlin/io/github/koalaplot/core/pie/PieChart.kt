@@ -274,9 +274,13 @@ public fun PieChart(
                 maxPieDiameter.toPx()
             )
 
-            val labelPositions = labelPositionProvider.computeLabelPositions(
-                pieDiameter * InitOuterRadius, holeSize, labelPlaceables, finalPieSliceData
-            )
+            val labelPositions =
+                labelPositionProvider.computeLabelPositions(
+                    pieDiameter * InitOuterRadius,
+                    holeSize,
+                    labelPlaceables,
+                    finalPieSliceData
+                )
 
             val size = pieMeasurePolicy.computeSize(labelPlaceables, labelPositions, pieDiameter).run {
                 // add one due to later float to int conversion dropping the fraction part
@@ -300,9 +304,7 @@ public fun PieChart(
                 subcompose("connector $index") {
                     Box(modifier = Modifier.fillMaxSize().alpha(labelAlpha.value)) {
                         labelConnectorTranslations[index]?.let {
-                            with(it.second) {
-                                labelConnector(index)
-                            }
+                            with(it.second) { labelConnector(index) }
                         }
                     }
                 }.map { it.measure(constraints) }
