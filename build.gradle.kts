@@ -28,7 +28,7 @@ dependencies {
 }
 
 group = "io.github.koalaplot"
-version = "0.7.1"
+version = "0.8.0-dev1"
 
 kotlin {
     explicitApi()
@@ -109,10 +109,10 @@ kotlin {
 
 android {
     namespace = "io.github.koalaplot"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
     }
 
     compileOptions {
