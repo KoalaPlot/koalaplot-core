@@ -1,5 +1,6 @@
 package io.github.koalaplot.core.xygraph
 
+import androidx.compose.runtime.State
 import androidx.compose.ui.unit.Dp
 
 internal val TickRatios = listOf(0.1f, 0.2f, 0.5f, 1f, 2f)
@@ -10,6 +11,8 @@ internal const val MinimumMajorTickIncrementDefault = 0.1f
 public interface LinearAxisModel<T> : AxisModel<T> where T : Comparable<T>, T : Number {
     public val range: ClosedRange<T>
     public val minimumMajorTickSpacing: Dp
+
+    public val viewRange: State<ClosedRange<T>>
 
     /**
      * Sets the currently viewable range on the axis. This is a more direct alternative to using [pan] and [zoom]

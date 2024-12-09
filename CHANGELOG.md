@@ -7,7 +7,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- viewRange property to LinearAxisModel.
+
 ### Changed
+
 - Upgrade Compose plugin to 1.7.1
 - Upgrade Kotlin to 2.1.0
 - Android Gradle Plugin to 8.7.2

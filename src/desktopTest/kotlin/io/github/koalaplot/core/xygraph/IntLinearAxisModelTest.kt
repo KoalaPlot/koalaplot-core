@@ -97,24 +97,24 @@ class IntLinearAxisModelTest {
     fun testSetRangeWithinAllowedRangeAndExtents() {
         val axis = IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 50)
         axis.setViewRange(0..20)
-        assertEquals(0, axis.currentRange.first)
-        assertEquals(20, axis.currentRange.last)
+        assertEquals(0, axis.currentRange.value.first)
+        assertEquals(20, axis.currentRange.value.last)
     }
 
     @Test
     fun testSetRangeWithTooSmallExtent() {
         val axis = IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 50)
         axis.setViewRange(1..5)
-        assertEquals(0, axis.currentRange.first)
-        assertEquals(10, axis.currentRange.last)
+        assertEquals(0, axis.currentRange.value.first)
+        assertEquals(10, axis.currentRange.value.last)
     }
 
     @Test
     fun testSetRangeWithTooLargeExtent() {
         val axis = IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 50)
         axis.setViewRange(0..60)
-        assertEquals(5, axis.currentRange.first)
-        assertEquals(55, axis.currentRange.last)
+        assertEquals(5, axis.currentRange.value.first)
+        assertEquals(55, axis.currentRange.value.last)
     }
 }
 
@@ -126,25 +126,6 @@ private fun testLinearAxisMajorTicks(
 ) {
     val axis = IntLinearAxisModel(range, minimumMajorTickSpacing = minTickSpacing)
     val ticks = axis.computeTickValues(axisLength).majorTickValues
-
-    // assertEquals on arrays of Floats does not factor in precision of the float
-    // so need to implement a loop asserting each float with precision
-    // e.g. +0f and -0f are not equal
-    assertEquals(expected.size, ticks.size, "Number of ticks")
-
-    expected.forEachIndexed { i, _ ->
-        assertEquals(expected[i], ticks[i], "Unexpected tick value")
-    }
-}
-
-private fun testLinearAxisMinorTicks(
-    range: IntRange,
-    axisLength: Dp,
-    minTickSpacing: Dp = 50.dp,
-    expected: List<Int>,
-) {
-    val axis = IntLinearAxisModel(range, minimumMajorTickSpacing = minTickSpacing)
-    val ticks = axis.computeTickValues(axisLength).minorTickValues
 
     // assertEquals on arrays of Floats does not factor in precision of the float
     // so need to implement a loop asserting each float with precision

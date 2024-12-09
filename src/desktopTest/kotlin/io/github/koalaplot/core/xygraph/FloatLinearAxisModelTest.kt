@@ -148,24 +148,24 @@ class FloatLinearAxisModelTest {
     fun testSetRangeWithinAllowedRangeAndExtents() {
         val axis = FloatLinearAxisModel(0f..100f, minViewExtent = 10f, maxViewExtent = 50f)
         axis.setViewRange(0f..20f)
-        assertEquals(0f, axis.currentRange.start)
-        assertEquals(20f, axis.currentRange.endInclusive)
+        assertEquals(0f, axis.currentRange.value.start)
+        assertEquals(20f, axis.currentRange.value.endInclusive)
     }
 
     @Test
     fun testSetRangeWithTooSmallExtent() {
         val axis = FloatLinearAxisModel(0f..100f, minViewExtent = 10f, maxViewExtent = 50f)
         axis.setViewRange(1f..5f)
-        assertEquals(0f, axis.currentRange.start)
-        assertEquals(10f, axis.currentRange.endInclusive)
+        assertEquals(0f, axis.currentRange.value.start)
+        assertEquals(10f, axis.currentRange.value.endInclusive)
     }
 
     @Test
     fun testSetRangeWithTooLargeExtent() {
         val axis = FloatLinearAxisModel(0f..100f, minViewExtent = 10f, maxViewExtent = 50f)
         axis.setViewRange(0f..60f)
-        assertEquals(5f, axis.currentRange.start)
-        assertEquals(55f, axis.currentRange.endInclusive)
+        assertEquals(5f, axis.currentRange.value.start)
+        assertEquals(55f, axis.currentRange.value.endInclusive)
     }
 }
 
