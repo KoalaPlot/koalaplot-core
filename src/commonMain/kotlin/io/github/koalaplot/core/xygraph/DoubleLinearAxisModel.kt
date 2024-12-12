@@ -42,6 +42,7 @@ public class DoubleLinearAxisModel(
     private val minorTickCount: Int = 4,
     private val allowZooming: Boolean = true,
     private val allowPanning: Boolean = true,
+    private val inverted: Boolean = false,
 ) : LinearAxisModel<Double> {
     init {
         require(range.endInclusive > range.start) {
@@ -65,15 +66,29 @@ public class DoubleLinearAxisModel(
         }
     }
 
+    // Function used to compute point offsets. Will be modified from the default if inverted is true.
+    private var offsetComputer = { point: Double ->
+        (
+            (point - currentRange.value.start) / (currentRange.value.endInclusive - currentRange.value.start)
+            ).toFloat()
+    }
+
+    init {
+        if (inverted) {
+            offsetComputer = { point: Double ->
+                (
+                    (currentRange.value.endInclusive - point) /
+                        (currentRange.value.endInclusive - currentRange.value.start)
+                    ).toFloat()
+            }
+        }
+    }
+
     private var currentRange = mutableStateOf(range.start..(range.start + maxViewExtent))
 
     public override val viewRange: State<ClosedRange<Double>> = currentRange
 
-    override fun computeOffset(point: Double): Float {
-        return (
-            (point - currentRange.value.start) / (currentRange.value.endInclusive - currentRange.value.start)
-            ).toFloat()
-    }
+    override fun computeOffset(point: Double): Float = offsetComputer(point)
 
     /**
      * Computes major tick values based on a minimum tick spacing that is a
@@ -110,8 +125,8 @@ public class DoubleLinearAxisModel(
             computeMajorTickSpacing(minTickSpacing)
         )
         return object : TickValues<Double> {
-            override val majorTickValues = majorTickValues
-            override val minorTickValues = minorTickValues
+            override val majorTickValues = if (inverted) majorTickValues.reversed() else majorTickValues
+            override val minorTickValues = if (inverted) minorTickValues.reversed() else minorTickValues
         }
     }
 

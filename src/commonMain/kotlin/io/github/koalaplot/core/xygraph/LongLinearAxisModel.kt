@@ -32,6 +32,7 @@ import kotlin.math.roundToLong
  * @param minorTickCount The number of minor ticks per major tick interval.
  * @param allowZooming If the axis should allow zooming
  * @param allowPanning If the axis should allow panning.
+ * @param inverted If the axis coordinates should be inverted so smaller values are at the top/right.
  */
 public class LongLinearAxisModel(
     public override val range: LongRange,
@@ -44,6 +45,7 @@ public class LongLinearAxisModel(
     private val minorTickCount: Int = 4,
     private val allowZooming: Boolean = true,
     private val allowPanning: Boolean = true,
+    private val inverted: Boolean = false,
 ) : LinearAxisModel<Long> {
     init {
         require(range.last > range.first) {
@@ -67,15 +69,29 @@ public class LongLinearAxisModel(
         }
     }
 
-    private var currentRange = mutableStateOf(range.first..(range.first + maxViewExtent))
-    public override val viewRange: State<ClosedRange<Long>> = currentRange
-
-    override fun computeOffset(point: Long): Float {
-        return (
+    // Function used to compute point offsets. Will be modified from the default if inverted is true.
+    private var offsetComputer = { point: Long ->
+        (
             (point - currentRange.value.first).toDouble() /
                 (currentRange.value.last - currentRange.value.first).toDouble()
             ).toFloat()
     }
+
+    init {
+        if (inverted) {
+            offsetComputer = { point: Long ->
+                (
+                    (currentRange.value.last - point).toDouble() /
+                        (currentRange.value.last - currentRange.value.first).toDouble()
+                    ).toFloat()
+            }
+        }
+    }
+
+    private var currentRange = mutableStateOf(range.first..(range.first + maxViewExtent))
+    public override val viewRange: State<ClosedRange<Long>> = currentRange
+
+    override fun computeOffset(point: Long): Float = offsetComputer(point)
 
     /**
      * Computes major tick values based on a minimum tick spacing that is a
@@ -112,8 +128,8 @@ public class LongLinearAxisModel(
             computeMajorTickSpacing(minTickSpacing)
         )
         return object : TickValues<Long> {
-            override val majorTickValues = majorTickValues
-            override val minorTickValues = minorTickValues
+            override val majorTickValues = if (inverted) majorTickValues.reversed() else majorTickValues
+            override val minorTickValues = if (inverted) minorTickValues.reversed() else minorTickValues
         }
     }
 

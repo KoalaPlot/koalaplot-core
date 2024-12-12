@@ -32,6 +32,7 @@ import kotlin.math.roundToInt
  * @param minorTickCount The number of minor ticks per major tick interval.
  * @param allowZooming If the axis should allow zooming
  * @param allowPanning If the axis should allow panning.
+ * @param inverted If the axis coordinates should be inverted so smaller values are at the top/right.
  */
 public class IntLinearAxisModel(
     public override val range: IntRange,
@@ -44,6 +45,7 @@ public class IntLinearAxisModel(
     private val minorTickCount: Int = 4,
     private val allowZooming: Boolean = true,
     private val allowPanning: Boolean = true,
+    private val inverted: Boolean = false,
 ) : LinearAxisModel<Int> {
     init {
         require(range.last > range.first) {
@@ -63,16 +65,26 @@ public class IntLinearAxisModel(
         }
     }
 
+    // Function used to compute point offsets. Will be modified from the default if inverted is true.
+    private var offsetComputer = { point: Int ->
+        (point - currentRange.value.first).toFloat() /
+            (currentRange.value.last - currentRange.value.first).toFloat()
+    }
+
+    init {
+        if (inverted) {
+            offsetComputer = { point: Int ->
+                (currentRange.value.last - point).toFloat() /
+                    (currentRange.value.last - currentRange.value.first).toFloat()
+            }
+        }
+    }
+
     // Internal for testing
     internal var currentRange = mutableStateOf(range.first..(range.first + maxViewExtent))
     public override val viewRange: State<ClosedRange<Int>> = currentRange
 
-    override fun computeOffset(point: Int): Float {
-        return (
-            (point - currentRange.value.first).toFloat() /
-                (currentRange.value.last - currentRange.value.first).toFloat()
-            )
-    }
+    override fun computeOffset(point: Int): Float = offsetComputer(point)
 
     /**
      * Computes major tick values based on a minimum tick spacing that is a
@@ -109,8 +121,8 @@ public class IntLinearAxisModel(
             computeMajorTickSpacing(minTickSpacing)
         )
         return object : TickValues<Int> {
-            override val majorTickValues = majorTickValues
-            override val minorTickValues = minorTickValues
+            override val majorTickValues = if (inverted) majorTickValues.reversed() else majorTickValues
+            override val minorTickValues = if (inverted) minorTickValues.reversed() else minorTickValues
         }
     }
 

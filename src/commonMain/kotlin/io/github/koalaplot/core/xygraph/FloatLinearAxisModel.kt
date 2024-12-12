@@ -32,6 +32,7 @@ import kotlin.math.sign
  * @param minorTickCount The number of minor ticks per major tick interval.
  * @param allowZooming If the axis should allow zooming
  * @param allowPanning If the axis should allow panning.
+ * @param inverted If the axis coordinates should be inverted so smaller values are at the top/right.
  */
 public class FloatLinearAxisModel(
     public override val range: ClosedFloatingPointRange<Float>,
@@ -43,6 +44,7 @@ public class FloatLinearAxisModel(
     private val minorTickCount: Int = 4,
     private val allowZooming: Boolean = true,
     private val allowPanning: Boolean = true,
+    private val inverted: Boolean = false,
 ) : AxisModel<Float>, LinearAxisModel<Float> {
     init {
         require(range.endInclusive > range.start) {
@@ -66,12 +68,23 @@ public class FloatLinearAxisModel(
         }
     }
 
+    // Function used to compute point offsets. Will be modified from the default if inverted is true.
+    private var offsetComputer = { point: Float ->
+        (point - currentRange.value.start) / (currentRange.value.endInclusive - currentRange.value.start)
+    }
+
+    init {
+        if (inverted) {
+            offsetComputer = { point: Float ->
+                (currentRange.value.endInclusive - point) / (currentRange.value.endInclusive - currentRange.value.start)
+            }
+        }
+    }
+
     internal var currentRange = mutableStateOf(range.start..(range.start + maxViewExtent))
     public override val viewRange: State<ClosedRange<Float>> = currentRange
 
-    override fun computeOffset(point: Float): Float {
-        return (point - currentRange.value.start) / (currentRange.value.endInclusive - currentRange.value.start)
-    }
+    override fun computeOffset(point: Float): Float = offsetComputer(point)
 
     /**
      * Computes major tick values based on a minimum tick spacing that is a
@@ -108,8 +121,8 @@ public class FloatLinearAxisModel(
             computeMajorTickSpacing(minTickSpacing)
         )
         return object : TickValues<Float> {
-            override val majorTickValues = majorTickValues
-            override val minorTickValues = minorTickValues
+            override val majorTickValues = if (inverted) majorTickValues.reversed() else majorTickValues
+            override val minorTickValues = if (inverted) minorTickValues.reversed() else minorTickValues
         }
     }
 

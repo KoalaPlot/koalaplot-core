@@ -10,6 +10,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - viewRange property to LinearAxisModel.
+- Support for "inverted" linear axes that plot their values from most to least.
 
 ### Changed
 
