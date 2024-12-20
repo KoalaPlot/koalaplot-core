@@ -222,6 +222,8 @@ public fun PieChart(
     forceCenteredPie: Boolean = false,
     pieAnimationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
     labelAnimationSpec: AnimationSpec<Float> = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing),
+    labelAnimationSpecStartValue: Float = 0f,
+    pieAnimationSpecStartValue: Float = 0f,
     pieStartAngle: AngularValue = AngleCCWTop.deg,
     pieExtendAngle: AngularValue = DegreesFullCircle.deg,
 ) {
@@ -232,8 +234,8 @@ public fun PieChart(
     }
 
     val currentValues by rememberUpdatedState(values)
-    val beta = remember(values) { Animatable(0f) }
-    val labelAlpha = remember(values) { Animatable(0f) }
+    val beta = remember(values) { Animatable(labelAnimationSpecStartValue) }
+    val labelAlpha = remember(values) { Animatable(pieAnimationSpecStartValue) }
 
     LaunchedEffect(values) {
         beta.animateTo(1f, animationSpec = pieAnimationSpec)
@@ -369,6 +371,8 @@ public fun PieChart(
     forceCenteredPie: Boolean = false,
     pieAnimationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
     labelAnimationSpec: AnimationSpec<Float> = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing),
+    labelAnimationSpecStartValue: Float = 0f,
+    pieAnimationSpecStartValue: Float = 0f,
 ) {
     require(labelSpacing >= 1f) { "labelSpacing must be greater than 1" }
     PieChart(
@@ -384,7 +388,9 @@ public fun PieChart(
         maxPieDiameter,
         forceCenteredPie,
         pieAnimationSpec,
-        labelAnimationSpec
+        labelAnimationSpec,
+        labelAnimationSpecStartValue = labelAnimationSpecStartValue,
+        pieAnimationSpecStartValue = pieAnimationSpecStartValue,
     )
 }
 
