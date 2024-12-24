@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 
 /**
+ * @param executionType Controls the execution of this animation use case.
  * @param chartAnimationSpec Specifies the animation to use when the chart is first drawn.
  * @param labelAnimationSpec Specifies the animation to use when the labels are drawn. Drawing of the labels begins
  * after the chart animation is complete.
