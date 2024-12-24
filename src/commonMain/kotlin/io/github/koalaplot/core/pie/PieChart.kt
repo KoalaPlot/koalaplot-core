@@ -1,7 +1,6 @@
 package io.github.koalaplot.core.pie
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -55,6 +53,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import io.github.koalaplot.core.animation.StartAnimationUseCase
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.AngularValue
 import io.github.koalaplot.core.util.DegreesFullCircle
@@ -196,9 +195,7 @@ private const val LabelFadeInDuration = 1000
  * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
  * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
  * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
- * @param pieAnimationSpec Specifies the animation to use when the pie chart is first drawn.
- * @param labelAnimationSpec Specifies the animation to use when the labels are drawn. Drawing of the labels begins
- * after the pie animation is complete.
+ * @param startAnimationUseCase Controls the animation.
  * @param pieStartAngle Sets an angle for the pie data to start at. Defaults to the top of the pie.
  * @param pieExtendAngle Sets a max angle for the pie to extend to, with a value between 1 and 360.
  * Defaults to [DegreesFullCircle].
@@ -220,10 +217,12 @@ public fun PieChart(
     minPieDiameter: Dp = 100.dp,
     maxPieDiameter: Dp = 300.dp,
     forceCenteredPie: Boolean = false,
-    pieAnimationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
-    labelAnimationSpec: AnimationSpec<Float> = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing),
-    pieAnimationSpecStartValue: Float = 0f,
-    labelAnimationSpecStartValue: Float = 0f,
+    startAnimationUseCase: StartAnimationUseCase =
+        StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            chartAnimationSpec = KoalaPlotTheme.animationSpec,
+            labelAnimationSpec = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
+        ),
     pieStartAngle: AngularValue = AngleCCWTop.deg,
     pieExtendAngle: AngularValue = DegreesFullCircle.deg,
 ) {
@@ -234,13 +233,13 @@ public fun PieChart(
     }
 
     val currentValues by rememberUpdatedState(values)
-    val beta = remember(values) { Animatable(pieAnimationSpecStartValue) }
-    val labelAlpha = remember(values) { Animatable(labelAnimationSpecStartValue) }
+    val beta = remember(values) { Animatable(startAnimationUseCase.chartAnimationStartValue) }
+    val labelAlpha = remember(values) { Animatable(startAnimationUseCase.labelAnimationStartValue) }
 
-    LaunchedEffect(values) {
-        beta.animateTo(1f, animationSpec = pieAnimationSpec)
+    startAnimationUseCase(key = values) { animationSpecs ->
+        beta.animateTo(StartAnimationUseCase.TARGET_ANIMATION_VALUE, animationSpec = animationSpecs.chartAnimationSpec)
         // fade in labels after pie animation is complete
-        labelAlpha.animateTo(1f, labelAnimationSpec)
+        labelAlpha.animateTo(StartAnimationUseCase.TARGET_ANIMATION_VALUE, animationSpecs.labelAnimationSpec)
     }
 
     // pieSliceData that gets animated - used for drawing the pie
@@ -348,8 +347,7 @@ public fun PieChart(
  * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
  * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
  * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
- * @param pieAnimationSpec Specifies the animation to use when the pie chart is first drawn.
- * @param labelAnimationSpec Specifies the animation to use when the labels are drawn. Drawing of the labels begins
+ * @param startAnimationUseCase Controls the animation.
  * after the pie animation is complete.
  */
 @ExperimentalKoalaPlotApi
@@ -369,10 +367,12 @@ public fun PieChart(
     minPieDiameter: Dp = 100.dp,
     maxPieDiameter: Dp = 300.dp,
     forceCenteredPie: Boolean = false,
-    pieAnimationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
-    labelAnimationSpec: AnimationSpec<Float> = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing),
-    pieAnimationSpecStartValue: Float = 0f,
-    labelAnimationSpecStartValue: Float = 0f,
+    startAnimationUseCase: StartAnimationUseCase =
+        StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            chartAnimationSpec = KoalaPlotTheme.animationSpec,
+            labelAnimationSpec = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
+        ),
 ) {
     require(labelSpacing >= 1f) { "labelSpacing must be greater than 1" }
     PieChart(
@@ -387,10 +387,7 @@ public fun PieChart(
         minPieDiameter,
         maxPieDiameter,
         forceCenteredPie,
-        pieAnimationSpec,
-        labelAnimationSpec,
-        pieAnimationSpecStartValue = pieAnimationSpecStartValue,
-        labelAnimationSpecStartValue = labelAnimationSpecStartValue,
+        startAnimationUseCase = startAnimationUseCase,
     )
 }
 
