@@ -96,25 +96,25 @@ class IntLinearAxisModelTest {
     @Test
     fun testSetRangeWithinAllowedRangeAndExtents() {
         val axis = IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 50)
-        axis.setViewRange(0..20)
-        assertEquals(0, axis.currentRange.value.first)
-        assertEquals(20, axis.currentRange.value.last)
+        axis.setViewRange(0.0..20.0)
+        assertEquals(0.0, axis.currentRange.value.start)
+        assertEquals(20.0, axis.currentRange.value.endInclusive)
     }
 
     @Test
     fun testSetRangeWithTooSmallExtent() {
         val axis = IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 50)
-        axis.setViewRange(1..5)
-        assertEquals(0, axis.currentRange.value.first)
-        assertEquals(10, axis.currentRange.value.last)
+        axis.setViewRange(1.0..5.0)
+        assertEquals(0.0, axis.currentRange.value.start)
+        assertEquals(10.0, axis.currentRange.value.endInclusive)
     }
 
     @Test
     fun testSetRangeWithTooLargeExtent() {
         val axis = IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 50)
-        axis.setViewRange(0..60)
-        assertEquals(5, axis.currentRange.value.first)
-        assertEquals(55, axis.currentRange.value.last)
+        axis.setViewRange(0.0..60.0)
+        assertEquals(5.0, axis.currentRange.value.start)
+        assertEquals(55.0, axis.currentRange.value.endInclusive)
     }
 }
 
