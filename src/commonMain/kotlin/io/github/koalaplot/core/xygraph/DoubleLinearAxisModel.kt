@@ -43,7 +43,7 @@ public class DoubleLinearAxisModel(
     private val allowZooming: Boolean = true,
     private val allowPanning: Boolean = true,
     private val inverted: Boolean = false,
-) : LinearAxisModel<Double> {
+) : ContinuousLinearAxisModel<Double> {
     init {
         require(range.endInclusive > range.start) {
             "Axis range end (${range.endInclusive}) must be greater than start (${range.start})"

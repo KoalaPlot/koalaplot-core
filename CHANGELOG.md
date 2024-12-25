@@ -19,6 +19,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Android Gradle Plugin to 8.7.2
 - Android compileSDK to 34 and minSDK to 23
 
+### Fixed
+
+- Panning support for Int and Long linear axis models by introducing ContinuousLinearAxisModel and
+  DiscreteLinearAxisModel interfaces
+
 ## [0.7.1]
 
 ### Fixed

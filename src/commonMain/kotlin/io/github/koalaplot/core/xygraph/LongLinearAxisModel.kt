@@ -46,7 +46,7 @@ public class LongLinearAxisModel(
     private val allowZooming: Boolean = true,
     private val allowPanning: Boolean = true,
     private val inverted: Boolean = false,
-) : LinearAxisModel<Long> {
+) : DiscreteLinearAxisModel<Long> {
     init {
         require(range.last > range.first) {
             "Axis range end (${range.last}) must be greater than start (${range.first})"
@@ -72,8 +72,8 @@ public class LongLinearAxisModel(
     // Function used to compute point offsets. Will be modified from the default if inverted is true.
     private var offsetComputer = { point: Long ->
         (
-            (point - currentRange.value.first).toDouble() /
-                (currentRange.value.last - currentRange.value.first).toDouble()
+            (point - currentRange.value.start) /
+                (currentRange.value.endInclusive - currentRange.value.start)
             ).toFloat()
     }
 
@@ -81,15 +81,17 @@ public class LongLinearAxisModel(
         if (inverted) {
             offsetComputer = { point: Long ->
                 (
-                    (currentRange.value.last - point).toDouble() /
-                        (currentRange.value.last - currentRange.value.first).toDouble()
+                    (currentRange.value.endInclusive - point) /
+                        (currentRange.value.endInclusive - currentRange.value.start)
                     ).toFloat()
             }
         }
     }
 
-    private var currentRange = mutableStateOf(range.first..(range.first + maxViewExtent))
-    public override val viewRange: State<ClosedRange<Long>> = currentRange
+    private var currentRange = mutableStateOf(
+        range.first.toDouble()..(range.first + maxViewExtent).toDouble()
+    )
+    public override val viewRange: State<ClosedRange<Double>> = currentRange
 
     override fun computeOffset(point: Long): Float = offsetComputer(point)
 
@@ -104,14 +106,14 @@ public class LongLinearAxisModel(
 
         return buildList {
             if (tickSpacing > 0) {
-                var tickCount = currentRange.value.first / tickSpacing
+                var tickCount = floor(currentRange.value.start / tickSpacing).toLong()
                 do {
                     val lastTick = tickCount * tickSpacing
-                    if (lastTick in currentRange.value) {
+                    if (lastTick >= currentRange.value.start && lastTick <= currentRange.value.endInclusive) {
                         add(lastTick)
                     }
                     tickCount++
-                } while (lastTick < currentRange.value.last)
+                } while (lastTick < currentRange.value.endInclusive)
             }
         }
     }
@@ -137,8 +139,8 @@ public class LongLinearAxisModel(
         require(minTickSpacing > 0 && minTickSpacing <= 1) {
             "Minimum tick spacing must be greater than 0 and less than or equal to 1"
         }
-        val length = currentRange.value.last - currentRange.value.first
-        val magnitude = 10.0.pow(floor(log10(length.toDouble())))
+        val length = currentRange.value.endInclusive - currentRange.value.start
+        val magnitude = 10.0.pow(floor(log10(length)))
         val scaledTickRatios = TickRatios.map { (it * magnitude).roundToLong() }
 
         // Test scaledTickRatios and pick the first that produces a distance greater than minTickSpacing
@@ -169,21 +171,21 @@ public class LongLinearAxisModel(
             var i = 1
             do {
                 val nextTick = majorTickValues.last() + minorIncrement * i
-                if (nextTick in currentRange.value) {
+                if (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive) {
                     add(nextTick)
                 }
                 i++
-            } while (nextTick in currentRange.value)
+            } while (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive)
 
             // create ticks before first major tick. if still space in the range
             i = 1
             do {
                 val nextTick = majorTickValues.first() - minorIncrement * i
-                if (nextTick in currentRange.value) {
+                if (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive) {
                     add(nextTick)
                 }
                 i++
-            } while (nextTick in currentRange.value)
+            } while (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive)
         }
     }
 
@@ -193,19 +195,19 @@ public class LongLinearAxisModel(
         require(zoomFactor > 0) { "Zoom amount must be greater than 0" }
         require(pivot in 0.0..1.0) { "Zoom pivot must be between 0 and 1: $pivot" }
 
-        if (zoomFactor > 1f && currentRange.value.last - currentRange.value.first == minViewExtent) {
+        if (zoomFactor > 1f && currentRange.value.endInclusive - currentRange.value.start <= minViewExtent) {
             // Can't zoom in more
-        } else if (zoomFactor < 1f && currentRange.value.last - currentRange.value.first == maxViewExtent) {
+        } else if (zoomFactor < 1f && currentRange.value.endInclusive - currentRange.value.start >= maxViewExtent) {
             // Can't zoom out more
         } else {
             // convert pivot to axis range space
-            val pivotAxisScale = currentRange.value.first +
-                ((currentRange.value.last - currentRange.value.first) * pivot.toDouble()).roundToLong()
+            val pivotAxisScale = currentRange.value.start +
+                ((currentRange.value.endInclusive - currentRange.value.start) * pivot.toDouble())
 
             val newLow =
-                (pivotAxisScale - (pivotAxisScale - currentRange.value.first) / zoomFactor.toDouble()).roundToLong()
+                (pivotAxisScale - (pivotAxisScale - currentRange.value.start) / zoomFactor.toDouble())
             val newHi =
-                (pivotAxisScale + (currentRange.value.last - pivotAxisScale) / zoomFactor.toDouble()).roundToLong()
+                (pivotAxisScale + (currentRange.value.endInclusive - pivotAxisScale) / zoomFactor.toDouble())
 
             setViewRange(newLow..newHi)
         }
@@ -215,37 +217,37 @@ public class LongLinearAxisModel(
         if (!allowPanning) return
 
         // convert pan amount to axis range space
-        val panAxisScale = ((currentRange.value.last - currentRange.value.first) * amount.toDouble()).roundToLong()
+        val panAxisScale = ((currentRange.value.endInclusive - currentRange.value.start) * amount)
 
         // Limit pan amount to not exceed bounds of range
-        val panLimitEnd = min(panAxisScale, range.last - currentRange.value.last)
-        val panLimited = max(panLimitEnd, range.first - currentRange.value.first)
+        val panLimitEnd = min(panAxisScale, range.last - currentRange.value.endInclusive)
+        val panLimited = max(panLimitEnd, range.first - currentRange.value.start)
 
-        val newLow = (currentRange.value.first + panLimited)
-        val newHi = (currentRange.value.last + panLimited)
+        val newLow = (currentRange.value.start + panLimited)
+        val newHi = (currentRange.value.endInclusive + panLimited)
 
         currentRange.value = newLow..newHi
     }
 
-    override fun setViewRange(newRange: ClosedRange<Long>) {
-        val newHi = newRange.endInclusive.coerceIn(range)
-        val newLow = newRange.start.coerceIn(range)
+    override fun setViewRange(newRange: ClosedRange<Double>) {
+        val newHi = newRange.endInclusive.coerceIn(range.first.toDouble(), range.last.toDouble())
+        val newLow = newRange.start.coerceIn(range.first.toDouble(), range.last.toDouble())
 
         if (newHi - newLow < minViewExtent) {
             val delta = (minViewExtent - (newHi - newLow)) / 2
             currentRange.value = (newLow - delta)..(newHi + delta)
             if (currentRange.value.start < range.start) {
-                currentRange.value = range.start..(range.start + minViewExtent)
+                currentRange.value = range.start.toDouble()..(range.start + minViewExtent).toDouble()
             } else if (currentRange.value.endInclusive > range.endInclusive) {
-                currentRange.value = (range.endInclusive - minViewExtent)..range.endInclusive
+                currentRange.value = (range.endInclusive - minViewExtent).toDouble()..range.endInclusive.toDouble()
             }
         } else if (newHi - newLow > maxViewExtent) {
             val delta = (newHi - newLow - maxViewExtent) / 2
             currentRange.value = (newLow + delta)..(newHi - delta)
             if (currentRange.value.start < range.start) {
-                currentRange.value = range.start..(range.start + maxViewExtent)
+                currentRange.value = range.start.toDouble()..(range.start + maxViewExtent).toDouble()
             } else if (currentRange.value.endInclusive > range.endInclusive) {
-                currentRange.value = (range.endInclusive - maxViewExtent)..range.endInclusive
+                currentRange.value = (range.endInclusive - maxViewExtent).toDouble()..range.endInclusive.toDouble()
             }
         } else {
             currentRange.value = newLow..newHi
