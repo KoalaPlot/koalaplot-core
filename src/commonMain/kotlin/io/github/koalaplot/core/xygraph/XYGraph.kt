@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -117,6 +117,10 @@ public fun <X, Y> XYGraph(
     content: @Composable XYGraphScope<X, Y>.() -> Unit
 ) {
     HoverableElementArea(modifier = modifier) {
+        // 그래프 사이즈와 마우스 좌표의 차트상 상대 좌표 추가
+        var graphSize by remember { mutableStateOf(IntSize.Zero) }
+        var mouseRelativeOffset by remember { mutableStateOf(IntOffset.Zero) }
+
         SubcomposeLayout { constraints ->
             val xAxisTitleMeasurable = subcompose("xaxistitle") {
                 Box(modifier = Modifier.fillMaxWidth()) { xAxisTitle() }
@@ -147,6 +151,23 @@ public fun <X, Y> XYGraph(
             val xAxisMeasurable = subcompose("xaxis") { Axis(xAxis) }[0]
             val yAxisMeasurable = subcompose("yaxis") { Axis(yAxis) }[0]
 
+            val chartAreas = ChartAreas(
+                constraints,
+                yAxisOffset = yAxis.axisOffset.roundToPx(),
+                xAxisHeight = xAxis.thicknessDp.roundToPx(),
+                xAxisOffset = xAxis.axisOffset.roundToPx()
+            )
+            val mouseAbsoluteOffset = getCurrentPointer()
+            val chartScope = XYGraphScopeImpl(
+                xAxisModel,
+                yAxisModel,
+                xAxis,
+                yAxis,
+                this@HoverableElementArea,
+                mouseRelativeOffset, graphSize
+            )
+
+
             val chartMeasurable = subcompose("chart") {
                 val panZoomModifier = if (panEnabled || zoomEnabled) {
                     Modifier.onGestureInput(
@@ -173,7 +194,6 @@ public fun <X, Y> XYGraph(
                 Box(
                     modifier = Modifier.clip(RectangleShape).then(panZoomModifier)
                 ) {
-                    val chartScope = XYGraphScopeImpl(xAxisModel, yAxisModel, xAxis, yAxis, this@HoverableElementArea)
                     chartScope.content()
                 }
             }[0]
@@ -211,7 +231,14 @@ public fun <X, Y> XYGraph(
             )
 
             with(XYAxisMeasurePolicy(xAxis, yAxis)) {
-                measure(measurablesMap, constraints)
+                //추가,변경 그래프 사이즈 업데이트
+                val measureReturn = measure(measurablesMap, constraints)
+                graphSize = measureReturn.second.graphSize
+                mouseRelativeOffset = chartAreas.copy(
+                    xAxisTitleHeight = xAxisMeasurable.maxIntrinsicHeight(chartAreas.graphSize.width),
+                    yAxisTitleWidth = yAxisMeasurable.maxIntrinsicWidth(chartAreas.graphSize.height)
+                ).getChartOffset(mouseAbsoluteOffset.x.toInt(), mouseAbsoluteOffset.y.toInt())
+                measureReturn.first
             }
         }
     }
@@ -491,6 +518,19 @@ private data class ChartAreas(
             }
         )
     }
+
+    fun getChartOffset(mouseX: Int, mouseY: Int): IntOffset {
+        // 고려해야 할 'xAxisLabelAreaHeight', 'yAxisLabelAreaWidth', 'yAxisTitleWidth', 'xAxisTitleHeight'의 값을 계산합니다.
+        val chartAreaWidth = constraints.maxWidth - (yAxisLabelAreaWidth + yAxisTitleWidth)
+        val chartAreaHeight = constraints.maxHeight - (xAxisLabelAreaHeight + xAxisTitleHeight)
+        // 마우스 커서 위치에서 x, y축의 라벨 및 타이틀 영역을 제외한 실제 그래프 영역 내의 offset 위치를 계산합니다.
+        var chartXOffset = mouseX - (yAxisLabelAreaWidth + yAxisTitleWidth)
+        var chartYOffset = mouseY - (xAxisLabelAreaHeight + xAxisTitleHeight)
+        // offset이 차트의 가로 및 세로 넓이를 넘어가지 않도록 합니다.
+        chartXOffset = chartXOffset.coerceIn(0, chartAreaWidth)
+        chartYOffset = chartYOffset.coerceIn(0, chartAreaHeight)
+        return IntOffset(chartXOffset, chartYOffset)
+    }
 }
 
 private fun <X, Y> Density.optimizeGraphSize(
@@ -531,7 +571,8 @@ private class XYAxisMeasurePolicy<X, Y>(
     val xAxis: AxisDelegate<X>,
     val yAxis: AxisDelegate<Y>
 ) {
-    fun MeasureScope.measure(m: Measurables, constraints: Constraints): MeasureResult {
+    fun MeasureScope.measure(m: Measurables, constraints: Constraints): Pair<MeasureResult, ChartAreas> {
+        //그래프 사이즈도 리턴하도록 변경
         val chartAreas = optimizeGraphSize(constraints, m, xAxis, yAxis)
 
         val yAxisLabelPlaceableDelegates: List<RotatedPlaceableDelegate> = m.yAxisLabels.map {
@@ -615,7 +656,7 @@ private class XYAxisMeasurePolicy<X, Y>(
 
             yAxisPlaceable.place(chartAreas.graphArea.left - yAxis.axisOffset.roundToPx(), chartAreas.graphArea.top)
             xAxisPlaceable.place(chartAreas.graphArea.left, chartAreas.graphArea.bottom - xAxis.axisOffset.roundToPx())
-        }
+        } to chartAreas
     }
 }
 
@@ -627,6 +668,8 @@ public interface XYGraphScope<X, Y> : HoverableElementAreaScope {
     public val yAxisModel: AxisModel<Y>
     public val xAxisState: AxisState
     public val yAxisState: AxisState
+    public var mouseToChartOffset: IntOffset
+    public var graphSize: IntSize
 
     /**
      * Transforms [point] from [AxisModel] space to display coordinates provided a plot area [size].
@@ -647,7 +690,9 @@ private class XYGraphScopeImpl<X, Y>(
     override val yAxisModel: AxisModel<Y>,
     override val xAxisState: AxisState,
     override val yAxisState: AxisState,
-    val hoverableElementAreaScope: HoverableElementAreaScope
+    val hoverableElementAreaScope: HoverableElementAreaScope,
+    override var mouseToChartOffset: IntOffset,
+    override var graphSize: IntSize = IntSize.Zero
 ) : XYGraphScope<X, Y>, HoverableElementAreaScope by hoverableElementAreaScope
 
 @Composable
