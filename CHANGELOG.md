@@ -18,11 +18,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Upgrade Kotlin to 2.1.0
 - Android Gradle Plugin to 8.7.2
 - Android compileSDK to 34 and minSDK to 23
+- BulletGraph using default qualitative range indicators will accept a max of 5 values when being configured rather
+  than throwing a null pointer exception when Composing.
 
 ### Fixed
 
 - Panning support for Int and Long linear axis models by introducing ContinuousLinearAxisModel and
   DiscreteLinearAxisModel interfaces
+- BulletGraph null pointer exception if more than 4 qualitative range indicators are used.
+- BulletGraph qualitative range default shading not according to spec under some conditions.
 
 ## [0.7.1]
 
