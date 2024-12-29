@@ -62,7 +62,7 @@ public fun HoverableElementArea(
     }
 
     Layout(
-        modifier = modifier.pointerPosition(Unit) { position = it },
+        modifier = modifier.pointerPosition(Unit, { position = it }, scope),
         // localProvider exhibiting inconsistent behavior between platforms and package location
 //        .modifierLocalProvider(ModifierLocalSender) {
 //            Sender { composable, display ->
@@ -106,13 +106,18 @@ public fun HoverableElementArea(
     }
 }
 
-private fun Modifier.pointerPosition(key1: Any?, update: (Offset) -> Unit): Modifier = composed {
+private fun Modifier.pointerPosition(
+    key1: Any?,
+    update: (Offset) -> Unit,
+    scope: HoverableElementAreaScopeImpl
+): Modifier = composed {
     Modifier.pointerInput(key1) {
         val currentContext = currentCoroutineContext()
         awaitPointerEventScope {
             while (currentContext.isActive) {
                 val event = awaitPointerEvent()
                 update(event.changes.last().position)
+                scope.currentPosition = event.changes.last().position // 추가
             }
         }
     }
@@ -124,14 +129,17 @@ private fun Modifier.pointerPosition(key1: Any?, update: (Offset) -> Unit): Modi
  */
 public interface HoverableElementAreaScope {
     public fun Modifier.hoverableElement(element: @Composable () -> Unit): Modifier
+    public fun getCurrentPointer(): Offset
 }
 
 private class HoverableElementAreaScopeImpl(private val sender: Sender) :
     HoverableElementAreaScope {
+    var currentPosition: Offset by mutableStateOf(Offset.Zero)
     override fun Modifier.hoverableElement(element: @Composable () -> Unit): Modifier = composed {
         val interactionSource = remember { MutableInteractionSource() }
         var hoverInteraction by remember { mutableStateOf<HoverInteraction.Enter?>(null) }
         // var sender by remember { mutableStateOf<Sender?>(null) }
+
 
         fun emitEnter() {
             if (hoverInteraction == null) {
@@ -183,5 +191,9 @@ private class HoverableElementAreaScopeImpl(private val sender: Sender) :
                     }
                 }
             }
+    }
+
+    override fun getCurrentPointer(): Offset {
+        return currentPosition
     }
 }
