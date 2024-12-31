@@ -46,7 +46,8 @@ public class StartAnimationUseCase(
     }
 
     public enum class ExecutionType {
-        Default, None,
+        Default,
+        None,
     }
 
     private companion object {
