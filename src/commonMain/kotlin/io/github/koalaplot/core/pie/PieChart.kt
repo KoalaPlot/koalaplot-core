@@ -1,6 +1,5 @@
 package io.github.koalaplot.core.pie
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -220,8 +219,8 @@ public fun PieChart(
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            chartAnimationSpec = KoalaPlotTheme.animationSpec,
-            labelAnimationSpec = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
+            /* chart animation */ KoalaPlotTheme.animationSpec,
+            /* label animation */  tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
         ),
     pieStartAngle: AngularValue = AngleCCWTop.deg,
     pieExtendAngle: AngularValue = DegreesFullCircle.deg,
@@ -231,16 +230,13 @@ public fun PieChart(
     require(pieExtendAngle.toDegrees().value > 0f && pieExtendAngle.toDegrees().value <= DegreesFullCircle) {
         "pieExtendAngle must be between 0 and 360, exclusive of 0"
     }
+    require(startAnimationUseCase.animatables.size == 2) { "startAnimationUseCase must have 2 animatables" }
 
     val currentValues by rememberUpdatedState(values)
-    val beta = remember(values) { Animatable(startAnimationUseCase.chartAnimationStartValue) }
-    val labelAlpha = remember(values) { Animatable(startAnimationUseCase.labelAnimationStartValue) }
+    val beta = remember(values) { startAnimationUseCase.animatables[0] }
+    val labelAlpha = remember(values) { startAnimationUseCase.animatables[1] }
 
-    startAnimationUseCase(key = values) { animationSpecs ->
-        beta.animateTo(StartAnimationUseCase.TARGET_ANIMATION_VALUE, animationSpec = animationSpecs.chartAnimationSpec)
-        // fade in labels after pie animation is complete
-        labelAlpha.animateTo(StartAnimationUseCase.TARGET_ANIMATION_VALUE, animationSpecs.labelAnimationSpec)
-    }
+    startAnimationUseCase(key = values)
 
     // pieSliceData that gets animated - used for drawing the pie
     val pieSliceData by remember(beta.value) {
@@ -370,8 +366,8 @@ public fun PieChart(
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            chartAnimationSpec = KoalaPlotTheme.animationSpec,
-            labelAnimationSpec = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
+            KoalaPlotTheme.animationSpec,
+            tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
         ),
 ) {
     require(labelSpacing >= 1f) { "labelSpacing must be greater than 1" }
