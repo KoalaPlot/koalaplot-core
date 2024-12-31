@@ -51,7 +51,7 @@ public class StartAnimationUseCase(
     }
 
     private companion object {
-        private const val START_ANIMATION_VALUE: Float = 0f
-        private const val TARGET_ANIMATION_VALUE: Float = 1f
+        private const val START_ANIMATION_VALUE = 0f
+        private const val TARGET_ANIMATION_VALUE = 1f
     }
 }
