@@ -1,5 +1,6 @@
 package io.github.koalaplot.core.pie
 
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -171,6 +172,79 @@ internal data class LabelConnectorScopeImpl(
 private const val InitOuterRadius = 0.95f
 
 private const val LabelFadeInDuration = 1000
+
+/**
+ * Creates a Pie Chart or, optionally, a Donut Chart if holeSize is nonZero, with optional
+ * hole content to place at the center of the donut hole. Pie slices are drawn starting at
+ * -90 degrees (top center), progressing clockwise around the pie. Each slice occupies a fraction
+ * of the overall pie according to its data value relative to the sum of all values.
+ *
+ * @param values The data values for each pie slice
+ * @param labelPositionProvider A provider of label offsets that can be used to implement different label
+ * placement strategies. See the [PieChart] override for a version that uses labels placed around the circumference
+ * of the pie.
+ * @param modifier Compose Modifiers to be applied to the overall PieChart
+ * @param slice Composable for a pie slice.
+ * @param label Composable for a pie slice label placed around the perimeter of the pie
+ * @param labelConnector Composable for label connectors connecting the pie slice to the label
+ * @param holeSize A relative size for an inner hole of the pie, creating a donut chart, with a
+ * value between 0 and 1.
+ * @param holeContent Optional content that may be placed in the space of the donut hole. To safely draw the content
+ * within the hole without intersecting with the chart, apply the passed `contentPadding` to your content composable.
+ * @param minPieDiameter Minimum diameter allowed for the pie.
+ * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
+ * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
+ * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
+ * @param pieAnimationSpec Specifies the animation to use when the pie chart is first drawn.
+ * @param labelAnimationSpec Specifies the animation to use when the labels are drawn. Drawing of the labels begins
+ * after the pie animation is complete.
+ * @param pieStartAngle Sets an angle for the pie data to start at. Defaults to the top of the pie.
+ * @param pieExtendAngle Sets a max angle for the pie to extend to, with a value between 1 and 360.
+ * Defaults to [DegreesFullCircle].
+ */
+@ExperimentalKoalaPlotApi
+@Composable
+public fun PieChart(
+    values: List<Float>,
+    labelPositionProvider: LabelPositionProvider,
+    modifier: Modifier = Modifier,
+    slice: @Composable PieSliceScope.(Int) -> Unit = {
+        val colors = remember(values.size) { generateHueColorPalette(values.size) }
+        DefaultSlice(colors[it])
+    },
+    label: @Composable (Int) -> Unit = {},
+    labelConnector: @Composable LabelConnectorScope.(Int) -> Unit = { StraightLineConnector() },
+    holeSize: Float = 0f,
+    holeContent: @Composable BoxScope.(contentPadding: PaddingValues) -> Unit = {},
+    minPieDiameter: Dp = 100.dp,
+    maxPieDiameter: Dp = 300.dp,
+    forceCenteredPie: Boolean = false,
+    pieAnimationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+    labelAnimationSpec: AnimationSpec<Float> = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing),
+    pieStartAngle: AngularValue = AngleCCWTop.deg,
+    pieExtendAngle: AngularValue = DegreesFullCircle.deg,
+) {
+    PieChart(
+        values = values,
+        labelPositionProvider = labelPositionProvider,
+        modifier = modifier,
+        slice = slice,
+        label = label,
+        labelConnector = labelConnector,
+        holeSize = holeSize,
+        holeContent = holeContent,
+        minPieDiameter = minPieDiameter,
+        maxPieDiameter = maxPieDiameter,
+        forceCenteredPie = forceCenteredPie,
+        pieStartAngle = pieStartAngle,
+        pieExtendAngle = pieExtendAngle,
+        startAnimationUseCase = StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            pieAnimationSpec,
+            labelAnimationSpec,
+        )
+    )
+}
 
 /**
  * Creates a Pie Chart or, optionally, a Donut Chart if holeSize is nonZero, with optional
