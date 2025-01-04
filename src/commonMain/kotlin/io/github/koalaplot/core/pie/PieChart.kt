@@ -417,8 +417,75 @@ public fun PieChart(
  * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
  * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
  * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
- * @param startAnimationUseCase Controls the animation.
+ * @param pieAnimationSpec Specifies the animation to use when the pie chart is first drawn.
+ * @param labelAnimationSpec Specifies the animation to use when the labels are drawn. Drawing of the labels begins
  * after the pie animation is complete.
+ */
+@ExperimentalKoalaPlotApi
+@Composable
+public fun PieChart(
+    values: List<Float>,
+    modifier: Modifier = Modifier,
+    slice: @Composable PieSliceScope.(Int) -> Unit = {
+        val colors = remember(values.size) { generateHueColorPalette(values.size) }
+        DefaultSlice(colors[it])
+    },
+    label: @Composable (Int) -> Unit = {},
+    labelConnector: @Composable LabelConnectorScope.(Int) -> Unit = { StraightLineConnector() },
+    labelSpacing: Float = DefaultLabelDiameterScale,
+    holeSize: Float = 0f,
+    holeContent: @Composable BoxScope.(contentPadding: PaddingValues) -> Unit = {},
+    minPieDiameter: Dp = 100.dp,
+    maxPieDiameter: Dp = 300.dp,
+    forceCenteredPie: Boolean = false,
+    pieAnimationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+    labelAnimationSpec: AnimationSpec<Float> = tween(LabelFadeInDuration, 0, LinearOutSlowInEasing),
+) {
+    PieChart(
+        values = values,
+        modifier = modifier,
+        slice = slice,
+        label = label,
+        labelConnector = labelConnector,
+        labelSpacing = labelSpacing,
+        holeSize = holeSize,
+        holeContent = holeContent,
+        minPieDiameter = minPieDiameter,
+        maxPieDiameter = maxPieDiameter,
+        forceCenteredPie = forceCenteredPie,
+        startAnimationUseCase =
+        StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            pieAnimationSpec,
+            labelAnimationSpec,
+        ),
+    )
+}
+
+/**
+ * Creates a Pie Chart or, optionally, a Donut Chart if holeSize is nonZero, with optional
+ * hole content to place at the center of the donut hole. Pie slices are drawn starting at
+ * -90 degrees (top center), progressing clockwise around the pie. Each slice occupies a fraction
+ * of the overall pie according to its data value relative to the sum of all values. Places labels around the pie
+ * at a minimum distance set by [labelSpacing].
+ *
+ * @param values The data values for each pie slice
+ * @param modifier Compose Modifiers to be applied to the overall PieChart
+ * @param slice Composable for a pie slice.
+ * @param label Composable for a pie slice label placed around the perimeter of the pie
+ * @param labelConnector Composable for label connectors connecting the pie slice to the label
+ * @param labelSpacing A value greater than 1 specifying the distance from the center of
+ * the pie at which to place the labels relative to the overall diameter of the pie, where a value
+ * of 1 is at the outer edge of the pie. Values between 1.05 and 1.4 tend to work well depending
+ * on the size of the labels and overall pie diameter.
+ * @param holeSize A relative size for an inner hole of the pie, creating a donut chart, with a
+ * value between 0 and 1.
+ * @param holeContent Optional content that may be placed in the space of the donut hole.
+ * @param minPieDiameter Minimum diameter allowed for the pie.
+ * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
+ * @param forceCenteredPie If true, will force the pie to be centered within its parent, by adjusting (decreasing) the
+ * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter.
+ * @param startAnimationUseCase Controls the animation.
  */
 @ExperimentalKoalaPlotApi
 @Composable
