@@ -1,12 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-buildscript {
-    dependencies {
-        classpath(libs.dokka.base) // needed for dokka custom format config
-    }
-}
-
 plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
@@ -127,20 +121,18 @@ android {
     }
 }
 
-/**
- * Custom format adds a custom logo
- */
-tasks.register<org.jetbrains.dokka.gradle.DokkaTask>("dokkaCustomFormat") {
+dokka {
     moduleName.set("Koala Plot Core")
-    outputDirectory.set(layout.buildDirectory.dir("docs/api/${project.version}").get())
 
-    pluginConfiguration<org.jetbrains.dokka.base.DokkaBase, org.jetbrains.dokka.base.DokkaBaseConfiguration> {
-        customStyleSheets = listOf(file("src/docs/dokka/logo-styles.css"))
-        customAssets = listOf(file("src/docs/assets/images/logo-icon.svg"))
+    dokkaPublications.html {
+        outputDirectory.set(layout.buildDirectory.dir("docs/api/${project.version}"))
+    }
+
+    pluginsConfiguration.html {
+        customStyleSheets.from("src/docs/dokka/logo-styles.css")
+        customAssets.from("src/docs/assets/images/logo-icon.svg")
     }
 }
-
-tasks["build"].dependsOn.add("dokkaCustomFormat")
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     detekt {
