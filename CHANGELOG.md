@@ -30,6 +30,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - BulletGraph null pointer exception if more than 4 qualitative range indicators are used.
 - BulletGraph qualitative range default shading not according to spec under some conditions.
 - Divide by 0 in XYGraph if an axis has no tick labels (#105).
+- XYGraph size changes when panning (#101). **Important Note**: This required a change to the XYGraph size
+  calculation that may result in clipping of the rightmost x-axis tick label and/or topmost y-axis tick label. Padding
+  can be explicitly added to the parent Composable to leave space for labels that extend beyond the graph edge.
 
 ## [0.7.1]
 
