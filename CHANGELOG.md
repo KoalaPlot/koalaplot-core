@@ -14,8 +14,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Upgrade Compose plugin to 1.7.1
+- Upgrade Compose plugin to 1.7.3
 - Upgrade Kotlin to 2.1.0
+- Upgrade kotlinx-coroutines to 1.10.1
+- Upgrade Dokka to 2.0.0
 - Android Gradle Plugin to 8.7.2
 - Android compileSDK to 34 and minSDK to 23
 - BulletGraph using default qualitative range indicators will accept a max of 5 values when being configured rather
