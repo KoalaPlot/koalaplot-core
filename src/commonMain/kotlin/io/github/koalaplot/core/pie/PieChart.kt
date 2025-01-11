@@ -293,8 +293,10 @@ public fun PieChart(
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */ KoalaPlotTheme.animationSpec,
-            /* label animation */  tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
+            /* chart animation */
+            KoalaPlotTheme.animationSpec,
+            /* label animation */
+            tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
         ),
     pieStartAngle: AngularValue = AngleCCWTop.deg,
     pieExtendAngle: AngularValue = DegreesFullCircle.deg,
@@ -507,7 +509,9 @@ public fun PieChart(
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
+            /* chart animation */
             KoalaPlotTheme.animationSpec,
+            /* label animation */
             tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
         ),
 ) {
