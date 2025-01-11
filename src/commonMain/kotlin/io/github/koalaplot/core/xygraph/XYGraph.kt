@@ -534,25 +534,12 @@ private class XYAxisMeasurePolicy<X, Y>(
     fun MeasureScope.measure(m: Measurables, constraints: Constraints): MeasureResult {
         val chartAreas = optimizeGraphSize(constraints, m, xAxis, yAxis)
 
-        val yAxisLabelPlaceableDelegates: List<RotatedPlaceableDelegate> = m.yAxisLabels.map {
-            RotatedPlaceableDelegate(
-                it.measure(Constraints(maxHeight = chartAreas.graphSize.height / m.yAxisLabels.size)),
-                -yAxis.style.labelRotation.toFloat()
-            )
-        }
+        val yAxisLabelPlaceableDelegates = createYAxisRotatedPlaceableDelegates(m, chartAreas)
 
         val xAxisPlaceable = m.xAxis.measure(Constraints.fixedWidth(chartAreas.graphSize.width))
         val xAxisTitlePlaceable = m.xAxisTitle.measure(Constraints(maxWidth = chartAreas.graphSize.width))
 
-        val xAxisLabelPlaceableDelegates = m.xAxisLabels.calcXAxisLabelWidthConstraints(
-            xAxis.style.labelRotation,
-            chartAreas.graphSize.width / m.xAxisLabels.size,
-            chartAreas.xAxisLabelAreaHeight,
-            { meas, w -> meas.measure(Constraints(maxWidth = w)) },
-            { placeable -> placeable.height }
-        ).map {
-            RotatedPlaceableDelegate(it, -xAxis.style.labelRotation.toFloat())
-        }
+        val xAxisLabelPlaceableDelegates = createXAxisRotatedPlaceableDelegates(m, chartAreas)
 
         val yAxisTitlePlaceable = m.yAxisTitle.measure(Constraints(maxHeight = chartAreas.graphSize.height))
         val yAxisPlaceable = m.yAxis.measure(Constraints.fixedHeight(chartAreas.graphSize.height))
@@ -617,6 +604,29 @@ private class XYAxisMeasurePolicy<X, Y>(
             xAxisPlaceable.place(chartAreas.graphArea.left, chartAreas.graphArea.bottom - xAxis.axisOffset.roundToPx())
         }
     }
+
+    private fun createYAxisRotatedPlaceableDelegates(m: Measurables, chartAreas: ChartAreas) =
+        m.yAxisLabels.map {
+            RotatedPlaceableDelegate(
+                it.measure(Constraints(maxHeight = chartAreas.graphSize.height / m.yAxisLabels.size)),
+                -yAxis.style.labelRotation.toFloat()
+            )
+        }
+
+    private fun createXAxisRotatedPlaceableDelegates(m: Measurables, chartAreas: ChartAreas) =
+        if (m.xAxisLabels.isNotEmpty()) {
+            m.xAxisLabels.calcXAxisLabelWidthConstraints(
+                xAxis.style.labelRotation,
+                chartAreas.graphSize.width / m.xAxisLabels.size,
+                chartAreas.xAxisLabelAreaHeight,
+                { meas, w -> meas.measure(Constraints(maxWidth = w)) },
+                { placeable -> placeable.height }
+            ).map {
+                RotatedPlaceableDelegate(it, -xAxis.style.labelRotation.toFloat())
+            }
+        } else {
+            listOf()
+        }
 }
 
 /**

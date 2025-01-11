@@ -27,6 +27,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   DiscreteLinearAxisModel interfaces
 - BulletGraph null pointer exception if more than 4 qualitative range indicators are used.
 - BulletGraph qualitative range default shading not according to spec under some conditions.
+- Divide by 0 in XYGraph if an axis has no tick labels (#105).
 
 ## [0.7.1]
 
