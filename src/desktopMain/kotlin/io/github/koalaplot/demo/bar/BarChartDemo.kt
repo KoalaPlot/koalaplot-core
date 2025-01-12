@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.bar.GroupedVerticalBarPlot
 import io.github.koalaplot.core.bar.solidBar
@@ -23,14 +22,12 @@ import io.github.koalaplot.core.xygraph.rememberAxisStyle
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import io.github.koalaplot.demo.util.ColorUtil
 
-private const val ITEM_WIDTH = 50f
-
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
 internal fun BarChartDemo() {
-    val graph = List(6) { BarChartModel((it + 1).toString(), List(3) { StackValue((it + 1).toFloat()) }) }
+    val graph = List(GraphSize) { BarChartModel(it.toString(), List(ItemCount) { StackValue(it.toFloat()) }) }
     val maxYValue = graph.maxOf { it.stackValues.maxOf { it.counter } }
-    val width = graph.size * ITEM_WIDTH
+    val width = graph.size * ItemWidth
 
     Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
@@ -83,3 +80,7 @@ internal data class BarChartModel(
 internal data class StackValue(
     val counter: Float,
 )
+
+internal const val GraphSize = 6
+internal const val ItemCount = 3
+internal const val ItemWidth = 50f
