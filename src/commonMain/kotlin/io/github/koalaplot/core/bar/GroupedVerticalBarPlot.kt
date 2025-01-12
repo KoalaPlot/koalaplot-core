@@ -253,12 +253,7 @@ private fun <E : VerticalBarPlotGroupedPointEntry<X, Y>, X, Y> XYGraphScope<X, Y
 public fun <X, Y> XYGraphScope<X, Y>.GroupedVerticalBarPlot(
     modifier: Modifier = Modifier,
     maxBarGroupWidth: Float = 0.9f,
-    startAnimationUseCase: StartAnimationUseCase =
-        StartAnimationUseCase(
-            executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */
-            KoalaPlotTheme.animationSpec,
-        ),
+    startAnimationUseCase: StartAnimationUseCase,
     content: GroupedVerticalBarPlotScope<X, Y>.() -> Unit
 ) {
     val scope = remember(content) {
