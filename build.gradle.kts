@@ -71,10 +71,7 @@ kotlin {
 
         val desktopMain by getting {
             dependsOn(commonMain.get())
-            dependencies {
-                implementation(compose.desktop.currentOs)
-                implementation(libs.kotlinx.coroutines.swing)
-            }
+            dependencies {}
         }
 
         val desktopTest by getting {
