@@ -1,11 +1,9 @@
 package io.github.koalaplot.core.bar
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,6 +12,7 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.unit.Constraints
+import io.github.koalaplot.core.animation.StartAnimationUseCase
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.fixedHeight
 import io.github.koalaplot.core.util.generateHueColorPalette
@@ -56,6 +55,7 @@ public data class DefaultVerticalBarPlotGroupedPointEntry<X, Y>(
  * @param bar Composable function to emit a bar for each data element, see [VerticalBarComposable].
  * @param maxBarGroupWidth The fraction of space between adjacent x-axis bars or bar groups that
  * may be used. Must be between 0 and 1, defaults to 0.9.
+ * @param animationSpec Specifies the animation to use when the pie chart is first drawn.
  */
 @Composable
 public fun <X, Y, E : VerticalBarPlotGroupedPointEntry<X, Y>> XYGraphScope<X, Y>.GroupedVerticalBarPlot(
@@ -73,16 +73,61 @@ public fun <X, Y, E : VerticalBarPlotGroupedPointEntry<X, Y>> XYGraphScope<X, Y>
     maxBarGroupWidth: Float = 0.9f,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
+    GroupedVerticalBarPlot(
+        data = data,
+        modifier = modifier,
+        bar = bar,
+        maxBarGroupWidth = maxBarGroupWidth,
+        startAnimationUseCase = StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            /* chart animation */
+            animationSpec,
+        ),
+    )
+}
+
+/**
+ * A Vertical Bar Plot to be used in an XYGraph and that plots multiple series side-by-side.
+ *
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ * @param E The type of the data element holding the values for each bar
+ * @param data Coordinate data for the bars to be plotted.
+ * @param bar Composable function to emit a bar for each data element, see [VerticalBarComposable].
+ * @param maxBarGroupWidth The fraction of space between adjacent x-axis bars or bar groups that
+ * may be used. Must be between 0 and 1, defaults to 0.9.
+ * @param startAnimationUseCase Controls the animation.
+ */
+@Composable
+public fun <X, Y, E : VerticalBarPlotGroupedPointEntry<X, Y>> XYGraphScope<X, Y>.GroupedVerticalBarPlot(
+    data: List<E>,
+    modifier: Modifier = Modifier,
+    bar: @Composable BarScope.(dataIndex: Int, groupIndex: Int, entry: E) -> Unit = { i, g, _ ->
+        val colors = remember(data) {
+            generateHueColorPalette(data.maxOf { it.y.size })
+        }
+        DefaultVerticalBar(
+            brush = SolidColor(colors[g]),
+            modifier = Modifier.fillMaxWidth(KoalaPlotTheme.sizes.barWidth)
+        )
+    },
+    maxBarGroupWidth: Float = 0.9f,
+    startAnimationUseCase: StartAnimationUseCase =
+        StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            /* chart animation */
+            KoalaPlotTheme.animationSpec,
+        ),
+) {
     require(maxBarGroupWidth in 0f..1f) { "maxBarGroupWidth must be between 0 and 1" }
+    require(startAnimationUseCase.animatables.size == 1) { "startAnimationUseCase must have one animatable" }
     if (data.isEmpty()) return
 
     val barScope = remember { BarScopeImpl(this) }
 
     // Animation scale factor
-    val beta = remember(data) { Animatable(0f) }
-    LaunchedEffect(data) {
-        beta.animateTo(1f, animationSpec = animationSpec)
-    }
+    val beta = remember(data) { startAnimationUseCase.animatables[0] }
+    startAnimationUseCase(key = data)
 
     Layout(
         modifier = modifier,
@@ -201,13 +246,14 @@ private fun <E : VerticalBarPlotGroupedPointEntry<X, Y>, X, Y> XYGraphScope<X, Y
  * @param Y The type of the y-axis values
  * @param maxBarGroupWidth The fraction of space between adjacent x-axis bars or bar groups that
  * may be used. Must be between 0 and 1, defaults to 0.9.
+ * @param startAnimationUseCase Controls the animation.
  * @param content A block which describes the content for the plot.
  */
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.GroupedVerticalBarPlot(
     modifier: Modifier = Modifier,
     maxBarGroupWidth: Float = 0.9f,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+    startAnimationUseCase: StartAnimationUseCase,
     content: GroupedVerticalBarPlotScope<X, Y>.() -> Unit
 ) {
     val scope = remember(content) {
@@ -256,7 +302,37 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedVerticalBarPlot(
             data.data[xIndex].yb[seriesIndex].second.invoke(this)
         },
         maxBarGroupWidth,
-        animationSpec
+        startAnimationUseCase = startAnimationUseCase,
+    )
+}
+
+/**
+ * A Vertical Bar Plot to be used in an XYGraph and that plots multiple series side-by-side.
+ *
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ * @param maxBarGroupWidth The fraction of space between adjacent x-axis bars or bar groups that
+ * may be used. Must be between 0 and 1, defaults to 0.9.
+ * @param animationSpec Specifies the animation to use when the pie chart is first drawn.
+ * @param content A block which describes the content for the plot.
+ */
+@Composable
+public fun <X, Y> XYGraphScope<X, Y>.GroupedVerticalBarPlot(
+    modifier: Modifier = Modifier,
+    maxBarGroupWidth: Float = 0.9f,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+    content: GroupedVerticalBarPlotScope<X, Y>.() -> Unit
+) {
+    GroupedVerticalBarPlot(
+        modifier = modifier,
+        maxBarGroupWidth = maxBarGroupWidth,
+        startAnimationUseCase =
+        StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            /* chart animation */
+            animationSpec,
+        ),
+        content = content
     )
 }
 

@@ -6,8 +6,8 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-dokka = {id = "org.jetbrains.dokka", version.ref = "dokka"}
-detekt = {id = "io.gitlab.arturbosch.detekt", version = "1.23.7"}
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version = "1.23.7" }
 
 [versions]
 
@@ -92,6 +92,6 @@ kotlin = "2.1.0"
 
 [libraries]
 
-dokka-base = {group = "org.jetbrains.dokka", name = "dokka-base", version.ref = "dokka"}
-kotlinx-coroutines = {group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.10.1"}
-detekt-formatting = {group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version = "1.23.7"}
+dokka-base = { group = "org.jetbrains.dokka", name = "dokka-base", version.ref = "dokka" }
+kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.10.1" }
+detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version = "1.23.7" }
