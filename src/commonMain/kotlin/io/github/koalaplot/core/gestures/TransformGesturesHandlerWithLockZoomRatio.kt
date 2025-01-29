@@ -3,7 +3,6 @@ package io.github.koalaplot.core.gestures
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
-import androidx.compose.foundation.gestures.calculateCentroidSize
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.ui.geometry.Offset
@@ -22,46 +21,42 @@ internal class TransformGesturesHandlerWithLockZoomRatio : TransformGesturesHand
 
     override suspend fun detectTransformGestures(
         scope: PointerInputScope,
-        panLock: Boolean,
-        zoomLock: Boolean,
-        onZoomChange: (size: IntSize, centroid: Offset, zoomX: Float, zoomY: Float) -> Unit,
-        onPanChange: (size: IntSize, pan: Offset) -> Unit,
+        gestureConfig: GestureConfig,
+        onZoomChange: (size: IntSize, centroid: Offset, zoom: ZoomFactor) -> Unit,
+        onPanChange: (size: IntSize, pan: Offset) -> Boolean,
     ) = scope.awaitEachGesture {
-        var pan = Offset.Zero
-        var pastTouchSlop = false
-        val touchSlop = viewConfiguration.touchSlop
-
-        var zoomCombined = ZoomFactor.NeutralPoint
-
         awaitFirstDown(requireUnconsumed = false)
         do {
             val event = awaitPointerEvent()
             val canceled = event.changes.fastAny { it.isConsumed }
             if (!canceled) {
-                val zoomCombinedChange = event.calculateZoom()
-                val panChange = event.calculatePan()
-
-                if (!pastTouchSlop) {
-                    zoomCombined *= zoomCombinedChange
-                    pan += panChange
-
-                    val centroidSize = event.calculateCentroidSize(useCurrent = false)
-                    val zoomMotion = calculateZoomMotion(zoomCombined, centroidSize)
-                    val panMotion = pan.getDistance()
-
-                    if (zoomMotion > touchSlop || panMotion > touchSlop) {
-                        pastTouchSlop = true
-                    }
+                val zoomChange = if (!gestureConfig.zoomXEnabled || !gestureConfig.zoomYEnabled) {
+                    ZoomFactor.NeutralPoint
                 } else {
-                    if (!zoomLock && zoomCombinedChange != ZoomFactor.NeutralPoint) {
-                        val centroid = event.calculateCentroid(useCurrent = false)
-                        onZoomChange(size, centroid, zoomCombinedChange, zoomCombinedChange)
-                    }
-                    if (!panLock && panChange != Offset.Zero) {
-                        onPanChange(size, panChange)
-                    }
-                    event.consumeChangedPositions()
+                    event.calculateZoom()
                 }
+                val panChange = event
+                    .calculatePan()
+                    .applyPanLocks(gestureConfig.panXEnabled, gestureConfig.panYEnabled)
+
+                val zoom = ZoomFactor(zoomChange, zoomChange)
+                val zoomAllowed = gestureConfig.zoomEnabled && zoom != ZoomFactor.Neutral
+
+                var allowConsumption = false
+
+                if (zoomAllowed) {
+                    val centroid = event.calculateCentroid(useCurrent = false)
+                    onZoomChange(size, centroid, zoom)
+                    allowConsumption = true
+                }
+
+                val panAllowed = gestureConfig.panEnabled && panChange != Offset.Zero
+
+                if (panAllowed) {
+                    allowConsumption = allowConsumption || onPanChange(size, panChange)
+                }
+
+                if (allowConsumption) event.consumeChangedPositions()
             }
         } while (!canceled && event.changes.fastAny { it.pressed })
     }

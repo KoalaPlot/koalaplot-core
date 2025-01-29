@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import io.github.koalaplot.core.util.ZoomFactor
-import io.github.koalaplot.core.util.max
 import kotlin.math.abs
 
 /**
@@ -21,17 +20,12 @@ internal class DefaultTransformGesturesHandler : TransformGesturesHandler {
 
     override suspend fun detectTransformGestures(
         scope: PointerInputScope,
-        panLock: Boolean,
-        zoomLock: Boolean,
-        onZoomChange: (size: IntSize, centroid: Offset, zoomX: Float, zoomY: Float) -> Unit,
-        onPanChange: (size: IntSize, pan: Offset) -> Unit,
+        gestureConfig: GestureConfig,
+        onZoomChange: (size: IntSize, centroid: Offset, zoomX: ZoomFactor) -> Unit,
+        onPanChange: (size: IntSize, pan: Offset) -> Boolean,
     ) = scope.awaitEachGesture {
-        var pan = Offset.Zero
-        var pastTouchSlop = false
-        val touchSlop = viewConfiguration.touchSlop
         val minTouchesDistance = viewConfiguration.minimumTouchTargetSize.width.toPx()
 
-        var (zoomX, zoomY) = ZoomFactor.Neutral
         var isHorizontalZoom = false
         var isZoomDirectionSet = false
 
@@ -40,8 +34,12 @@ internal class DefaultTransformGesturesHandler : TransformGesturesHandler {
             val event = awaitPointerEvent()
             val canceled = event.changes.fastAny { it.isConsumed }
             if (!canceled) {
-                var zoomXYChange = event.calculateZoomXY()
-                val panChange = event.calculatePan()
+                var zoomChange = event
+                    .calculateZoomXY()
+                    .applyZoomLocks(gestureConfig.zoomXEnabled, gestureConfig.zoomYEnabled)
+                val panChange = event
+                    .calculatePan()
+                    .applyPanLocks(gestureConfig.panXEnabled, gestureConfig.panYEnabled)
 
                 if (!isZoomDirectionSet) {
                     event.isHorizontalZoom()?.also {
@@ -49,37 +47,26 @@ internal class DefaultTransformGesturesHandler : TransformGesturesHandler {
                         isZoomDirectionSet = true
                     }
                 } else {
-                    zoomXYChange = zoomXYChange.resetOrthogonalAxis(isHorizontalZoom)
+                    zoomChange = zoomChange.resetOrthogonalAxis(isHorizontalZoom)
                 }
 
-                if (!pastTouchSlop) {
-                    zoomX *= zoomXYChange.x
-                    zoomY *= zoomXYChange.y
-                    pan += panChange
+                var allowConsumption = false
 
-                    val (centroidSizeX, centroidSizeY) = event.calculateCentroidSizeXY(useCurrent = false)
-                    val zoomMotion = max(
-                        calculateZoomMotion(zoomX, centroidSizeX),
-                        calculateZoomMotion(zoomY, centroidSizeY),
-                    )
+                val zoomAllowed = gestureConfig.zoomEnabled && zoomChange != ZoomFactor.Neutral &&
+                    event.zoomGestureIsCorrect(minTouchesDistance, isHorizontalZoom)
 
-                    val panMotion = pan.getDistance()
-
-                    if (zoomMotion > touchSlop || panMotion > touchSlop) {
-                        pastTouchSlop = true
-                    }
-                } else {
-                    if (!zoomLock && zoomXYChange != ZoomFactor.Neutral &&
-                        event.zoomGestureIsCorrect(minTouchesDistance, isHorizontalZoom)
-                    ) {
-                        val centroid = event.calculateCentroid(useCurrent = false)
-                        onZoomChange(size, centroid, zoomXYChange.x, zoomXYChange.y)
-                    }
-                    if (!panLock && panChange != Offset.Zero) {
-                        onPanChange(size, panChange)
-                    }
-                    event.consumeChangedPositions()
+                if (zoomAllowed) {
+                    val centroid = event.calculateCentroid(useCurrent = false)
+                    onZoomChange(size, centroid, zoomChange)
+                    allowConsumption = true
                 }
+
+                val panAllowed = gestureConfig.panEnabled && panChange != Offset.Zero
+
+                if (panAllowed) {
+                    allowConsumption = allowConsumption || onPanChange(size, panChange)
+                }
+                if (allowConsumption) event.consumeChangedPositions()
             }
         } while (!canceled && event.changes.fastAny { it.pressed })
     }

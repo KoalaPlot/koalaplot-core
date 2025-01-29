@@ -61,5 +61,7 @@ public interface AxisModel<T> {
      * the axis by 10% of its current range, increasing the values. Negative values will pan by
      * decreasing the minimum and maximum axis range.
      */
-    public fun pan(amount: Float) {}
+    public fun pan(amount: Float): Boolean {
+        return false
+    }
 }

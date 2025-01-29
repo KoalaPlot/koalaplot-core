@@ -30,8 +30,6 @@ import kotlin.math.roundToLong
  * @param minimumMajorTickSpacing Specifies the minimum physical spacing for major ticks, in
  * Dp units. Must be greater than 0.
  * @param minorTickCount The number of minor ticks per major tick interval.
- * @param allowZooming If the axis should allow zooming
- * @param allowPanning If the axis should allow panning.
  * @param inverted If the axis coordinates should be inverted so smaller values are at the top/right.
  */
 public class LongLinearAxisModel(
@@ -43,8 +41,6 @@ public class LongLinearAxisModel(
         ).toLong(),
     override val minimumMajorTickSpacing: Dp = 50.dp,
     private val minorTickCount: Int = 4,
-    private val allowZooming: Boolean = true,
-    private val allowPanning: Boolean = true,
     private val inverted: Boolean = false,
 ) : DiscreteLinearAxisModel<Long> {
     init {
@@ -190,7 +186,7 @@ public class LongLinearAxisModel(
     }
 
     override fun zoom(zoomFactor: Float, pivot: Float) {
-        if (!allowZooming || zoomFactor == 1f) return
+        if (zoomFactor == 1f) return
 
         require(zoomFactor > 0) { "Zoom amount must be greater than 0" }
         require(pivot in 0.0..1.0) { "Zoom pivot must be between 0 and 1: $pivot" }
@@ -213,9 +209,7 @@ public class LongLinearAxisModel(
         }
     }
 
-    override fun pan(amount: Float) {
-        if (!allowPanning) return
-
+    override fun pan(amount: Float): Boolean {
         // convert pan amount to axis range space
         val panAxisScale = ((currentRange.value.endInclusive - currentRange.value.start) * amount)
 
@@ -226,7 +220,10 @@ public class LongLinearAxisModel(
         val newLow = (currentRange.value.start + panLimited)
         val newHi = (currentRange.value.endInclusive + panLimited)
 
+        val result = currentRange.value != newLow..newHi
+
         currentRange.value = newLow..newHi
+        return result
     }
 
     override fun setViewRange(newRange: ClosedRange<Double>) {
@@ -264,9 +261,7 @@ public class LongLinearAxisModel(
         if (minViewExtent != other.minViewExtent) return false
         if (minimumMajorTickIncrement != other.minimumMajorTickIncrement) return false
         if (minimumMajorTickSpacing != other.minimumMajorTickSpacing) return false
-        if (minorTickCount != other.minorTickCount) return false
-        if (allowZooming != other.allowZooming) return false
-        return allowPanning == other.allowPanning
+        return minorTickCount == other.minorTickCount
     }
 
     override fun hashCode(): Int {
@@ -275,8 +270,6 @@ public class LongLinearAxisModel(
         result = 31 * result + minimumMajorTickIncrement.hashCode()
         result = 31 * result + minimumMajorTickSpacing.hashCode()
         result = 31 * result + minorTickCount
-        result = 31 * result + allowZooming.hashCode()
-        result = 31 * result + allowPanning.hashCode()
         return result
     }
 }
@@ -292,16 +285,12 @@ public fun rememberLongLinearAxisModel(
     minimumMajorTickIncrement: Long = ((range.last - range.first) * MinimumMajorTickIncrementDefault).toLong(),
     minimumMajorTickSpacing: Dp = 50.dp,
     minorTickCount: Int = 4,
-    allowZooming: Boolean = true,
-    allowPanning: Boolean = true,
 ): LongLinearAxisModel = remember(
     range,
     minViewExtent,
     minimumMajorTickIncrement,
     minimumMajorTickSpacing,
     minorTickCount,
-    allowZooming,
-    allowPanning
 ) {
     LongLinearAxisModel(
         range,
@@ -310,8 +299,6 @@ public fun rememberLongLinearAxisModel(
         minimumMajorTickIncrement,
         minimumMajorTickSpacing,
         minorTickCount,
-        allowZooming,
-        allowPanning
     )
 }
 

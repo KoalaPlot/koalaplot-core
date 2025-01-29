@@ -8,11 +8,13 @@ import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import io.github.koalaplot.core.gestures.GestureConfig
+import io.github.koalaplot.core.gestures.applyPanLocks
+import io.github.koalaplot.core.gestures.applyZoomLocks
 import io.github.koalaplot.core.gestures.getMaxZoomDeviation
 
 private const val ScrollDeltaMin = 0.75f
 private const val ScrollDeltaMax = 1.25f
-private const val DefaultScrollDelta = 1f
 
 /**
  * See the documentation of the expected fun
@@ -23,41 +25,47 @@ private const val DefaultScrollDelta = 1f
 internal actual fun Modifier.onGestureInput(
     key1: Any?,
     key2: Any?,
-    panLock: Boolean,
-    zoomLock: Boolean,
-    lockZoomRatio: Boolean,
-    onZoomChange: (size: IntSize, centroid: Offset, zoomX: Float, zoomY: Float) -> Unit,
-    onPanChange: (size: IntSize, pan: Offset) -> Unit,
+    gestureConfig: GestureConfig,
+    onZoomChange: (size: IntSize, centroid: Offset, zoom: ZoomFactor) -> Unit,
+    onPanChange: (size: IntSize, pan: Offset) -> Boolean,
 ): Modifier = this then Modifier
     .onPointerEvent(PointerEventType.Move) { event ->
-        if (panLock) return@onPointerEvent
+        if (!gestureConfig.panEnabled) return@onPointerEvent
         val change = event.changes.lastOrNull() ?: return@onPointerEvent
-        val result = change.position - change.previousPosition
-        if (result == Offset.Zero) return@onPointerEvent
-        onPanChange(size, result)
-        change.consume()
+
+        val pan = (change.position - change.previousPosition)
+            .applyPanLocks(gestureConfig.panXEnabled, gestureConfig.panYEnabled)
+
+        if (pan == Offset.Zero) return@onPointerEvent
+        if (onPanChange(size, pan)) change.consume()
     }
     .onPointerEvent(PointerEventType.Scroll) { event ->
         val change = event.changes.lastOrNull() ?: return@onPointerEvent
         val isZoomEvent = event.keyboardModifiers.isCtrlPressed
 
-        if (isZoomEvent && !zoomLock) {
+        if (isZoomEvent && gestureConfig.zoomEnabled) {
             val (scrollX, scrollY) = change.scrollDelta
-            val (zoomX, zoomY) = if (lockZoomRatio) {
+            val rawZoom = if (!gestureConfig.independentZoomEnabled) {
                 val maxZoomDeviation = getMaxZoomDeviation(
                     normalizeScrollDeltaToZoom(scrollX),
                     normalizeScrollDeltaToZoom(scrollY),
                 )
-                maxZoomDeviation to maxZoomDeviation
+                ZoomFactor(maxZoomDeviation, maxZoomDeviation)
             } else {
-                normalizeScrollDeltaToZoom(scrollX) to normalizeScrollDeltaToZoom(scrollY)
+                ZoomFactor(normalizeScrollDeltaToZoom(scrollX), normalizeScrollDeltaToZoom(scrollY))
             }
-            onZoomChange(size, change.position, zoomX, zoomY)
+
+            val zoom = rawZoom.applyZoomLocks(gestureConfig.zoomXEnabled, gestureConfig.zoomYEnabled)
+
+            if (zoom == ZoomFactor.Neutral) return@onPointerEvent
+            onZoomChange(size, change.position, zoom)
             change.consume()
-        } else if (!panLock) {
-            val pan = change.scrollDelta * -64.dp.toPx()
-            onPanChange(size, pan)
-            change.consume()
+        } else if (gestureConfig.panEnabled) {
+            val rawPan = change.scrollDelta * -64.dp.toPx()
+            val pan = rawPan.applyPanLocks(gestureConfig.panXEnabled, gestureConfig.panYEnabled)
+
+            if (pan == Offset.Zero) return@onPointerEvent
+            if (onPanChange(size, pan)) change.consume()
         }
     }
 
@@ -70,5 +78,5 @@ internal actual fun Modifier.onGestureInput(
  * @param value Scroll Value
  */
 internal fun normalizeScrollDeltaToZoom(value: Float): Float {
-    return (DefaultScrollDelta - value).coerceIn(ScrollDeltaMin..ScrollDeltaMax)
+    return (ZoomFactor.NeutralPoint - value).coerceIn(ScrollDeltaMin..ScrollDeltaMax)
 }
