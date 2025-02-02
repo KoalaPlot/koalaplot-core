@@ -41,6 +41,13 @@ public interface AxisModel<T> {
     public fun computeOffset(point: T): Float
 
     /**
+     * Converts an offset in the 0..1 range to a data type [T].
+     * If the axis is linear, the conversion follows: min + offset * (max - min).
+     * For a logarithmic axis, an appropriate inverse transformation should be implemented.
+     */
+    public fun computeValue(offset: Float): T
+
+    /**
      * Asks the AxisState to compute new ranges and tick values after zooming, if the axis supports
      * zooming.
      *

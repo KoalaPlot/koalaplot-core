@@ -35,6 +35,28 @@ public class CategoryAxisModel<T>(
         return TickValues(categories, listOf())
     }
 
+    override fun computeValue(offset: Float): T {
+        // The offset is expected to be in the 0~1 range. Handle exceptions if out of bounds.
+        require(offset in 0f..1f) { "Offset ($offset) must be in [0,1]" }
+
+        // When firstCategoryIsZero == true:
+        //   computeOffset(point) is index / categories.size
+        //   -> index = offset * categories.size
+        // When firstCategoryIsZero == false:
+        //   computeOffset(point) is (index + 1) / (categories.size + 1)
+        //   -> index = offset * (categories.size + 1) - 1
+        val rawIndex = if (firstCategoryIsZero) {
+            (offset * categories.size)
+        } else {
+            (offset * (categories.size + 1) - 1)
+        }
+
+        // Adjust safely to prevent negative values or exceeding (categories.size - 1)
+        val index = rawIndex.toInt().coerceIn(0, categories.size - 1)
+
+        return categories[index]
+    }
+
     private data class TickValues<T>(override val majorTickValues: List<T>, override val minorTickValues: List<T>) :
         io.github.koalaplot.core.xygraph.TickValues<T>
 }

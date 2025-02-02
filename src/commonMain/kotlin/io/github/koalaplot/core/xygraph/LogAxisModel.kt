@@ -47,4 +47,12 @@ public class LogAxisModel(private val range: ClosedRange<Int>) : AxisModel<Float
             override val minorTickValues = computeMinorTickValues(majorTickValues)
         }
     }
+
+    override fun computeValue(offset: Float): Float {
+        // The offset is in the [0..1] range.
+        // Convert it to an exponent using range.start..range.endInclusive,
+        // then compute the actual value as 10^(exponent).
+        val exponent = range.start + offset * (range.endInclusive - range.start)
+        return Base.pow(exponent.toDouble()).toFloat()
+    }
 }

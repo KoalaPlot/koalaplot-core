@@ -132,6 +132,32 @@ public class IntLinearAxisModel(
         }
     }
 
+    override fun computeValue(offset: Float): Int {
+        require(offset in 0f..1f) {
+            "Offset ($offset) must be in [0, 1]"
+        }
+        val start = currentRange.value.start
+        val end = currentRange.value.endInclusive
+
+        // Calculation differs based on whether inverted is true or false.
+        // Non-inverted:
+        //   offset = (point - start) / (end - start)
+        //   -> point = start + offset * (end - start)
+        // Inverted:
+        //   offset = (end - point) / (end - start)
+        //   -> point = end - offset * (end - start)
+        val pointDouble = if (!inverted) {
+            start + offset * (end - start)
+        } else {
+            end - offset * (end - start)
+        }
+
+        // Double → Int Conversion
+        // Typically uses roundToInt() and clamps within the axis range.
+        val pointInt = pointDouble.roundToInt()
+        return pointInt.coerceIn(range.first, range.last)
+    }
+
     private fun computeMajorTickSpacing(minTickSpacing: Float): Int {
         require(minTickSpacing > 0 && minTickSpacing <= 1) {
             "Minimum tick spacing must be greater than 0 and less than or equal to 1"
