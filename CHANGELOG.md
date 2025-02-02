@@ -9,20 +9,37 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Support for StartAnimationUseCase in bar-chart (GroupedVerticalBarPlot)
+
+## [0.8.0]
+
+### Added
+
 - viewRange property to LinearAxisModel.
 - Support for "inverted" linear axes that plot their values from most to least.
+- Support for StartAnimationUseCase in PieChart
 
 ### Changed
 
-- Upgrade Compose plugin to 1.7.1
+- Upgrade Compose plugin to 1.7.3
 - Upgrade Kotlin to 2.1.0
+- Upgrade kotlinx-coroutines to 1.10.1
+- Upgrade Dokka to 2.0.0
 - Android Gradle Plugin to 8.7.2
 - Android compileSDK to 34 and minSDK to 23
+- BulletGraph using default qualitative range indicators will accept a max of 5 values when being configured rather
+  than throwing a null pointer exception when Composing.
 
 ### Fixed
 
 - Panning support for Int and Long linear axis models by introducing ContinuousLinearAxisModel and
   DiscreteLinearAxisModel interfaces
+- BulletGraph null pointer exception if more than 4 qualitative range indicators are used.
+- BulletGraph qualitative range default shading not according to spec under some conditions.
+- Divide by 0 in XYGraph if an axis has no tick labels (#105).
+- XYGraph size changes when panning (#101). **Important Note**: This required a change to the XYGraph size
+  calculation that may result in clipping of the rightmost x-axis tick label and/or topmost y-axis tick label. Padding
+  can be explicitly added to the parent Composable to leave space for labels that extend beyond the graph edge.
 
 ## [0.7.1]
 

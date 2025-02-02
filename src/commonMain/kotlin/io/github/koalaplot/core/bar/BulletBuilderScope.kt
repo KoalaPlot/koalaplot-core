@@ -61,6 +61,9 @@ private val DefaultRangeShades = listOf(
     listOf(0.5f, 0.65f, 0.8f, 0.9f, 0.97f),
 )
 
+// Max number of qualitative ranges supported by the DefaultRangeShades above
+private const val MaxQualitativeRanges = 5
+
 private const val MinRangeShade = 0.99f
 
 /**
@@ -174,6 +177,11 @@ public class BulletBuilderScope<T>(private val axisModel: LinearAxisModel<T>) wh
      * to be customized then use the overloaded version of this function.
      */
     public fun ranges(vararg values: T) {
+        // Subtract 1 because first value is the start of first range, not a range itself
+        require(values.size - 1 <= MaxQualitativeRanges) {
+            "A maximum of $MaxQualitativeRanges qualitative ranges is supported by this function. If more are " +
+                "required, use the overloaded version of this function."
+        }
         rangesScope = RangesScope<T>().apply {
             values.forEach {
                 ranges.add(Range<T>(it, null))
@@ -358,11 +366,12 @@ public class BulletBuilderScope<T>(private val axisModel: LinearAxisModel<T>) wh
         @OptIn(ExperimentalKoalaPlotApi::class)
         @Composable
         private fun <T> RangeIndicators(builtScope: BulletBuilderScope<T>) where T : Comparable<T>, T : Number {
-            val shadeIndex = max(builtScope.rangesScope.ranges.size - 1, DefaultRangeShades.lastIndex)
-            val numShades = DefaultRangeShades[shadeIndex].size
             for (rangeIndex in 1 until builtScope.rangesScope.ranges.size) {
                 val range = builtScope.rangesScope.ranges[rangeIndex]
                 if (range.indicator == null) {
+                    val shadeIndex = min(builtScope.rangesScope.ranges.size - 2, DefaultRangeShades.lastIndex)
+                        .coerceIn(0..DefaultRangeShades.lastIndex)
+                    val numShades = DefaultRangeShades[shadeIndex].size
                     val shade = if (rangeIndex - 1 >= numShades) {
                         MinRangeShade
                     } else {

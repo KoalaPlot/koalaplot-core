@@ -44,7 +44,6 @@ import io.github.koalaplot.core.util.rotate
 import io.github.koalaplot.core.util.rotateVertically
 import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
@@ -351,27 +350,17 @@ private data class ChartAreas(
     val xAxisOffset: Int = 0,
     val xAxisTitleHeight: Int = 0,
     val xAxisLabelAreaHeight: Int = 0,
-    val xAxisFirstLabelExtensionWidth: Int = 0,
-    val xAxisLastLabelExtensionWidth: Int = 0,
     val yAxisTitleWidth: Int = 0,
     val yAxisLabelAreaWidth: Int = 0,
-    val yAxisFirstLabelExtensionHeight: Int = 0,
-    val yAxisLastLabelExtensionHeight: Int = 0
 ) {
     val graphSize: IntSize by lazy {
         IntSize(
             (
-                constraints.maxWidth -
-                    max(yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset, xAxisFirstLabelExtensionWidth) -
-                    xAxisLastLabelExtensionWidth
+                constraints.maxWidth - (yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset)
                 ).coerceAtLeast(0),
             (
                 constraints.maxHeight -
-                    max(
-                        xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset,
-                        yAxisFirstLabelExtensionHeight
-                    ) -
-                    yAxisLastLabelExtensionHeight
+                    (xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset)
                 ).coerceAtLeast(0)
         )
     }
@@ -381,10 +370,7 @@ private data class ChartAreas(
      */
     val graphArea: IntRect by lazy {
         IntRect(
-            IntOffset(
-                max(yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset, xAxisFirstLabelExtensionWidth),
-                yAxisLastLabelExtensionHeight
-            ),
+            IntOffset(yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset, 0),
             graphSize
         )
     }
@@ -396,34 +382,11 @@ private data class ChartAreas(
         return graphSize.width / number.coerceAtLeast(1)
     }
 
-    private fun maxFirstLabelWidth(majorTickOffsets: List<Float>): Int {
-        return if (majorTickOffsets.size > 1) {
-            (graphSize.width * (majorTickOffsets[1] - majorTickOffsets[0])).toInt()
-        } else {
-            graphSize.width
-        }
-    }
-
-    private fun maxLastLabelWidth(majorTickOffsets: List<Float>): Int {
-        return if (majorTickOffsets.size > 1) {
-            (
-                graphSize.width * (majorTickOffsets.last() - majorTickOffsets[majorTickOffsets.lastIndex - 1])
-                ).toInt()
-        } else {
-            graphSize.width
-        }
-    }
-
     /**
      * Returns a copy of this ChartAreas after setting the [xAxisLabelAreaHeight],
-     * [xAxisFirstLabelExtensionWidth], and [xAxisLastLabelExtensionWidth] based on the
-     * x-axis labels and their rotation angle.
+     * based on the x-axis labels and their rotation angle.
      */
-    fun withComputedXAxisLabelAreas(
-        majorTickOffsets: List<Float>,
-        xAxisLabels: List<Measurable>,
-        rotation: Int
-    ): ChartAreas {
+    fun withComputedXAxisLabelAreas(xAxisLabels: List<Measurable>, rotation: Int): ChartAreas {
         val xAxisLabelHeights = xAxisLabels.calcXAxisLabelWidthConstraints(
             rotation,
             xTickSpacing(xAxisLabels.size),
@@ -439,60 +402,12 @@ private data class ChartAreas(
             )
         }
 
-        fun firstTickOffset(): Int {
-            return if (majorTickOffsets.isNotEmpty()) {
-                (graphSize.width * majorTickOffsets[0]).toInt()
-            } else {
-                graphSize.width / 2
-            }
-        }
-
-        fun lastTickOffset(): Int {
-            return if (majorTickOffsets.isNotEmpty()) {
-                (graphSize.width * (1 - majorTickOffsets.last())).toInt()
-            } else {
-                graphSize.width / 2
-            }
-        }
-
-        return copy(
-            xAxisLabelAreaHeight = labelAreas.maxOfOrNull { it.height } ?: 0,
-            xAxisFirstLabelExtensionWidth = if (rotation == 0) {
-                // If the major ticks are closer together than label width the actual space provided for
-                // the label will be less (it will overflow or clip).
-                // The allocated space is approximated by maxFirstLabelWidth().
-                (
-                    min(
-                        maxFirstLabelWidth(majorTickOffsets) / 2,
-                        labelAreas.firstOrNull()?.widthLeft(AnchorPoint.TopCenter) ?: 0
-                    ) - firstTickOffset()
-                    ).coerceAtLeast(0)
-            } else {
-                // 2nd (or subsequent) label may possibly extend further left than the first label due to the angle
-                majorTickOffsets.mapIndexed { index, fl ->
-                    (labelAreas[index].widthLeft(AnchorPoint.RightMiddle) - (graphSize.width * fl).toInt())
-                        .coerceAtLeast(0)
-                }.maxOrNull() ?: 0
-            },
-            xAxisLastLabelExtensionWidth = if (rotation == 0) {
-                (
-                    min(
-                        maxLastLabelWidth(majorTickOffsets) / 2,
-                        labelAreas.lastOrNull()?.widthRight(AnchorPoint.TopCenter) ?: 0
-                    ) - lastTickOffset()
-                    ).coerceAtLeast(0)
-            } else {
-                (
-                    (labelAreas.lastOrNull()?.widthRight(AnchorPoint.RightMiddle) ?: 0) - lastTickOffset()
-                    ).coerceAtLeast(0)
-            }
-        )
+        return copy(xAxisLabelAreaHeight = labelAreas.maxOfOrNull { it.height } ?: 0)
     }
 
     /**
-     * Returns a copy of this ChartAreas after setting the [yAxisLabelAreaWidth],
-     * [yAxisFirstLabelExtensionHeight], and [yAxisLastLabelExtensionHeight] based on the
-     * y-axis labels and their rotation angle.
+     * Returns a copy of this ChartAreas after setting the [yAxisLabelAreaWidth]
+     * based on the y-axis labels and their rotation angle.
      */
     fun withComputedYAxisLabelAreas(yAxisLabels: List<Measurable>, rotation: Int): ChartAreas {
         val yAxisLabelAreas = yAxisLabels.map {
@@ -504,19 +419,7 @@ private data class ChartAreas(
             )
         }
 
-        return copy(
-            yAxisLabelAreaWidth = yAxisLabelAreas.maxOfOrNull { it.width } ?: 0,
-            yAxisFirstLabelExtensionHeight = if (rotation == 90) {
-                yAxisLabelAreas.firstOrNull()?.heightBelow(AnchorPoint.BottomCenter) ?: 0
-            } else {
-                yAxisLabelAreas.firstOrNull()?.heightBelow(AnchorPoint.RightMiddle) ?: 0
-            },
-            yAxisLastLabelExtensionHeight = if (rotation == 90) {
-                yAxisLabelAreas.lastOrNull()?.heightAbove(AnchorPoint.BottomCenter) ?: 0
-            } else {
-                yAxisLabelAreas.lastOrNull()?.heightAbove(AnchorPoint.RightMiddle) ?: 0
-            }
-        )
+        return copy(yAxisLabelAreaWidth = yAxisLabelAreas.maxOfOrNull { it.width } ?: 0)
     }
 
     fun getChartOffset(mouseX: Int, mouseY: Int): IntOffset {
@@ -556,7 +459,7 @@ private fun <X, Y> Density.optimizeGraphSize(
         )
 
         chartAreas =
-            chartAreas.withComputedXAxisLabelAreas(xAxis.majorTickOffsets, m.xAxisLabels, xAxis.style.labelRotation)
+            chartAreas.withComputedXAxisLabelAreas(m.xAxisLabels, xAxis.style.labelRotation)
         chartAreas = chartAreas.withComputedYAxisLabelAreas(m.yAxisLabels, yAxis.style.labelRotation)
 
         iterations++
@@ -575,25 +478,12 @@ private class XYAxisMeasurePolicy<X, Y>(
         //그래프 사이즈도 리턴하도록 변경
         val chartAreas = optimizeGraphSize(constraints, m, xAxis, yAxis)
 
-        val yAxisLabelPlaceableDelegates: List<RotatedPlaceableDelegate> = m.yAxisLabels.map {
-            RotatedPlaceableDelegate(
-                it.measure(Constraints(maxHeight = chartAreas.graphSize.height / m.yAxisLabels.size)),
-                -yAxis.style.labelRotation.toFloat()
-            )
-        }
+        val yAxisLabelPlaceableDelegates = createYAxisRotatedPlaceableDelegates(m, chartAreas)
 
         val xAxisPlaceable = m.xAxis.measure(Constraints.fixedWidth(chartAreas.graphSize.width))
         val xAxisTitlePlaceable = m.xAxisTitle.measure(Constraints(maxWidth = chartAreas.graphSize.width))
 
-        val xAxisLabelPlaceableDelegates = m.xAxisLabels.calcXAxisLabelWidthConstraints(
-            xAxis.style.labelRotation,
-            chartAreas.graphSize.width / m.xAxisLabels.size,
-            chartAreas.xAxisLabelAreaHeight,
-            { meas, w -> meas.measure(Constraints(maxWidth = w)) },
-            { placeable -> placeable.height }
-        ).map {
-            RotatedPlaceableDelegate(it, -xAxis.style.labelRotation.toFloat())
-        }
+        val xAxisLabelPlaceableDelegates = createXAxisRotatedPlaceableDelegates(m, chartAreas)
 
         val yAxisTitlePlaceable = m.yAxisTitle.measure(Constraints(maxHeight = chartAreas.graphSize.height))
         val yAxisPlaceable = m.yAxis.measure(Constraints.fixedHeight(chartAreas.graphSize.height))
@@ -658,6 +548,29 @@ private class XYAxisMeasurePolicy<X, Y>(
             xAxisPlaceable.place(chartAreas.graphArea.left, chartAreas.graphArea.bottom - xAxis.axisOffset.roundToPx())
         } to chartAreas
     }
+
+    private fun createYAxisRotatedPlaceableDelegates(m: Measurables, chartAreas: ChartAreas) =
+        m.yAxisLabels.map {
+            RotatedPlaceableDelegate(
+                it.measure(Constraints(maxHeight = chartAreas.graphSize.height / m.yAxisLabels.size)),
+                -yAxis.style.labelRotation.toFloat()
+            )
+        }
+
+    private fun createXAxisRotatedPlaceableDelegates(m: Measurables, chartAreas: ChartAreas) =
+        if (m.xAxisLabels.isNotEmpty()) {
+            m.xAxisLabels.calcXAxisLabelWidthConstraints(
+                xAxis.style.labelRotation,
+                chartAreas.graphSize.width / m.xAxisLabels.size,
+                chartAreas.xAxisLabelAreaHeight,
+                { meas, w -> meas.measure(Constraints(maxWidth = w)) },
+                { placeable -> placeable.height }
+            ).map {
+                RotatedPlaceableDelegate(it, -xAxis.style.labelRotation.toFloat())
+            }
+        } else {
+            listOf()
+        }
 }
 
 /**
