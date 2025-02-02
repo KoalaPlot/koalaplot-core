@@ -3,11 +3,7 @@
 package io.github.koalaplot.core.xygraph
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -19,29 +15,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.layout.Measurable
-import androidx.compose.ui.layout.MeasureResult
-import androidx.compose.ui.layout.MeasureScope
-import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.*
+import androidx.compose.ui.unit.*
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
-import io.github.koalaplot.core.util.Deg2Rad
-import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.util.HoverableElementArea
-import io.github.koalaplot.core.util.HoverableElementAreaScope
-import io.github.koalaplot.core.util.Vector
-import io.github.koalaplot.core.util.VerticalRotation
-import io.github.koalaplot.core.util.length
-import io.github.koalaplot.core.util.lineDistance
-import io.github.koalaplot.core.util.onGestureInput
-import io.github.koalaplot.core.util.rotate
-import io.github.koalaplot.core.util.rotateVertically
+import io.github.koalaplot.core.util.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -116,10 +94,6 @@ public fun <X, Y> XYGraph(
     content: @Composable XYGraphScope<X, Y>.() -> Unit
 ) {
     HoverableElementArea(modifier = modifier) {
-        // 그래프 사이즈와 마우스 좌표의 차트상 상대 좌표 추가
-        var graphSize by remember { mutableStateOf(IntSize.Zero) }
-        var mouseRelativeOffset by remember { mutableStateOf(IntOffset.Zero) }
-
         SubcomposeLayout { constraints ->
             val xAxisTitleMeasurable = subcompose("xaxistitle") {
                 Box(modifier = Modifier.fillMaxWidth()) { xAxisTitle() }
@@ -138,36 +112,45 @@ public fun <X, Y> XYGraph(
             val xAxis = AxisDelegate.createHorizontalAxis(
                 xAxisModel,
                 xAxisStyle,
-                (constraints.maxWidth - -yAxisTitleMeasurable.maxIntrinsicWidth(constraints.maxHeight)).toDp()
+                (constraints.maxWidth - -(yAxisTitleMeasurable.maxIntrinsicWidth(constraints.maxHeight) ?: 0)).toDp()
             )
-
             val yAxis = AxisDelegate.createVerticalAxis(
                 yAxisModel,
                 yAxisStyle,
-                (constraints.maxHeight - -xAxisTitleMeasurable.maxIntrinsicHeight(constraints.maxWidth)).toDp()
+                (constraints.maxHeight - -(xAxisTitleMeasurable.maxIntrinsicHeight(constraints.maxWidth) ?: 0)).toDp()
             )
 
             val xAxisMeasurable = subcompose("xaxis") { Axis(xAxis) }[0]
             val yAxisMeasurable = subcompose("yaxis") { Axis(yAxis) }[0]
 
-            val chartAreas = ChartAreas(
-                constraints,
-                yAxisOffset = yAxis.axisOffset.roundToPx(),
-                xAxisHeight = xAxis.thicknessDp.roundToPx(),
-                xAxisOffset = xAxis.axisOffset.roundToPx()
-            )
-            val mouseAbsoluteOffset = getCurrentPointer()
-            val chartScope = XYGraphScopeImpl(
-                xAxisModel,
-                yAxisModel,
-                xAxis,
-                yAxis,
-                this@HoverableElementArea,
-                mouseRelativeOffset, graphSize
-            )
+            val measurables = subcompose("gridAndLabels") {
 
+                Grid(
+                    xAxisState = xAxis,
+                    yAxisState = yAxis,
+                    horizontalMajorGridLineStyle,
+                    horizontalMinorGridLineStyle,
+                    verticalMajorGridLineStyle,
+                    verticalMinorGridLineStyle
+                )
 
-            val chartMeasurable = subcompose("chart") {
+                xAxis.majorTickValues.forEach {
+                    Box(modifier = Modifier.rotate(-xAxisStyle.labelRotation.toFloat())) {
+                        xAxisLabels(it)
+                    }
+                }
+
+                yAxis.majorTickValues.forEach {
+                    Box(modifier = Modifier.rotate(-yAxisStyle.labelRotation.toFloat())) {
+                        yAxisLabels(it)
+                    }
+                }
+            }
+
+            // Predefine subcomposition with the name 'chart' (contents will be added below)
+            val chartMeasurable = subcompose("chartBase") {
+                // Placeholder Box that does not render anything
+                // (Actual content will be added in the second subcompose)
                 val panZoomModifier = if (panEnabled || zoomEnabled) {
                     Modifier.onGestureInput(
                         key1 = xAxisModel,
@@ -191,53 +174,80 @@ public fun <X, Y> XYGraph(
                 }
 
                 Box(
-                    modifier = Modifier.clip(RectangleShape).then(panZoomModifier)
-                ) {
-                    chartScope.content()
-                }
+                    modifier = Modifier
+                        .clip(RectangleShape)
+                        .then(panZoomModifier)
+                )
             }[0]
 
-            val measurables = subcompose(Unit) {
-                Grid(
-                    xAxis,
-                    yAxis,
-                    horizontalMajorGridLineStyle,
-                    horizontalMinorGridLineStyle,
-                    verticalMajorGridLineStyle,
-                    verticalMinorGridLineStyle
+            // 2) Measure and arrange the elements using a MeasurePolicy
+            with(XYAxisMeasurePolicy(xAxis, yAxis)) {
+                val (partialLayoutResult, chartAreas) = measure(
+                    m = Measurables(
+                        grid = measurables.getOrNull(0),
+                        chart = chartMeasurable,
+                        xAxis = xAxisMeasurable,
+                        xAxisLabels = measurables.subList(1, xAxis.majorTickValues.size + 1),
+                        xAxisTitle = xAxisTitleMeasurable,
+                        yAxis = yAxisMeasurable,
+                        yAxisLabels = measurables.subList(
+                            xAxis.majorTickValues.size + 1,
+                            xAxis.majorTickValues.size + 1 + yAxis.majorTickValues.size
+                        ),
+                        yAxisTitle = yAxisTitleMeasurable
+                    ),
+                    constraints = constraints
                 )
 
-                xAxis.majorTickValues.forEach {
-                    Box(modifier = Modifier.rotate(-xAxisStyle.labelRotation.toFloat())) { xAxisLabels(it) }
-                }
-                yAxis.majorTickValues.forEach {
-                    Box(modifier = Modifier.rotate(-yAxisStyle.labelRotation.toFloat())) { yAxisLabels(it) }
-                }
-            }
+                //
+                // Based on the measurement results, calculate mouse coordinates and create Scope
+                //
+                val mouseAbsoluteOffset = getCurrentPointer() // Absolute screen coordinates (FractionalOffset)
+                val mouseOffsetPx = chartAreas.copy(
+                    xAxisTitleHeight = xAxisMeasurable?.maxIntrinsicHeight(chartAreas.graphSize.width) ?: 0,
+                    yAxisTitleWidth = yAxisMeasurable?.maxIntrinsicWidth(chartAreas.graphSize.height) ?: 0
+                ).getChartOffset(
+                    mouseX = mouseAbsoluteOffset.x.toInt(),
+                    mouseY = mouseAbsoluteOffset.y.toInt()
+                )
 
-            val measurablesMap = Measurables(
-                measurables[0],
-                chartMeasurable,
-                xAxisMeasurable,
-                measurables.subList(1, xAxis.majorTickValues.size + 1),
-                xAxisTitleMeasurable,
-                yAxisMeasurable,
-                measurables.subList(
-                    xAxis.majorTickValues.size + 1,
-                    xAxis.majorTickValues.size + 1 + yAxis.majorTickValues.size
-                ),
-                yAxisTitleMeasurable
-            )
 
-            with(XYAxisMeasurePolicy(xAxis, yAxis)) {
-                //추가,변경 그래프 사이즈 업데이트
-                val measureReturn = measure(measurablesMap, constraints)
-                graphSize = measureReturn.second.graphSize
-                mouseRelativeOffset = chartAreas.copy(
-                    xAxisTitleHeight = xAxisMeasurable.maxIntrinsicHeight(chartAreas.graphSize.width),
-                    yAxisTitleWidth = yAxisMeasurable.maxIntrinsicWidth(chartAreas.graphSize.height)
-                ).getChartOffset(mouseAbsoluteOffset.x.toInt(), mouseAbsoluteOffset.y.toInt())
-                measureReturn.first
+                val scopeImpl = XYGraphScopeImpl(
+                    xAxisModel = xAxisModel,
+                    yAxisModel = yAxisModel,
+                    xAxisState = xAxis,
+                    yAxisState = yAxis,
+                    hoverableElementAreaScope = this@HoverableElementArea,
+                    mouseOffsetPx = mouseOffsetPx,
+                    chartSizePx = chartAreas.graphSize
+                )
+
+                //
+                // 3) Render the actual chart content using the second subcompose
+                //    Although within the measure block, the 'subcompose(...)' safely executes @Composable lambdas
+                //
+                val chartContentPlaceables = subcompose("chartContent") {
+                    // Safely call scopeImpl.content() here
+                    scopeImpl.content()
+                }.map {
+                    // Measure 'chartContent' Composables
+                    it.measure(Constraints.fixed(chartAreas.graphArea.width, chartAreas.graphArea.height))
+                }
+
+                //
+                // 4) Return the final layout
+                //    The partialLayoutResult already places grid/axes; just add chartContentPlaceables for the graph area
+                //
+                val finalLayout = layout(constraints.maxWidth, constraints.maxHeight) {
+                    // Existing place operation
+                    partialLayoutResult.placeChildren()
+                    // Arrange chartContentPlaceables (Graph Area)
+                    chartContentPlaceables.forEach { placeable ->
+                        placeable.place(chartAreas.graphArea.left, chartAreas.graphArea.top)
+                    }
+                }
+
+                finalLayout
             }
         }
     }
@@ -275,14 +285,14 @@ private fun Offset.normalizePan(): Offset = copy(
 )
 
 private data class Measurables(
-    val grid: Measurable,
-    val chart: Measurable,
-    val xAxis: Measurable,
+    val grid: Measurable?,
+    val chart: Measurable?,
+    val xAxis: Measurable?,
     val xAxisLabels: List<Measurable>,
-    val xAxisTitle: Measurable,
-    val yAxis: Measurable,
+    val xAxisTitle: Measurable?,
+    val yAxis: Measurable?,
     val yAxisLabels: List<Measurable>,
-    val yAxisTitle: Measurable,
+    val yAxisTitle: Measurable?,
 )
 
 private const val IterationLimit = 10
@@ -312,7 +322,7 @@ private fun <T> List<Measurable>.calcXAxisLabelWidthConstraints(
         } else {
             if (index == 0) {
                 max((verticalSpace / sin(labelRotation * Deg2Rad)).roundToInt(), 0)
-            } else { // potentially constrain the width so the label does not overlap the previous label
+            } else {
                 val origin = Vector(0f, 0f)
                 val p1 = Vector(0f, lastHeight.toFloat())
                 val p2 = p1.rotate(-labelRotation.toFloat())
@@ -321,18 +331,13 @@ private fun <T> List<Measurable>.calcXAxisLabelWidthConstraints(
                     p2,
                     Vector(tickSpacing.toFloat(), 0f)
                 )
-
-                // Check if the intersection point interferes with the previous label
-                // The origin, p2, and intersection are on the same line
-                // So check if intersection is closer to p1 than p2
                 if (intersection.norm() < p2.norm()) {
-                    distance.toInt() // limit allowed width to position of previous label
+                    distance.toInt()
                 } else {
                     max((verticalSpace / sin(labelRotation * Deg2Rad)).roundToInt(), 0)
                 }
             }
         }
-
         val t = measure(label, w)
         add(t)
         lastHeight = getHeight(t)
@@ -355,12 +360,9 @@ private data class ChartAreas(
 ) {
     val graphSize: IntSize by lazy {
         IntSize(
+            (constraints.maxWidth - (yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset)).coerceAtLeast(0),
             (
-                constraints.maxWidth - (yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset)
-                ).coerceAtLeast(0),
-            (
-                constraints.maxHeight -
-                    (xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset)
+                constraints.maxHeight - (xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset)
                 ).coerceAtLeast(0)
         )
     }
@@ -369,10 +371,7 @@ private data class ChartAreas(
      * The location of the graph area within the chart.
      */
     val graphArea: IntRect by lazy {
-        IntRect(
-            IntOffset(yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset, 0),
-            graphSize
-        )
+        IntRect(IntOffset(yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset, 0), graphSize)
     }
 
     /**
@@ -386,7 +385,10 @@ private data class ChartAreas(
      * Returns a copy of this ChartAreas after setting the [xAxisLabelAreaHeight],
      * based on the x-axis labels and their rotation angle.
      */
-    fun withComputedXAxisLabelAreas(xAxisLabels: List<Measurable>, rotation: Int): ChartAreas {
+    fun withComputedXAxisLabelAreas(
+        xAxisLabels: List<Measurable>,
+        rotation: Int
+    ): ChartAreas {
         val xAxisLabelHeights = xAxisLabels.calcXAxisLabelWidthConstraints(
             rotation,
             xTickSpacing(xAxisLabels.size),
@@ -394,14 +396,12 @@ private data class ChartAreas(
             { meas, w -> meas.maxIntrinsicHeight(w) },
             { h -> h }
         )
-
         val labelAreas = xAxisLabels.mapIndexed { index, label ->
             RotatedComposableAreaDelegate(
                 IntSize(label.maxIntrinsicWidth(xAxisLabelHeights[index]), xAxisLabelHeights[index]),
                 rotation.toFloat()
             )
         }
-
         return copy(xAxisLabelAreaHeight = labelAreas.maxOfOrNull { it.height } ?: 0)
     }
 
@@ -409,29 +409,38 @@ private data class ChartAreas(
      * Returns a copy of this ChartAreas after setting the [yAxisLabelAreaWidth]
      * based on the y-axis labels and their rotation angle.
      */
-    fun withComputedYAxisLabelAreas(yAxisLabels: List<Measurable>, rotation: Int): ChartAreas {
+    fun withComputedYAxisLabelAreas(
+        yAxisLabels: List<Measurable>,
+        rotation: Int
+    ): ChartAreas {
         val yAxisLabelAreas = yAxisLabels.map {
             val width = it.maxIntrinsicWidth(graphSize.height / yAxisLabels.size)
-
             RotatedComposableAreaDelegate(
                 IntSize(width, it.maxIntrinsicHeight(width)),
                 rotation.toFloat()
             )
         }
-
         return copy(yAxisLabelAreaWidth = yAxisLabelAreas.maxOfOrNull { it.width } ?: 0)
     }
 
+    /**
+     * Convert global screen coordinates (mouseX, mouseY) to chart-relative coordinates
+     */
     fun getChartOffset(mouseX: Int, mouseY: Int): IntOffset {
-        // 고려해야 할 'xAxisLabelAreaHeight', 'yAxisLabelAreaWidth', 'yAxisTitleWidth', 'xAxisTitleHeight'의 값을 계산합니다.
-        val chartAreaWidth = constraints.maxWidth - (yAxisLabelAreaWidth + yAxisTitleWidth)
-        val chartAreaHeight = constraints.maxHeight - (xAxisLabelAreaHeight + xAxisTitleHeight)
-        // 마우스 커서 위치에서 x, y축의 라벨 및 타이틀 영역을 제외한 실제 그래프 영역 내의 offset 위치를 계산합니다.
-        var chartXOffset = mouseX - (yAxisLabelAreaWidth + yAxisTitleWidth)
-        var chartYOffset = mouseY - (xAxisLabelAreaHeight + xAxisTitleHeight)
-        // offset이 차트의 가로 및 세로 넓이를 넘어가지 않도록 합니다.
+
+        val chartAreaWidth = constraints.maxWidth - (yAxisLabelAreaWidth + yAxisTitleWidth + yAxisOffset)
+        val chartAreaHeight = constraints.maxHeight -
+            (xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset)
+
+        var chartXOffset = mouseX - (yAxisLabelAreaWidth + yAxisTitleWidth + yAxisOffset)
+        var chartYOffset = mouseY
+//        - (xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset)
+
+
+        // clamp
         chartXOffset = chartXOffset.coerceIn(0, chartAreaWidth)
         chartYOffset = chartYOffset.coerceIn(0, chartAreaHeight)
+
         return IntOffset(chartXOffset, chartYOffset)
     }
 }
@@ -452,14 +461,11 @@ private fun <X, Y> Density.optimizeGraphSize(
 
     do {
         oldSize = chartAreas.graphSize
-
         chartAreas = chartAreas.copy(
-            xAxisTitleHeight = m.xAxisTitle.maxIntrinsicHeight(chartAreas.graphSize.width),
-            yAxisTitleWidth = m.yAxisTitle.maxIntrinsicWidth(chartAreas.graphSize.height)
+            xAxisTitleHeight = m.xAxisTitle?.maxIntrinsicHeight(chartAreas.graphSize.width) ?: 0,
+            yAxisTitleWidth = m.yAxisTitle?.maxIntrinsicWidth(chartAreas.graphSize.height) ?: 0
         )
-
-        chartAreas =
-            chartAreas.withComputedXAxisLabelAreas(m.xAxisLabels, xAxis.style.labelRotation)
+        chartAreas = chartAreas.withComputedXAxisLabelAreas(m.xAxisLabels, xAxis.style.labelRotation)
         chartAreas = chartAreas.withComputedYAxisLabelAreas(m.yAxisLabels, yAxis.style.labelRotation)
 
         iterations++
@@ -474,30 +480,31 @@ private class XYAxisMeasurePolicy<X, Y>(
     val xAxis: AxisDelegate<X>,
     val yAxis: AxisDelegate<Y>
 ) {
-    fun MeasureScope.measure(m: Measurables, constraints: Constraints): Pair<MeasureResult, ChartAreas> {
-        //그래프 사이즈도 리턴하도록 변경
+    fun MeasureScope.measure(
+        m: Measurables,
+        constraints: Constraints
+    ): Pair<MeasureResult, ChartAreas> {
         val chartAreas = optimizeGraphSize(constraints, m, xAxis, yAxis)
 
         val yAxisLabelPlaceableDelegates = createYAxisRotatedPlaceableDelegates(m, chartAreas)
-
-        val xAxisPlaceable = m.xAxis.measure(Constraints.fixedWidth(chartAreas.graphSize.width))
-        val xAxisTitlePlaceable = m.xAxisTitle.measure(Constraints(maxWidth = chartAreas.graphSize.width))
-
+        val xAxisPlaceable = m.xAxis?.measure(Constraints.fixedWidth(chartAreas.graphSize.width))
+        val xAxisTitlePlaceable = m.xAxisTitle?.measure(Constraints(maxWidth = chartAreas.graphSize.width))
         val xAxisLabelPlaceableDelegates = createXAxisRotatedPlaceableDelegates(m, chartAreas)
+        val yAxisTitlePlaceable = m.yAxisTitle?.measure(Constraints(maxHeight = chartAreas.graphSize.height))
+        val yAxisPlaceable = m.yAxis?.measure(Constraints.fixedHeight(chartAreas.graphSize.height))
+        val chartBasePlaceable = m.chart?.measure(
+            Constraints.fixed(chartAreas.graphArea.width, chartAreas.graphArea.height)
+        )
 
-        val yAxisTitlePlaceable = m.yAxisTitle.measure(Constraints(maxHeight = chartAreas.graphSize.height))
-        val yAxisPlaceable = m.yAxis.measure(Constraints.fixedHeight(chartAreas.graphSize.height))
+        val layoutResult = layout(constraints.maxWidth, constraints.maxHeight) {
+            m.grid?.measure(
+                Constraints.fixed(chartAreas.graphSize.width, chartAreas.graphSize.height)
+            )?.place(chartAreas.graphArea.left, chartAreas.graphArea.top)
 
-        return layout(constraints.maxWidth, constraints.maxHeight) {
-            m.grid.measure(Constraints.fixed(chartAreas.graphSize.width, chartAreas.graphSize.height)).place(
-                chartAreas.graphArea.left,
-                chartAreas.graphArea.top
-            )
-
-            xAxisTitlePlaceable.place(
-                chartAreas.graphArea.left + chartAreas.graphArea.width / 2 - xAxisTitlePlaceable.width / 2,
-                chartAreas.graphArea.bottom + xAxisPlaceable.height - xAxis.axisOffset.roundToPx() +
-                    chartAreas.xAxisLabelAreaHeight
+            xAxisTitlePlaceable?.place(
+                chartAreas.graphArea.left + chartAreas.graphArea.width / 2 - (xAxisTitlePlaceable.width / 2),
+                chartAreas.graphArea.bottom + (xAxisPlaceable?.height ?: 0) - xAxis.axisOffset.roundToPx()
+                    + chartAreas.xAxisLabelAreaHeight
             )
 
             xAxisLabelPlaceableDelegates.forEachIndexed { index, placeable ->
@@ -508,45 +515,52 @@ private class XYAxisMeasurePolicy<X, Y>(
                 }
                 with(placeable) {
                     place(
-                        (chartAreas.graphArea.left + xAxis.majorTickOffsets[index] * chartAreas.graphArea.width)
-                            .toInt(),
-                        chartAreas.graphArea.bottom + xAxisPlaceable.height - xAxis.axisOffset.roundToPx(),
+                        (chartAreas.graphArea.left + xAxis.majorTickOffsets[index] * chartAreas.graphArea.width).toInt(),
+                        chartAreas.graphArea.bottom + (xAxisPlaceable?.height ?: 0) - xAxis.axisOffset.roundToPx(),
                         anchor
                     )
                 }
             }
 
-            yAxisTitlePlaceable.place(
-                chartAreas.graphArea.left - yAxis.axisOffset.roundToPx() -
-                    chartAreas.yAxisLabelAreaWidth - yAxisTitlePlaceable.width,
-                chartAreas.graphArea.top + chartAreas.graphArea.height / 2 - yAxisTitlePlaceable.height / 2
+            yAxisTitlePlaceable?.place(
+                chartAreas.graphArea.left - yAxis.axisOffset.roundToPx()
+                    - chartAreas.yAxisLabelAreaWidth - yAxisTitlePlaceable.width,
+                chartAreas.graphArea.top + chartAreas.graphArea.height / 2 - (yAxisTitlePlaceable.height / 2)
             )
 
             yAxisLabelPlaceableDelegates.forEachIndexed { index, placeable ->
-                @Suppress("MagicNumber")
                 val anchor = if (yAxis.style.labelRotation == 90) {
                     AnchorPoint.BottomCenter
                 } else {
                     AnchorPoint.RightMiddle
                 }
-
                 with(placeable) {
                     place(
                         chartAreas.graphArea.left - yAxis.axisOffset.roundToPx(),
-                        (
-                            chartAreas.graphArea.bottom - yAxis.majorTickOffsets[index] * chartAreas.graphArea.height
-                            ).toInt(),
+                        (chartAreas.graphArea.bottom - yAxis.majorTickOffsets[index] * chartAreas.graphArea.height).toInt(),
                         anchor
                     )
                 }
             }
 
-            m.chart.measure(Constraints.fixed(chartAreas.graphArea.width, chartAreas.graphArea.height))
-                .place(chartAreas.graphArea.left, chartAreas.graphArea.top)
+            yAxisPlaceable?.place(
+                chartAreas.graphArea.left - yAxis.axisOffset.roundToPx(),
+                chartAreas.graphArea.top
+            )
 
-            yAxisPlaceable.place(chartAreas.graphArea.left - yAxis.axisOffset.roundToPx(), chartAreas.graphArea.top)
-            xAxisPlaceable.place(chartAreas.graphArea.left, chartAreas.graphArea.bottom - xAxis.axisOffset.roundToPx())
-        } to chartAreas
+            xAxisPlaceable?.place(
+                chartAreas.graphArea.left,
+                chartAreas.graphArea.bottom - xAxis.axisOffset.roundToPx()
+            )
+
+            // chart Base (Empty Box)
+            chartBasePlaceable?.place(
+                chartAreas.graphArea.left,
+                chartAreas.graphArea.top
+            )
+        }
+
+        return layoutResult to chartAreas
     }
 
     private fun createYAxisRotatedPlaceableDelegates(m: Measurables, chartAreas: ChartAreas) =
@@ -581,8 +595,12 @@ public interface XYGraphScope<X, Y> : HoverableElementAreaScope {
     public val yAxisModel: AxisModel<Y>
     public val xAxisState: AxisState
     public val yAxisState: AxisState
-    public var mouseToChartOffset: IntOffset
-    public var graphSize: IntSize
+
+    /**
+     * Converts the mouse position within the chart (0..1 range) to data coordinates.
+     * Returns null if the mouse is outside the chart.
+     */
+    public val pointerData: Point<X, Y>?
 
     /**
      * Transforms [point] from [AxisModel] space to display coordinates provided a plot area [size].
@@ -604,9 +622,25 @@ private class XYGraphScopeImpl<X, Y>(
     override val xAxisState: AxisState,
     override val yAxisState: AxisState,
     val hoverableElementAreaScope: HoverableElementAreaScope,
-    override var mouseToChartOffset: IntOffset,
-    override var graphSize: IntSize = IntSize.Zero
-) : XYGraphScope<X, Y>, HoverableElementAreaScope by hoverableElementAreaScope
+    mouseOffsetPx: IntOffset,
+    chartSizePx: IntSize
+) : XYGraphScope<X, Y>, HoverableElementAreaScope by hoverableElementAreaScope {
+    override val pointerData: Point<X, Y>? = run {
+        if (mouseOffsetPx.x < 0 || mouseOffsetPx.y < 0 ||
+            mouseOffsetPx.x > chartSizePx.width || mouseOffsetPx.y > chartSizePx.height
+        ) {
+            null
+        } else {
+            val nx = mouseOffsetPx.x.toFloat() / chartSizePx.width
+            val ny = 1f - (mouseOffsetPx.y.toFloat() / chartSizePx.height)
+            Point(
+                x = xAxisModel.computeValue(nx),
+                y = yAxisModel.computeValue(ny)
+            )
+        }
+    }
+}
+
 
 @Composable
 private fun Grid(
@@ -645,51 +679,50 @@ private fun Grid(
 }
 
 private fun DrawScope.drawVerticalGridLines(
-    values: List<Float>,
+    xOffsets: List<Float>,
     scale: Float,
     style: LineStyle?
 ) {
     if (style != null) {
-        values.forEach {
+        xOffsets.forEach {
             drawGridLine(
                 style,
-                start = Offset(it * scale, 0f),
-                end = Offset(it * scale, size.height)
+                Offset(it * scale, 0f),
+                Offset(it * scale, size.height)
             )
         }
     }
 }
 
 private fun DrawScope.drawHorizontalGridLines(
-    values: List<Float>,
+    yOffsets: List<Float>,
     scale: Float,
     style: LineStyle?
 ) {
     if (style != null) {
-        values.forEach {
-            drawGridLine(
-                style,
-                start = Offset(0f, scale - it * scale),
-                end = Offset(size.width, scale - it * scale)
-            )
+        yOffsets.forEach {
+            val yPos = scale - it * scale
+            drawGridLine(style, Offset(0f, yPos), Offset(size.width, yPos))
         }
     }
 }
 
-private fun DrawScope.drawGridLine(gridLineStyle: LineStyle?, start: Offset, end: Offset) {
-    if (gridLineStyle != null) {
-        with(gridLineStyle) {
-            drawLine(
-                start = start,
-                end = end,
-                brush = brush,
-                strokeWidth = strokeWidth.toPx(),
-                pathEffect = pathEffect,
-                alpha = alpha,
-                colorFilter = colorFilter,
-                blendMode = blendMode
-            )
-        }
+private fun DrawScope.drawGridLine(
+    gridLineStyle: LineStyle,
+    start: Offset,
+    end: Offset
+) {
+    with(gridLineStyle) {
+        drawLine(
+            brush = brush,
+            start = start,
+            end = end,
+            strokeWidth = strokeWidth.toPx(),
+            pathEffect = pathEffect,
+            alpha = alpha,
+            colorFilter = colorFilter,
+            blendMode = blendMode
+        )
     }
 }
 
@@ -782,7 +815,8 @@ public fun <X, Y> XYGraph(
                         yAxisTitle,
                         color = MaterialTheme.colorScheme.onBackground,
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
+                        modifier = Modifier
+                            .rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
                             .padding(bottom = KoalaPlotTheme.sizes.gap),
                     )
                 }

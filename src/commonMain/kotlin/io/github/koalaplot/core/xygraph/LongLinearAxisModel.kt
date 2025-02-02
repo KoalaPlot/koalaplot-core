@@ -135,6 +135,29 @@ public class LongLinearAxisModel(
         }
     }
 
+    override fun computeValue(offset: Float): Long {
+        require(offset in 0f..1f) {
+            "Offset ($offset) must be between 0 and 1."
+        }
+        val start = currentRange.value.start
+        val end = currentRange.value.endInclusive
+
+        val pointDouble = if (!inverted) {
+            // offset = (point - start) / (end - start)
+            // => point = start + offset * (end - start)
+            start + offset * (end - start)
+        } else {
+            // offset = (end - point) / (end - start)
+            // => point = end - offset * (end - start)
+            end - offset * (end - start)
+        }
+
+        // double → long
+        val pointLong = pointDouble.roundToLong()
+        // long range(clamp)
+        return pointLong.coerceIn(range.first, range.last)
+    }
+
     private fun computeMajorTickSpacing(minTickSpacing: Float): Long {
         require(minTickSpacing > 0 && minTickSpacing <= 1) {
             "Minimum tick spacing must be greater than 0 and less than or equal to 1"

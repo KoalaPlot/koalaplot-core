@@ -126,6 +126,24 @@ public class FloatLinearAxisModel(
         }
     }
 
+    override fun computeValue(offset: Float): Float {
+        require(offset in 0f..1f) {
+            "Offset ($offset) must be in [0, 1]"
+        }
+        val start = currentRange.value.start
+        val end = currentRange.value.endInclusive
+
+        return if (!inverted) {
+            // offset = (point - start) / (end - start)
+            // point = start + offset * (end - start)
+            start + offset * (end - start)
+        } else {
+            // offset = (end - point) / (end - start)
+            // point = end - offset * (end - start)
+            end - offset * (end - start)
+        }
+    }
+
     private fun computeMajorTickSpacing(minTickSpacing: Float): Float {
         require(minTickSpacing > 0 && minTickSpacing <= 1) {
             "Minimum tick spacing must be greater than 0 and less than or equal to 1"

@@ -130,6 +130,23 @@ public class DoubleLinearAxisModel(
         }
     }
 
+    override fun computeValue(offset: Float): Double {
+        require(offset in 0f..1f) {
+            "Offset ($offset) must be within [0, 1]"
+        }
+
+        val cr = currentRange.value
+        return if (!inverted) {
+            // offsetComputer(point) = (point - start) / (end - start)
+            // → point = start + offset * (end - start)
+            cr.start + offset * (cr.endInclusive - cr.start)
+        } else {
+            // offsetComputer(point) = (end - point) / (end - start)
+            // → point = end - offset * (end - start)
+            cr.endInclusive - offset * (cr.endInclusive - cr.start)
+        }
+    }
+
     private fun computeMajorTickSpacing(minTickSpacing: Float): Double {
         require(minTickSpacing > 0 && minTickSpacing <= 1) {
             "Minimum tick spacing must be greater than 0 and less than or equal to 1"
