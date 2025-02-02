@@ -60,8 +60,7 @@ public fun <X, Y> candleStickPlotEntry(x: X, open: Y, close: Y, high: Y, low: Y)
         override val low = low
     }
 
-public const val WICKWIDTH: Float = 0.1f
-
+public const val WICKWIDTH: Float = 0.02f
 
 @ExperimentalKoalaPlotApi
 @Composable
@@ -71,6 +70,8 @@ public fun <X, Y : Comparable<Y>> XYGraphScope<X, Y>.CandleStickPlot(
     candleWidth: Float = 0.5f,
     wickWidth: Float = WICKWIDTH,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+    colorForIncrease: Color = Color.Green,
+    colorForDecrease: Color = Color.Red,
     content: CandleStickPlotScope<X, Y>.() -> Unit
 ) {
     val scope = remember(content, defaultCandle) { CandleStickPlotScopeImpl<X, Y>(defaultCandle) }
@@ -87,14 +88,14 @@ public fun <X, Y : Comparable<Y>> XYGraphScope<X, Y>.CandleStickPlot(
         verticalBarPlotEntry(entry.x, entry.low, entry.high)
     }
 
-     VerticalBarPlot(
+    VerticalBarPlot(
         data = candleBodyEntries,
         modifier = modifier,
         barWidth = candleWidth,
         animationSpec = animationSpec,
         bar = { index ->
             val entry = data[index]
-            val candleColor = if (entry.close >= entry.open) Color.Green else Color.Red
+            val candleColor = if (entry.close >= entry.open) colorForIncrease else colorForDecrease
             DefaultCandleBody(
                 color = candleColor,
                 hoverElement = {
@@ -111,7 +112,7 @@ public fun <X, Y : Comparable<Y>> XYGraphScope<X, Y>.CandleStickPlot(
         animationSpec = animationSpec,
         bar = { index ->
             val entry = data[index]
-            val wickColor = if (entry.close >= entry.open) Color.Green else Color.Red
+            val wickColor = if (entry.close >= entry.open) colorForIncrease else colorForDecrease
             DefaultCandleWick(
                 color = wickColor,
                 width = wickWidth,
@@ -120,11 +121,12 @@ public fun <X, Y : Comparable<Y>> XYGraphScope<X, Y>.CandleStickPlot(
                 }
             )
         }
-        )
+    )
 }
+
 /**
-* Scope item to allow adding items to a [CandleStickPlot].
-*/
+ * Scope item to allow adding items to a [CandleStickPlot].
+ */
 public interface CandleStickPlotScope<X, Y> {
 
     public fun item(
@@ -143,7 +145,7 @@ internal class CandleStickPlotScopeImpl<X, Y>(
     override fun item(
         entry: CandleStickPlotEntry<X, Y>,
         candleContent: (
-            @Composable BarScope.(entry: CandleStickPlotEntry<X, Y>) -> Unit
+        @Composable BarScope.(entry: CandleStickPlotEntry<X, Y>) -> Unit
         )?
     ) {
         data.add(entry)
@@ -152,6 +154,7 @@ internal class CandleStickPlotScopeImpl<X, Y>(
         }
     }
 }
+
 /**
  * A default implementation of a candle body for candle stick charts.
  * @param brush The brush to paint the candle body with
