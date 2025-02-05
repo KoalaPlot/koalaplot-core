@@ -7,6 +7,8 @@ import androidx.compose.ui.util.fastForEach
 import io.github.koalaplot.core.util.ZoomFactor
 import kotlin.math.abs
 
+internal const val DefaultPanValue = 0f
+
 internal fun PointerEvent.consumeChangedPositions() {
     changes.fastForEach { change ->
         if (change.positionChanged()) change.consume()
@@ -19,13 +21,6 @@ internal fun Offset.getDistanceY(): Float = abs(y)
 
 /**
  * Returns the largest zoom value of the two axes
- * @param zoom The current zoom value on the X or Y axes
- * @param size The width of the area for the [zoom] axis
- */
-internal fun calculateZoomMotion(zoom: Float, size: Float): Float = abs(ZoomFactor.NeutralPoint - zoom) * size
-
-/**
- * Returns the largest zoom value of the two axes
  * @param zoomX The current zoom value on the X axis
  * @param zoomY The current zoom value on the Y axis
  */
@@ -34,3 +29,13 @@ internal fun getMaxZoomDeviation(zoomX: Float, zoomY: Float): Float {
     val deviationY = abs(zoomY - ZoomFactor.NeutralPoint)
     return if (deviationX > deviationY) zoomX else zoomY
 }
+
+internal fun Offset.applyPanLocks(panXEnabled: Boolean, panYEnabled: Boolean): Offset = this.copy(
+    x = if (panXEnabled) this.x else DefaultPanValue,
+    y = if (panYEnabled) this.y else DefaultPanValue,
+)
+
+internal fun ZoomFactor.applyZoomLocks(zoomXEnabled: Boolean, zoomYEnabled: Boolean): ZoomFactor = this.copy(
+    x = if (zoomXEnabled) this.x else ZoomFactor.NeutralPoint,
+    y = if (zoomYEnabled) this.y else ZoomFactor.NeutralPoint,
+)

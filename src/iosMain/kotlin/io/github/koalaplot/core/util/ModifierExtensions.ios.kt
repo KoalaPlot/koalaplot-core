@@ -5,6 +5,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntSize
 import io.github.koalaplot.core.gestures.DefaultTransformGesturesHandler
+import io.github.koalaplot.core.gestures.GestureConfig
 import io.github.koalaplot.core.gestures.TransformGesturesHandlerWithLockZoomRatio
 
 /**
@@ -14,21 +15,18 @@ import io.github.koalaplot.core.gestures.TransformGesturesHandlerWithLockZoomRat
 internal actual fun Modifier.onGestureInput(
     key1: Any?,
     key2: Any?,
-    panLock: Boolean,
-    zoomLock: Boolean,
-    lockZoomRatio: Boolean,
-    onZoomChange: (size: IntSize, centroid: Offset, zoomX: Float, zoomY: Float) -> Unit,
-    onPanChange: (size: IntSize, pan: Offset) -> Unit,
-): Modifier = this then Modifier.pointerInput(key1, key2, panLock, zoomLock, lockZoomRatio) {
-    val gesturesHandler = if (lockZoomRatio) {
-        TransformGesturesHandlerWithLockZoomRatio()
-    } else {
+    gestureConfig: GestureConfig,
+    onZoomChange: (size: IntSize, centroid: Offset, zoom: ZoomFactor) -> Unit,
+    onPanChange: (size: IntSize, pan: Offset) -> Boolean,
+): Modifier = this then Modifier.pointerInput(key1, key2, gestureConfig) {
+    val gesturesHandler = if (gestureConfig.independentZoomEnabled) {
         DefaultTransformGesturesHandler()
+    } else {
+        TransformGesturesHandlerWithLockZoomRatio()
     }
     gesturesHandler.detectTransformGestures(
         scope = this,
-        panLock = panLock,
-        zoomLock = zoomLock,
+        gestureConfig = gestureConfig,
         onZoomChange = onZoomChange,
         onPanChange = onPanChange
     )

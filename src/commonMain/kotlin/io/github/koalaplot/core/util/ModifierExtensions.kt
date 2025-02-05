@@ -3,6 +3,7 @@ package io.github.koalaplot.core.util
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
+import io.github.koalaplot.core.gestures.GestureConfig
 
 /**
  * Create a modifier for gesture processing
@@ -25,19 +26,14 @@ import androidx.compose.ui.unit.IntSize
  *
  * @param key1 see [androidx.compose.ui.input.pointer.pointerInput]
  * @param key2 see [androidx.compose.ui.input.pointer.pointerInput]
- * @param panLock If `true`, it blocks pan handling
- * @param zoomLock If `true`, it blocks zoom handling
- * @param lockZoomRatio If `true`, the split zoom will be blocked and the zoom will be calculated simultaneously
- * for the X and Y axes
+ * @param gestureConfig Configuration for gesture handling. See [GestureConfig]
  * @param onZoomChange Called every time the zoom changes
  * @param onPanChange Called every time the pan changes
  */
 internal expect fun Modifier.onGestureInput(
     key1: Any?,
     key2: Any?,
-    panLock: Boolean = false,
-    zoomLock: Boolean = false,
-    lockZoomRatio: Boolean = false,
-    onZoomChange: (size: IntSize, centroid: Offset, zoomX: Float, zoomY: Float) -> Unit,
-    onPanChange: (size: IntSize, pan: Offset) -> Unit,
+    gestureConfig: GestureConfig,
+    onZoomChange: (size: IntSize, centroid: Offset, zoom: ZoomFactor) -> Unit,
+    onPanChange: (size: IntSize, pan: Offset) -> Boolean,
 ): Modifier
