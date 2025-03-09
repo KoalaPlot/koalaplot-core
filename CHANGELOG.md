@@ -11,6 +11,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Support for StartAnimationUseCase in bar-chart (GroupedVerticalBarPlot)
 - Ability to disable the consumption of gesture events
+- Pan fling behavior for Android and iOS platforms (#106)
 
 ### Changed
 
@@ -22,6 +23,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - Discrete panning in X and Y axes (#104)
+- Fix an error in the logic of setting the initial zoom direction,
+  which is why the orthogonal axis of the first touch movement was not reset
 
 ## [0.8.0]
 

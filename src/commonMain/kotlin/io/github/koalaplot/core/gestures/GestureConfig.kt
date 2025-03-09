@@ -15,27 +15,34 @@ import androidx.compose.runtime.Stable
  * @property zoomXEnabled Whether the zoom is enabled for the X-axis
  * @property zoomYEnabled Whether the zoom is enabled for the Y-axis
  * @property independentZoomEnabled Whether independent zoom (zooming on X and Y axes separately) is allowed
+ * @property panFlingAnimationEnabled Whether the inertial pan fling animation is enabled
  */
 @Immutable
 public data class GestureConfig(
 
     /**
      * Whether the pan gesture is enabled for the X-axis
+     *
      * If `true`, pan gestures along the X-axis will be processed
+     *
      * If `false`, no pan gestures will be handled for the X-axis
      */
     val panXEnabled: Boolean = false,
 
     /**
      * Whether the pan gesture is enabled for the Y-axis
+     *
      * If `true`, pan gestures along the Y-axis will be processed
+     *
      * If `false`, no pan gestures will be handled for the Y-axis
      */
     val panYEnabled: Boolean = false,
 
     /**
      * Whether the pan gesture on the X-axis should be consumed. Has no effect for `js` and `wasmJs`
+     *
      * If `true`, the pan gesture will be consumed and will not propagate further
+     *
      * If `false`, the pan gesture will not be consumed and may propagate. However, the gesture will still be
      * processed but `PointerInputChange#consume` will not be called, allowing parent containers to process
      * the gesture if needed
@@ -44,7 +51,9 @@ public data class GestureConfig(
 
     /**
      * Whether the pan gesture on the Y-axis should be consumed. Has no effect for `js` and `wasmJs`
+     *
      * If `true`, the pan gesture will be consumed and will not propagate further
+     *
      * If `false`, the pan gesture will not be consumed and may propagate. However, the gesture will still be
      * processed but `PointerInputChange#consume` will not be called, allowing parent containers to process
      * the gesture if needed
@@ -53,14 +62,18 @@ public data class GestureConfig(
 
     /**
      * Whether the zoom gesture is enabled for the X-axis
+     *
      * If `true`, zoom gestures along the X-axis will be processed
+     *
      * If `false`, no zoom gestures will be handled for the X-axis
      */
     val zoomXEnabled: Boolean = false,
 
     /**
      * Whether the zoom gesture is enabled for the Y-axis
+     *
      * If `true`, zoom gestures along the Y-axis will be processed
+     *
      * If `false`, no zoom gestures will be handled for the Y-axis
      */
     val zoomYEnabled: Boolean = false,
@@ -99,6 +112,17 @@ public data class GestureConfig(
      * scroll while pressing Ctrl/Cmd is not supported (a problem with browser scaling)
      */
     val independentZoomEnabled: Boolean = false,
+
+    /**
+     * Whether the inertial pan fling animation is enabled
+     *
+     * If `true`, pan gestures will be followed by an inertial fling animation,
+     * creating a natural sliding effect with gradual deceleration.
+     *
+     * If `false`, no inertial fling animation will be applied, and the pan gesture
+     * will stop immediately after the user finishes the gesture.
+     */
+    val panFlingAnimationEnabled: Boolean = true,
 ) {
     @Stable
     val gesturesEnabled: Boolean

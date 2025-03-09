@@ -1,11 +1,14 @@
 package io.github.koalaplot.core.gestures
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.util.fastForEach
 import io.github.koalaplot.core.util.ZoomFactor
 import kotlin.math.abs
+import kotlin.math.sqrt
 
 internal const val DefaultPanValue = 0f
 
@@ -39,3 +42,9 @@ internal fun ZoomFactor.applyZoomLocks(zoomXEnabled: Boolean, zoomYEnabled: Bool
     x = if (zoomXEnabled) this.x else ZoomFactor.NeutralPoint,
     y = if (zoomYEnabled) this.y else ZoomFactor.NeutralPoint,
 )
+
+/**
+ * The magnitude of the Velocity.
+ */
+@Stable
+internal fun Velocity.getSpeed(): Float = sqrt(x * x + y * y)
