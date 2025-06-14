@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.text.Paragraph
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.sp
 
@@ -29,7 +30,7 @@ public fun ResponsiveText(
     modifier: Modifier = Modifier,
     style: TextStyle = LocalTextStyle.current,
     maxLines: Int = Int.MAX_VALUE,
-    ellipsis: Boolean = false
+    overflow: TextOverflow = TextOverflow.Clip,
 ) {
     var lastSize by remember { mutableStateOf(Size(0f, 0f)) }
     var lastTextSize by remember { mutableStateOf(0.0f) }
@@ -64,7 +65,7 @@ public fun ResponsiveText(
             constraints = constraints.copy(minWidth = 0, minHeight = 0),
             density = density,
             fontFamilyResolver = fontResolver,
-            ellipsis = ellipsis
+            overflow = overflow,
         )
 
         return if (paragraph.didExceedMaxLines ||
@@ -108,7 +109,7 @@ public fun ResponsiveText(
             constraints = constraints.copy(minWidth = 0, minHeight = 0),
             density = this,
             fontFamilyResolver = fontResolver,
-            ellipsis = ellipsis
+            overflow = overflow,
         )
 
         drawIntoCanvas { canvas ->
