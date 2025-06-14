@@ -19,6 +19,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - A separate object has been created for the gesture configuration GestureConfig
 - Removing the gesture logic "pastTouchSlop", in practice it turned out to be inconsistent when capturing panning
   from the parent container
+- Upgrade Gradle and detekt versions
 
 ### Fixed
 
