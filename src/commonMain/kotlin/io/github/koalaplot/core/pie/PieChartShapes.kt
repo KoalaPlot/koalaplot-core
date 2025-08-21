@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2025 Peter Artur Getek.
- * All rights reserved.
- */
-
 package io.github.koalaplot.core.pie
 
 import androidx.compose.animation.core.animateFloatAsState
