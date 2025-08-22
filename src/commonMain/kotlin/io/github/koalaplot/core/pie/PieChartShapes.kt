@@ -133,7 +133,7 @@ private class ConcaveConvexSlice(
         val outerRect = Rect(center, radius)
 
         // Gap can lead to negative sweep angle which causes rendering issues
-        val sweepAngle = max(0F,angle)
+        val sweepAngle = max(0F, angle)
         val innerCircleRadius = (radius - holeRadius) / 2F
         val innerCircleCenterRadius = (radius + holeRadius) / 2F
 
