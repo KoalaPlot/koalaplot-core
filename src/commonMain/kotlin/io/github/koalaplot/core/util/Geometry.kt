@@ -163,8 +163,8 @@ internal fun y2theta(y: Float, radius: Float): Pair<Float, Float> {
 /**
  * Returns the edge-length of a square circumscribed by a circle with the provided [diameter].
  */
-internal fun circumscribedSquareSize(diameter: Double): Double {
-    return diameter / sqrt(2.0)
+internal fun circumscribedSquareSize(diameter: Float): Float {
+    return diameter / sqrt(2.0f)
 }
 
 internal fun Path.moveTo(offset: Offset) {

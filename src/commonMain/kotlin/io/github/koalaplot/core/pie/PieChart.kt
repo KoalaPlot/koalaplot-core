@@ -365,11 +365,11 @@ public fun PieChart(
 
             val labelConnectorTranslations = pieMeasurePolicy.computeLabelConnectorScopes(labelPositions, pieDiameter)
 
-            val holeDiameter = pieDiameter * holeSize.toDouble()
+            val holeDiameter = (pieDiameter * holeSize)
             val holeSafeEdgeLength = circumscribedSquareSize(holeDiameter)
             val holePlaceable = subcompose("hole") {
                 Box(modifier = Modifier.clip(CircleShape)) {
-                    holeContent(PaddingValues((holeDiameter - holeSafeEdgeLength).toInt().dp))
+                    holeContent(PaddingValues(((holeDiameter - holeSafeEdgeLength) / 2.0f).toDp()))
                 }
             }[0].measure(Constraints.fixed(holeDiameter.toInt(), holeDiameter.toInt()))
 
@@ -456,11 +456,11 @@ public fun PieChart(
         maxPieDiameter = maxPieDiameter,
         forceCenteredPie = forceCenteredPie,
         startAnimationUseCase =
-        StartAnimationUseCase(
-            executionType = StartAnimationUseCase.ExecutionType.Default,
-            pieAnimationSpec,
-            labelAnimationSpec,
-        ),
+            StartAnimationUseCase(
+                executionType = StartAnimationUseCase.ExecutionType.Default,
+                pieAnimationSpec,
+                labelAnimationSpec,
+            ),
     )
 }
 
