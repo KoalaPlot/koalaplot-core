@@ -455,12 +455,11 @@ public fun PieChart(
         minPieDiameter = minPieDiameter,
         maxPieDiameter = maxPieDiameter,
         forceCenteredPie = forceCenteredPie,
-        startAnimationUseCase =
-            StartAnimationUseCase(
-                executionType = StartAnimationUseCase.ExecutionType.Default,
-                pieAnimationSpec,
-                labelAnimationSpec,
-            ),
+        startAnimationUseCase = StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            pieAnimationSpec,
+            labelAnimationSpec,
+        ),
     )
 }
 
