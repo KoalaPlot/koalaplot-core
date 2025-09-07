@@ -1,6 +1,7 @@
 package io.github.koalaplot.core.xygraph
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +70,13 @@ public class IntLinearAxisModel(
             ).toFloat()
     }
 
+    // Function used to compute the inverse of offsetComputer. Set as a variable to avoid an
+    // additional check for inverted on every execution.
+    private var offsetToValueFunction: (Float) -> Int = { offset ->
+        require(offset in 0f..1f) { "Offset must be within [0, 1]" }
+        (currentRange.value.start + offset * (currentRange.value.endInclusive - currentRange.value.start)).roundToInt()
+    }
+
     init {
         if (inverted) {
             offsetComputer = { point: Int ->
@@ -76,6 +84,14 @@ public class IntLinearAxisModel(
                     (currentRange.value.endInclusive - point) /
                         (currentRange.value.endInclusive - currentRange.value.start)
                     ).toFloat()
+            }
+
+            offsetToValueFunction = { offset ->
+                require(offset in 0f..1f) { "Offset must be within [0, 1]" }
+                (
+                    currentRange.value.endInclusive -
+                        offset * (currentRange.value.endInclusive - currentRange.value.start)
+                    ).roundToInt()
             }
         }
     }
@@ -88,6 +104,107 @@ public class IntLinearAxisModel(
 
     override fun computeOffset(point: Int): Float = offsetComputer(point)
 
+    override fun offsetToValue(offset: Float): Int = offsetToValueFunction(offset)
+
+    private val tickCalculator =
+        IntTickCalculator(minimumMajorTickSpacing, currentRange, minimumMajorTickIncrement, minorTickCount, inverted)
+
+    override fun computeTickValues(axisLength: Dp): TickValues<Int> = tickCalculator.computeTickValues(axisLength)
+
+    override fun zoom(zoomFactor: Float, pivot: Float) {
+        if (zoomFactor == 1f) return
+
+        require(zoomFactor > 0) { "Zoom amount must be greater than 0" }
+        require(pivot in 0.0..1.0) { "Zoom pivot must be between 0 and 1: $pivot" }
+
+        if (zoomFactor > 1f && currentRange.value.endInclusive - currentRange.value.start <= minViewExtent) {
+            // Can't zoom in more
+        } else if (zoomFactor < 1f && currentRange.value.endInclusive - currentRange.value.start >= maxViewExtent) {
+            // Can't zoom out more
+        } else {
+            // convert pivot to axis range space
+            val pivotAxisScale =
+                currentRange.value.start + ((currentRange.value.endInclusive - currentRange.value.start) * pivot)
+
+            val newLow = (pivotAxisScale - (pivotAxisScale - currentRange.value.start) / zoomFactor)
+            val newHi = (pivotAxisScale + (currentRange.value.endInclusive - pivotAxisScale) / zoomFactor)
+
+            setViewRange(newLow..newHi)
+        }
+    }
+
+    override fun pan(amount: Float): Boolean {
+        // convert pan amount to axis range space
+        val panAxisScale = ((currentRange.value.endInclusive - currentRange.value.start) * amount)
+
+        // Limit pan amount to not exceed bounds of range
+        val panLimitEnd = min(panAxisScale, range.endInclusive - currentRange.value.endInclusive)
+        val panLimited = max(panLimitEnd, range.start - currentRange.value.start)
+
+        val newLow = (currentRange.value.start + panLimited)
+        val newHi = (currentRange.value.endInclusive + panLimited)
+
+        val result = currentRange.value != newLow..newHi
+
+        currentRange.value = newLow..newHi
+        return result
+    }
+
+    override fun setViewRange(newRange: ClosedRange<Double>) {
+        val newHi = newRange.endInclusive.coerceIn(range.first.toDouble(), range.last.toDouble())
+        val newLow = newRange.start.coerceIn(range.first.toDouble(), range.last.toDouble())
+
+        if (newHi - newLow < minViewExtent) {
+            val delta = (minViewExtent - (newHi - newLow)) / 2
+            currentRange.value = (newLow - delta)..(newHi + delta)
+            if (currentRange.value.start < range.first) {
+                currentRange.value = range.first.toDouble()..(range.first + minViewExtent).toDouble()
+            } else if (currentRange.value.endInclusive > range.last) {
+                currentRange.value = (range.last - minViewExtent).toDouble()..range.last.toDouble()
+            }
+        } else if (newHi - newLow > maxViewExtent) {
+            val delta = (newHi - newLow - maxViewExtent) / 2
+            currentRange.value = (newLow + delta)..(newHi - delta)
+            if (currentRange.value.start < range.first) {
+                currentRange.value = range.first.toDouble()..(range.first + maxViewExtent).toDouble()
+            } else if (currentRange.value.endInclusive > range.last) {
+                currentRange.value = (range.last - maxViewExtent).toDouble()..range.last.toDouble()
+            }
+        } else {
+            currentRange.value = newLow..newHi
+        }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as IntLinearAxisModel
+
+        if (range != other.range) return false
+        if (minViewExtent != other.minViewExtent) return false
+        if (minimumMajorTickIncrement != other.minimumMajorTickIncrement) return false
+        if (minimumMajorTickSpacing != other.minimumMajorTickSpacing) return false
+        return minorTickCount == other.minorTickCount
+    }
+
+    override fun hashCode(): Int {
+        var result = range.hashCode()
+        result = 31 * result + minViewExtent.hashCode()
+        result = 31 * result + minimumMajorTickIncrement.hashCode()
+        result = 31 * result + minimumMajorTickSpacing.hashCode()
+        result = 31 * result + minorTickCount
+        return result
+    }
+}
+
+private class IntTickCalculator(
+    private val minimumMajorTickSpacing: Dp,
+    private val currentRange: MutableState<ClosedFloatingPointRange<Double>>,
+    private val minimumMajorTickIncrement: Int,
+    private val minorTickCount: Int,
+    private val inverted: Boolean,
+) {
     /**
      * Computes major tick values based on a minimum tick spacing that is a
      * fraction of the overall axis length.
@@ -111,7 +228,7 @@ public class IntLinearAxisModel(
         }
     }
 
-    override fun computeTickValues(axisLength: Dp): TickValues<Int> {
+    fun computeTickValues(axisLength: Dp): TickValues<Int> {
         val minTickSpacing = if (axisLength == 0.dp) {
             1f
         } else {
@@ -180,92 +297,6 @@ public class IntLinearAxisModel(
                 i++
             } while (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive)
         }
-    }
-
-    override fun zoom(zoomFactor: Float, pivot: Float) {
-        if (zoomFactor == 1f) return
-
-        require(zoomFactor > 0) { "Zoom amount must be greater than 0" }
-        require(pivot in 0.0..1.0) { "Zoom pivot must be between 0 and 1: $pivot" }
-
-        if (zoomFactor > 1f && currentRange.value.endInclusive - currentRange.value.start <= minViewExtent) {
-            // Can't zoom in more
-        } else if (zoomFactor < 1f && currentRange.value.endInclusive - currentRange.value.start >= maxViewExtent) {
-            // Can't zoom out more
-        } else {
-            // convert pivot to axis range space
-            val pivotAxisScale =
-                currentRange.value.start + ((currentRange.value.endInclusive - currentRange.value.start) * pivot)
-
-            val newLow = (pivotAxisScale - (pivotAxisScale - currentRange.value.start) / zoomFactor)
-            val newHi = (pivotAxisScale + (currentRange.value.endInclusive - pivotAxisScale) / zoomFactor)
-
-            setViewRange(newLow..newHi)
-        }
-    }
-
-    override fun pan(amount: Float): Boolean {
-        // convert pan amount to axis range space
-        val panAxisScale = ((currentRange.value.endInclusive - currentRange.value.start) * amount)
-
-        // Limit pan amount to not exceed bounds of range
-        val panLimitEnd = min(panAxisScale, range.last - currentRange.value.endInclusive)
-        val panLimited = max(panLimitEnd, range.first - currentRange.value.start)
-
-        val newLow = (currentRange.value.start + panLimited)
-        val newHi = (currentRange.value.endInclusive + panLimited)
-
-        val result = currentRange.value != newLow..newHi
-
-        currentRange.value = newLow..newHi
-        return result
-    }
-
-    override fun setViewRange(newRange: ClosedRange<Double>) {
-        val newHi = newRange.endInclusive.coerceIn(range.first.toDouble(), range.last.toDouble())
-        val newLow = newRange.start.coerceIn(range.first.toDouble(), range.last.toDouble())
-
-        if (newHi - newLow < minViewExtent) {
-            val delta = (minViewExtent - (newHi - newLow)) / 2
-            currentRange.value = (newLow - delta)..(newHi + delta)
-            if (currentRange.value.start < range.first) {
-                currentRange.value = range.first.toDouble()..(range.first + minViewExtent).toDouble()
-            } else if (currentRange.value.endInclusive > range.last) {
-                currentRange.value = (range.last - minViewExtent).toDouble()..range.last.toDouble()
-            }
-        } else if (newHi - newLow > maxViewExtent) {
-            val delta = (newHi - newLow - maxViewExtent) / 2
-            currentRange.value = (newLow + delta)..(newHi - delta)
-            if (currentRange.value.start < range.first) {
-                currentRange.value = range.first.toDouble()..(range.first + maxViewExtent).toDouble()
-            } else if (currentRange.value.endInclusive > range.last) {
-                currentRange.value = (range.last - maxViewExtent).toDouble()..range.last.toDouble()
-            }
-        } else {
-            currentRange.value = newLow..newHi
-        }
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as IntLinearAxisModel
-
-        if (range != other.range) return false
-        if (minViewExtent != other.minViewExtent) return false
-        if (minimumMajorTickIncrement != other.minimumMajorTickIncrement) return false
-        if (minimumMajorTickSpacing != other.minimumMajorTickSpacing) return false
-        return minorTickCount == other.minorTickCount
-    }
-
-    override fun hashCode(): Int {
-        var result = range.hashCode()
-        result = 31 * result + minViewExtent.hashCode()
-        result = 31 * result + minimumMajorTickIncrement.hashCode()
-        result = 31 * result + minimumMajorTickSpacing.hashCode()
-        result = 31 * result + minorTickCount
-        return result
     }
 }
 

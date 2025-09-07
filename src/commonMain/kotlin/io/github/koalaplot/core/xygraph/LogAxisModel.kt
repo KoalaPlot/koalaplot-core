@@ -26,6 +26,10 @@ public class LogAxisModel(private val range: ClosedRange<Int>) : AxisModel<Float
             ).toFloat()
     }
 
+    override fun offsetToValue(offset: Float): Float {
+        return Base.pow((offset * (range.endInclusive - range.start) + range.start).toDouble()).toFloat()
+    }
+
     private fun computeMinorTickValues(majorTickValues: List<Float>): List<Float> = buildList {
         for (tick in 0 until majorTickValues.lastIndex) {
             val init = majorTickValues[tick]

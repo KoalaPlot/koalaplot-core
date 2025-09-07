@@ -1,6 +1,7 @@
 package io.github.koalaplot.core.xygraph
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,6 +74,13 @@ public class LongLinearAxisModel(
             ).toFloat()
     }
 
+    // Function used to compute the inverse of offsetComputer. Set as a variable to avoid an
+    // additional check for inverted on every execution.
+    private var offsetToValueFunction: (Float) -> Long = { offset ->
+        require(offset in 0f..1f) { "Offset must be within [0, 1]" }
+        (currentRange.value.start + offset * (currentRange.value.endInclusive - currentRange.value.start)).roundToLong()
+    }
+
     init {
         if (inverted) {
             offsetComputer = { point: Long ->
@@ -80,6 +88,14 @@ public class LongLinearAxisModel(
                     (currentRange.value.endInclusive - point) /
                         (currentRange.value.endInclusive - currentRange.value.start)
                     ).toFloat()
+            }
+
+            offsetToValueFunction = { offset ->
+                require(offset in 0f..1f) { "Offset must be within [0, 1]" }
+                (
+                    currentRange.value.endInclusive -
+                        offset * (currentRange.value.endInclusive - currentRange.value.start)
+                    ).roundToLong()
             }
         }
     }
@@ -91,99 +107,12 @@ public class LongLinearAxisModel(
 
     override fun computeOffset(point: Long): Float = offsetComputer(point)
 
-    /**
-     * Computes major tick values based on a minimum tick spacing that is a
-     * fraction of the overall axis length.
-     *
-     * @param minTickSpacing minimum tick spacing, must be greater than 0 and less than or equal to 1.
-     */
-    private fun computeMajorTickValues(minTickSpacing: Float): List<Long> {
-        val tickSpacing = computeMajorTickSpacing(minTickSpacing)
+    override fun offsetToValue(offset: Float): Long = offsetToValueFunction(offset)
 
-        return buildList {
-            if (tickSpacing > 0) {
-                var tickCount = floor(currentRange.value.start / tickSpacing).toLong()
-                do {
-                    val lastTick = tickCount * tickSpacing
-                    if (lastTick >= currentRange.value.start && lastTick <= currentRange.value.endInclusive) {
-                        add(lastTick)
-                    }
-                    tickCount++
-                } while (lastTick < currentRange.value.endInclusive)
-            }
-        }
-    }
+    private val tickCalculator =
+        LongTickCalculator(minimumMajorTickSpacing, currentRange, minimumMajorTickIncrement, minorTickCount, inverted)
 
-    override fun computeTickValues(axisLength: Dp): TickValues<Long> {
-        val minTickSpacing = if (axisLength == 0.dp) {
-            1f
-        } else {
-            (minimumMajorTickSpacing / axisLength).coerceIn(0f..1f)
-        }
-        val majorTickValues = computeMajorTickValues(minTickSpacing)
-        val minorTickValues = computeMinorTickValues(
-            majorTickValues,
-            computeMajorTickSpacing(minTickSpacing)
-        )
-        return object : TickValues<Long> {
-            override val majorTickValues = if (inverted) majorTickValues.reversed() else majorTickValues
-            override val minorTickValues = if (inverted) minorTickValues.reversed() else minorTickValues
-        }
-    }
-
-    private fun computeMajorTickSpacing(minTickSpacing: Float): Long {
-        require(minTickSpacing > 0 && minTickSpacing <= 1) {
-            "Minimum tick spacing must be greater than 0 and less than or equal to 1"
-        }
-        val length = currentRange.value.endInclusive - currentRange.value.start
-        val magnitude = 10.0.pow(floor(log10(length)))
-        val scaledTickRatios = TickRatios.map { (it * magnitude).roundToLong() }
-
-        // Test scaledTickRatios and pick the first that produces a distance greater than minTickSpacing
-        // and an increment greater than minimumMajorTickIncrement
-        val tickSpacing = scaledTickRatios.find {
-            (it.toFloat() / length.toFloat()) >= minTickSpacing && it >= minimumMajorTickIncrement
-        } ?: minimumMajorTickIncrement
-
-        return tickSpacing
-    }
-
-    private fun computeMinorTickValues(majorTickValues: List<Long>, majorTickSpacing: Long): List<Long> = buildList {
-        if (minorTickCount > 0 && majorTickValues.isNotEmpty()) {
-            val minorIncrement = majorTickSpacing / (minorTickCount + 1)
-
-            if (minorIncrement == 0L) return@buildList
-
-            // Create ticks between first and last major ticks
-            for (major in 0 until majorTickValues.lastIndex) {
-                val majorTick1 = majorTickValues[major]
-
-                for (i in 1..minorTickCount) {
-                    add(majorTick1 + minorIncrement * i)
-                }
-            }
-
-            // create ticks after last major tick, if still space in the range
-            var i = 1
-            do {
-                val nextTick = majorTickValues.last() + minorIncrement * i
-                if (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive) {
-                    add(nextTick)
-                }
-                i++
-            } while (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive)
-
-            // create ticks before first major tick. if still space in the range
-            i = 1
-            do {
-                val nextTick = majorTickValues.first() - minorIncrement * i
-                if (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive) {
-                    add(nextTick)
-                }
-                i++
-            } while (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive)
-        }
-    }
+    override fun computeTickValues(axisLength: Dp): TickValues<Long> = tickCalculator.computeTickValues(axisLength)
 
     override fun zoom(zoomFactor: Float, pivot: Float) {
         if (zoomFactor == 1f) return
@@ -271,6 +200,108 @@ public class LongLinearAxisModel(
         result = 31 * result + minimumMajorTickSpacing.hashCode()
         result = 31 * result + minorTickCount
         return result
+    }
+}
+
+private class LongTickCalculator(
+    private val minimumMajorTickSpacing: Dp,
+    private val currentRange: MutableState<ClosedFloatingPointRange<Double>>,
+    private val minimumMajorTickIncrement: Long,
+    private val minorTickCount: Int,
+    private val inverted: Boolean
+) {
+    /**
+     * Computes major tick values based on a minimum tick spacing that is a
+     * fraction of the overall axis length.
+     *
+     * @param minTickSpacing minimum tick spacing, must be greater than 0 and less than or equal to 1.
+     */
+    private fun computeMajorTickValues(minTickSpacing: Float): List<Long> {
+        val tickSpacing = computeMajorTickSpacing(minTickSpacing)
+
+        return buildList {
+            if (tickSpacing > 0) {
+                var tickCount = floor(currentRange.value.start / tickSpacing).toLong()
+                do {
+                    val lastTick = tickCount * tickSpacing
+                    if (lastTick >= currentRange.value.start && lastTick <= currentRange.value.endInclusive) {
+                        add(lastTick)
+                    }
+                    tickCount++
+                } while (lastTick < currentRange.value.endInclusive)
+            }
+        }
+    }
+
+    fun computeTickValues(axisLength: Dp): TickValues<Long> {
+        val minTickSpacing = if (axisLength == 0.dp) {
+            1f
+        } else {
+            (minimumMajorTickSpacing / axisLength).coerceIn(0f..1f)
+        }
+        val majorTickValues = computeMajorTickValues(minTickSpacing)
+        val minorTickValues = computeMinorTickValues(
+            majorTickValues,
+            computeMajorTickSpacing(minTickSpacing)
+        )
+        return object : TickValues<Long> {
+            override val majorTickValues = if (inverted) majorTickValues.reversed() else majorTickValues
+            override val minorTickValues = if (inverted) minorTickValues.reversed() else minorTickValues
+        }
+    }
+
+    private fun computeMajorTickSpacing(minTickSpacing: Float): Long {
+        require(minTickSpacing > 0 && minTickSpacing <= 1) {
+            "Minimum tick spacing must be greater than 0 and less than or equal to 1"
+        }
+        val length = currentRange.value.endInclusive - currentRange.value.start
+        val magnitude = 10.0.pow(floor(log10(length)))
+        val scaledTickRatios = TickRatios.map { (it * magnitude).roundToLong() }
+
+        // Test scaledTickRatios and pick the first that produces a distance greater than minTickSpacing
+        // and an increment greater than minimumMajorTickIncrement
+        val tickSpacing = scaledTickRatios.find {
+            (it.toFloat() / length.toFloat()) >= minTickSpacing && it >= minimumMajorTickIncrement
+        } ?: minimumMajorTickIncrement
+
+        return tickSpacing
+    }
+
+    private fun computeMinorTickValues(majorTickValues: List<Long>, majorTickSpacing: Long): List<Long> = buildList {
+        if (minorTickCount > 0 && majorTickValues.isNotEmpty()) {
+            val minorIncrement = majorTickSpacing / (minorTickCount + 1)
+
+            if (minorIncrement == 0L) return@buildList
+
+            // Create ticks between first and last major ticks
+            for (major in 0 until majorTickValues.lastIndex) {
+                val majorTick1 = majorTickValues[major]
+
+                for (i in 1..minorTickCount) {
+                    add(majorTick1 + minorIncrement * i)
+                }
+            }
+
+            // create ticks after last major tick, if still space in the range
+            var i = 1
+            do {
+                val nextTick = majorTickValues.last() + minorIncrement * i
+                if (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive) {
+                    add(nextTick)
+                }
+                i++
+            } while (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive)
+
+            // create ticks before first major tick. if still space in the range
+            i = 1
+            do {
+                val nextTick = majorTickValues.first() - minorIncrement * i
+                if (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive) {
+                    add(nextTick)
+                }
+                i++
+            } while (nextTick >= currentRange.value.start && nextTick <= currentRange.value.endInclusive)
+        }
     }
 }
 

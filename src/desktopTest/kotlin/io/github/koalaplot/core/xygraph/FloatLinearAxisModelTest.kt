@@ -1,4 +1,5 @@
 @file:Suppress("MagicNumber")
+
 package io.github.koalaplot.core.xygraph
 
 import androidx.compose.ui.unit.Dp
@@ -7,6 +8,7 @@ import org.junit.Test
 import kotlin.math.abs
 import kotlin.test.assertEquals
 
+@Suppress("TooManyFunctions")
 class FloatLinearAxisModelTest {
     @Test
     fun testComputeMajorTickValues0to10() {
@@ -166,6 +168,48 @@ class FloatLinearAxisModelTest {
         axis.setViewRange(0f..60f)
         assertEquals(5f, axis.currentRange.value.start)
         assertEquals(55f, axis.currentRange.value.endInclusive)
+    }
+
+    @Test
+    fun testComputeOffset() {
+        val testPoints = listOf(
+            30f to 0.3f,
+            0f to 0.0f,
+            100f to 1.0f
+        )
+
+        FloatLinearAxisModel(0f..100f, minViewExtent = 10f, maxViewExtent = 100f).let { axisModel ->
+            testPoints.forEach { (p, e) ->
+                assertEquals(e, axisModel.computeOffset(p), 1E-3f)
+            }
+        }
+
+        FloatLinearAxisModel(0f..200f, minViewExtent = 10f, maxViewExtent = 100f).let { axisModel ->
+            testPoints.forEach { (p, e) ->
+                assertEquals(e, axisModel.computeOffset(p), 1E-3f)
+            }
+        }
+    }
+
+    @Test
+    fun testOffsetToValue() {
+        val testPoints = listOf(
+            0.3f to 30f,
+            0.0f to 0f,
+            1.0f to 100f
+        )
+
+        FloatLinearAxisModel(0f..100f, minViewExtent = 10f, maxViewExtent = 100f).let { axisModel ->
+            testPoints.forEach { (p, e) ->
+                assertEquals(e, axisModel.offsetToValue(p), 1E-3f)
+            }
+        }
+
+        FloatLinearAxisModel(0f..200f, minViewExtent = 10f, maxViewExtent = 100f).let { axisModel ->
+            testPoints.forEach { (p, e) ->
+                assertEquals(e, axisModel.offsetToValue(p), 1E-3f)
+            }
+        }
     }
 }
 

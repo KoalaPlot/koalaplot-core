@@ -19,6 +19,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
@@ -82,6 +84,7 @@ public fun <X, Y> XYGraph(
     verticalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
     verticalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
     gestureConfig: GestureConfig = GestureConfig(),
+    onPointerMove: ((X, Y) -> Unit)? = null,
     content: @Composable XYGraphScope<X, Y>.() -> Unit
 ) {
     HoverableElementArea(modifier = modifier) {
@@ -143,6 +146,7 @@ public fun <X, Y> XYGraph(
 
                 Box(
                     modifier = Modifier.clip(RectangleShape).then(panZoomModifier)
+                        .onPointerMove(xAxisModel, yAxisModel, onPointerMove)
                 ) {
                     val chartScope = XYGraphScopeImpl(xAxisModel, yAxisModel, xAxis, yAxis, this@HoverableElementArea)
                     chartScope.content()
@@ -183,6 +187,30 @@ public fun <X, Y> XYGraph(
 
             with(XYAxisMeasurePolicy(xAxis, yAxis)) {
                 measure(measurablesMap, constraints)
+            }
+        }
+    }
+}
+
+/**
+ * Modifier that tracks pointer movement
+ *
+ * @param onPointerMove Callback invoked when the pointer moves, receives the current position
+ */
+private fun <X, Y> Modifier.onPointerMove(
+    xAxisModel: AxisModel<X>,
+    yAxisModel: AxisModel<Y>,
+    onPointerMove: ((X, Y) -> Unit)?
+) = this.pointerInput(xAxisModel, yAxisModel, onPointerMove) {
+    awaitPointerEventScope {
+        while (true) {
+            val event = awaitPointerEvent()
+            if (event.type == PointerEventType.Move) {
+                val change = event.changes.last()
+                onPointerMove?.invoke(
+                    xAxisModel.offsetToValue(change.position.x / size.width),
+                    yAxisModel.offsetToValue(1f - change.position.y / size.height)
+                )
             }
         }
     }
@@ -657,6 +685,7 @@ public fun <X, Y> XYGraph(
     verticalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
     verticalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
     gestureConfig: GestureConfig = GestureConfig(),
+    onPointerMove: ((X, Y) -> Unit)? = null,
     content: @Composable XYGraphScope<X, Y>.() -> Unit
 ) {
     XYGraph(
@@ -710,6 +739,7 @@ public fun <X, Y> XYGraph(
         verticalMajorGridLineStyle,
         verticalMinorGridLineStyle,
         gestureConfig,
+        onPointerMove,
         content
     )
 }

@@ -116,6 +116,48 @@ class IntLinearAxisModelTest {
         assertEquals(5.0, axis.currentRange.value.start)
         assertEquals(55.0, axis.currentRange.value.endInclusive)
     }
+
+    @Test
+    fun testComputeOffset() {
+        val testPoints = listOf(
+            30 to 0.3f,
+            0 to 0.0f,
+            100 to 1.0f
+        )
+
+        IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 100).let { axisModel ->
+            testPoints.forEach { (p, e) ->
+                assertEquals(e, axisModel.computeOffset(p), 0.01f)
+            }
+        }
+
+        IntLinearAxisModel(0..200, minViewExtent = 10, maxViewExtent = 100).let { axisModel ->
+            testPoints.forEach { (p, e) ->
+                assertEquals(e, axisModel.computeOffset(p), 0.01f)
+            }
+        }
+    }
+
+    @Test
+    fun testOffsetToValue() {
+        val testPoints = listOf(
+            0.3f to 30,
+            0.0f to 0,
+            1.0f to 100
+        )
+
+        IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 100).let{ axisModel ->
+            testPoints.forEach { (p, e) ->
+                assertEquals(e, axisModel.offsetToValue(p))
+            }
+        }
+
+        IntLinearAxisModel(0..200, minViewExtent = 10, maxViewExtent = 100).let { axisModel ->
+            testPoints.forEach { (p, e) ->
+                assertEquals(e, axisModel.offsetToValue(p))
+            }
+        }
+    }
 }
 
 private fun testLinearAxisMajorTicks(

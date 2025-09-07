@@ -1,6 +1,7 @@
 package io.github.koalaplot.core.xygraph
 
 import androidx.compose.ui.unit.Dp
+import kotlin.math.roundToInt
 
 /**
  * An axis that uses arbitrary category objects instead of numbers as its values. It is a discrete
@@ -29,6 +30,10 @@ public class CategoryAxisModel<T>(
         } else {
             ((index + 1).toFloat() / (categories.size + 1).toFloat())
         }
+    }
+
+    override fun offsetToValue(offset: Float): T {
+        return categories[(offset * categories.size).roundToInt().coerceIn(categories.indices)]
     }
 
     override fun computeTickValues(axisLength: Dp): io.github.koalaplot.core.xygraph.TickValues<T> {

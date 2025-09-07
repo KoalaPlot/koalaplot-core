@@ -41,6 +41,11 @@ public interface AxisModel<T> {
     public fun computeOffset(point: T): Float
 
     /**
+     * Inverse of [computeOffset].
+     */
+    public fun offsetToValue(offset: Float): T
+
+    /**
      * Asks the AxisState to compute new ranges and tick values after zooming, if the axis supports
      * zooming.
      *
