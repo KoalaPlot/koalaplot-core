@@ -7,5 +7,5 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.gradle-nexus:publish-plugin:2.0.0-rc-1")
+    implementation("io.github.gradle-nexus:publish-plugin:2.0.0")
 }
