@@ -64,6 +64,7 @@ import kotlin.math.sin
  * @param yAxisLabels Composable to display labels for specific y-axis values
  * @param yAxisTitle Title for the y-axis
  * @param gestureConfig Configuration for gesture handling. See [GestureConfig]
+ * @param onPointerMove Callback invoked when the pointer moves with the current pointer position in plot coordinates
  * @param content The content to be displayed, which should include one plot for each series to be
  * plotted on this XYGraph.
  */
@@ -665,6 +666,7 @@ private fun DrawScope.drawGridLine(gridLineStyle: LineStyle?, start: Offset, end
  * @param yAxisLabels String factory of y-axis label Strings
  * @param yAxisTitle Title for the y-axis
  * @param gestureConfig Configuration for gesture handling. See [GestureConfig]
+ * @param onPointerMove Callback invoked when the pointer moves with the current pointer position in plot coordinates
  * @param content The content to be displayed within this graph, which should include one plot for each
  * data series to be plotted.
  */
