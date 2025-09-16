@@ -91,6 +91,14 @@ internal class BarScopeImpl(val hoverableElementAreaScope: HoverableElementAreaS
 public typealias VerticalBarComposable<E> = @Composable BarScope.(series: Int, index: Int, value: E) -> Unit
 
 /**
+ * Defines a Composable function used to emit a vertical bar for [VerticalBarPlotEntry] values.
+ * Delegates to [VerticalBarComposable] with [VerticalBarPlotEntry] as type parameter.
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ */
+public typealias DefaultVerticalBarComposable<X, Y> = VerticalBarComposable<VerticalBarPlotEntry<X, Y>>
+
+/**
  * A VerticalBarPlot to be used in an XYGraph and that plots a single series of data points as vertical bars.
  *
  * @param X The type of the x-axis values
@@ -106,7 +114,7 @@ public fun <X> XYGraphScope<X, Float>.VerticalBarPlot(
     xData: List<X>,
     yData: List<Float>,
     modifier: Modifier = Modifier,
-    bar: @Composable BarScope.(index: Int) -> Unit,
+    bar: DefaultVerticalBarComposable<X, Float>,
     barWidth: Float = 0.9f,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
@@ -137,7 +145,7 @@ public fun <X> XYGraphScope<X, Float>.VerticalBarPlot(
 public fun <X, Y, E : VerticalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.VerticalBarPlot(
     data: List<E>,
     modifier: Modifier = Modifier,
-    bar: @Composable BarScope.(index: Int) -> Unit,
+    bar: DefaultVerticalBarComposable<X, Y>,
     barWidth: Float = 0.9f,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
@@ -149,8 +157,8 @@ public fun <X, Y, E : VerticalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.VerticalBar
     GroupedVerticalBarPlot(
         dataAdapter,
         modifier = modifier,
-        bar = { dataIndex, _, _ ->
-            bar(dataIndex)
+        bar = { series, index, value ->
+            bar(series, index, GroupedEntryToEntryAdapter(value))
         },
         maxBarGroupWidth = barWidth,
         animationSpec = animationSpec
@@ -178,6 +186,15 @@ private class EntryToGroupedEntryAdapter<X, Y>(val entry: VerticalBarPlotEntry<X
         }
 }
 
+internal class GroupedEntryToEntryAdapter<X, Y>(
+    private val entry: VerticalBarPlotGroupedPointEntry<X, Y>
+) : VerticalBarPlotEntry<X, Y> {
+    override val x: X
+        get() = entry.x
+    override val y: VerticalBarPosition<Y>
+        get() = entry.y.first()
+}
+
 /**
  * Creates a Vertical Bar Plot.
  *
@@ -188,13 +205,13 @@ private class EntryToGroupedEntryAdapter<X, Y>(val entry: VerticalBarPlotEntry<X
  */
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot(
-    defaultBar: @Composable BarScope.() -> Unit = solidBar(Color.Blue),
+    defaultBar: DefaultVerticalBarComposable<X, Y> = solidBar(Color.Blue),
     modifier: Modifier = Modifier,
     barWidth: Float = 0.9f,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
     content: VerticalBarPlotScope<X, Y>.() -> Unit
 ) {
-    val scope = remember(content, defaultBar) { VerticalBarPlotScopeImpl<X, Y>(defaultBar) }
+    val scope = remember(content, defaultBar) { VerticalBarPlotScopeImpl(defaultBar) }
     val data = remember(scope) {
         scope.content()
         scope.data.values.toList()
@@ -203,8 +220,8 @@ public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot(
     VerticalBarPlot(
         data.map { it.first },
         modifier,
-        {
-            data[it].second.invoke(this)
+        { series, index, value ->
+            data[index].second.invoke(this, series, index, value)
         },
         barWidth,
         animationSpec
@@ -220,15 +237,15 @@ public interface VerticalBarPlotScope<X, Y> {
      * [yMin] to [yMax]. An optional [bar] can be provided to customize the Composable used to
      * generate the bar for this specific item.
      */
-    public fun item(x: X, yMin: Y, yMax: Y, bar: (@Composable BarScope.() -> Unit)? = null)
+    public fun item(x: X, yMin: Y, yMax: Y, bar: (DefaultVerticalBarComposable<X, Y>)? = null)
 }
 
-internal class VerticalBarPlotScopeImpl<X, Y>(private val defaultBar: @Composable BarScope.() -> Unit) :
+internal class VerticalBarPlotScopeImpl<X, Y>(private val defaultBar: DefaultVerticalBarComposable<X, Y>) :
     VerticalBarPlotScope<X, Y> {
-    val data: MutableMap<X, Pair<VerticalBarPlotEntry<X, Y>, @Composable BarScope.() -> Unit>> =
+    val data: MutableMap<X, Pair<VerticalBarPlotEntry<X, Y>, DefaultVerticalBarComposable<X, Y>>> =
         mutableMapOf()
 
-    override fun item(x: X, yMin: Y, yMax: Y, bar: (@Composable BarScope.() -> Unit)?) {
+    override fun item(x: X, yMin: Y, yMax: Y, bar: (DefaultVerticalBarComposable<X, Y>)?) {
         data[x] = Pair(verticalBarPlotEntry(x, yMin, yMax), bar ?: defaultBar)
     }
 }
@@ -273,10 +290,41 @@ public fun BarScope.DefaultVerticalBar(
 /**
  * Factory function to create a Composable that emits a solid colored bar.
  */
-public fun solidBar(
+public fun <X, Y> solidBar(
     color: Color,
     shape: Shape = RectangleShape,
     border: BorderStroke? = null,
-): @Composable BarScope.() -> Unit = {
+): DefaultVerticalBarComposable<X, Y> = { _, _, _ ->
     DefaultVerticalBar(SolidColor(color), shape = shape, border = border)
+}
+
+/**
+ * Factory function to create a Composable that emits a solid colored bar.
+ * The endings of each bar consist of a concave and a convex shape.
+ */
+public fun <X> XYGraphScope<X, Float>.concaveConvexBar(
+    color: Color,
+    border: BorderStroke? = null,
+): DefaultVerticalBarComposable<X, Float> = { _, index, value ->
+    DefaultVerticalBar(
+        brush = SolidColor(color),
+        shape = ConcaveConvexShape(this@concaveConvexBar, index, value),
+        border = border
+    )
+}
+
+/**
+ * Factory function to create a Composable that emits a solid colored bar.
+ * The endings of each bar consist of a concave and a convex shape.
+ * There's an additional convex cutout at the bottom of the bar.
+ */
+public fun <X> XYGraphScope<X, Float>.convexConcaveConvexBar(
+    color: Color,
+    border: BorderStroke? = null,
+): DefaultVerticalBarComposable<X, Float> = { _, index, value ->
+    DefaultVerticalBar(
+        brush = SolidColor(color),
+        shape = ConvexConcaveConvexShape(this@convexConcaveConvexBar, index, value),
+        border = border
+    )
 }

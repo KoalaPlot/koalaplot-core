@@ -47,7 +47,7 @@ public data class DefaultVerticalBarPlotStackedPointEntry<X, Y>(
 public fun <X, Y, E : VerticalBarPlotStackedPointEntry<X, Y>> XYGraphScope<X, Y>.StackedVerticalBarPlot(
     data: List<E>,
     modifier: Modifier = Modifier,
-    bar: @Composable BarScope.(xIndex: Int, barIndex: Int) -> Unit,
+    bar: DefaultVerticalBarComposable<X, Y>,
     barWidth: Float = 0.9f,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
 ) {
@@ -58,8 +58,8 @@ public fun <X, Y, E : VerticalBarPlotStackedPointEntry<X, Y>> XYGraphScope<X, Y>
         VerticalBarPlot(
             layerData,
             modifier,
-            { index ->
-                bar(index, barIndex)
+            { series, index, value ->
+                bar(index, barIndex, value)
             },
             barWidth,
             animationSpec
@@ -106,17 +106,17 @@ public fun <X> XYGraphScope<X, Float>.StackedVerticalBarPlot(
     modifier: Modifier = Modifier,
     barWidth: Float = 0.9f,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
-    content: StackedVerticalBarPlotScope<X>.() -> Unit
+    content: StackedVerticalBarPlotScope<X, Float>.() -> Unit
 ) {
     val scope = remember(content) {
-        val scope = StackedVerticalBarPlotScopeImpl<X>()
+        val scope = StackedVerticalBarPlotScopeImpl<X, Float>()
         scope.content()
         scope
     }
 
     data class EntryWithBars<X>(
         override val x: X,
-        val yb: List<Pair<Float, @Composable BarScope.() -> Unit>>
+        val yb: List<Pair<Float, DefaultVerticalBarComposable<X, Float>>>
     ) : VerticalBarPlotStackedPointEntry<X, Float> {
         override val yOrigin = 0f
 
@@ -154,8 +154,8 @@ public fun <X> XYGraphScope<X, Float>.StackedVerticalBarPlot(
     StackedVerticalBarPlot(
         data,
         modifier,
-        { xIndex, seriesIndex ->
-            data.data[xIndex].yb[seriesIndex].second.invoke(this)
+        { xIndex, seriesIndex, value ->
+            data.data[xIndex].yb[seriesIndex].second.invoke(this, xIndex, seriesIndex, value)
         },
         barWidth,
         animationSpec
@@ -165,24 +165,24 @@ public fun <X> XYGraphScope<X, Float>.StackedVerticalBarPlot(
 /**
  * Receiver scope used by [StackedVerticalBarPlot].
  */
-public interface StackedVerticalBarPlotScope<X> {
+public interface StackedVerticalBarPlotScope<X, Y> {
     /**
      * Starts a new series of bars to be plotted, with a [defaultBar] to use for rendering all
      * bars in this series.
      */
     public fun series(
-        defaultBar: @Composable BarScope.() -> Unit = solidBar(Color.Blue),
-        content: StackedVerticalBarPlotSeriesScope<X>.() -> Unit
+        defaultBar: DefaultVerticalBarComposable<X, Y> = solidBar(Color.Blue),
+        content: StackedVerticalBarPlotSeriesScope<X, Y>.() -> Unit
     )
 }
 
-private class StackedVerticalBarPlotScopeImpl<X> : StackedVerticalBarPlotScope<X> {
-    val series: MutableList<StackedVerticalBarPlotSeriesScopeImpl<X>> = mutableListOf()
+private class StackedVerticalBarPlotScopeImpl<X, Y> : StackedVerticalBarPlotScope<X, Y> {
+    val series: MutableList<StackedVerticalBarPlotSeriesScopeImpl<X, Y>> = mutableListOf()
     override fun series(
-        defaultBar: @Composable BarScope.() -> Unit,
-        content: StackedVerticalBarPlotSeriesScope<X>.() -> Unit
+        defaultBar: DefaultVerticalBarComposable<X, Y>,
+        content: StackedVerticalBarPlotSeriesScope<X, Y>.() -> Unit
     ) {
-        val scope = StackedVerticalBarPlotSeriesScopeImpl<X>(defaultBar)
+        val scope = StackedVerticalBarPlotSeriesScopeImpl(defaultBar)
         series.add(scope)
         scope.content()
     }
@@ -191,21 +191,21 @@ private class StackedVerticalBarPlotScopeImpl<X> : StackedVerticalBarPlotScope<X
 /**
  * Scope item to allow adding items to a [StackedVerticalBarPlot].
  */
-public interface StackedVerticalBarPlotSeriesScope<X> {
+public interface StackedVerticalBarPlotSeriesScope<X, Y> {
     /**
      * Adds an item at the specified [x] axis coordinate, with a vertical extent [y], which will
      * be added to series elements at the same x-axis coordinate already added to the plot.
      * An optional [bar] can be provided to customize the Composable used to
      * generate the bar for this specific item.
      */
-    public fun item(x: X, y: Float, bar: (@Composable BarScope.() -> Unit)? = null)
+    public fun item(x: X, y: Float, bar: (DefaultVerticalBarComposable<X, Y>)? = null)
 }
 
-private class StackedVerticalBarPlotSeriesScopeImpl<X>(val defaultBar: @Composable BarScope.() -> Unit) :
-    StackedVerticalBarPlotSeriesScope<X> {
-    val data: MutableMap<X, Pair<Float, @Composable BarScope.() -> Unit>> = mutableMapOf()
+private class StackedVerticalBarPlotSeriesScopeImpl<X, Y>(val defaultBar: DefaultVerticalBarComposable<X, Y>) :
+    StackedVerticalBarPlotSeriesScope<X, Y> {
+    val data: MutableMap<X, Pair<Float, DefaultVerticalBarComposable<X, Y>>> = mutableMapOf()
 
-    override fun item(x: X, y: Float, bar: (@Composable BarScope.() -> Unit)?) {
+    override fun item(x: X, y: Float, bar: (DefaultVerticalBarComposable<X, Y>)?) {
         data[x] = Pair(y, bar ?: defaultBar)
     }
 }
