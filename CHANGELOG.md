@@ -11,11 +11,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Alternate pie chart slice style, ConcaveConvexSlice.
 - #55 mouse tracking
+- #24 Horizontal bar plot
 
 ### Changed
 
 - Update dependencies: Compose to 1.8.2, Kotlin to 2.2.10
-
+- VerticalBarPosition renamed to BarPosition
+- DefaultVerticalBarPosition renamed to DefaultBarPosition
+- DefaultVerticalBar renamed to DefaultBar
+- VerticalBarPlotGroupedPointEntry renamed to BarPlotGroupedPointEntry and changed names of member values
 
 ## [0.9.1]
 

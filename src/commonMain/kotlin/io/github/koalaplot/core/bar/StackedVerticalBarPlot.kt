@@ -1,10 +1,10 @@
 package io.github.koalaplot.core.bar
 
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import io.github.koalaplot.core.animation.StartAnimationUseCase
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.xygraph.XYGraphScope
 
@@ -49,12 +49,17 @@ public fun <X, Y, E : VerticalBarPlotStackedPointEntry<X, Y>> XYGraphScope<X, Y>
     modifier: Modifier = Modifier,
     bar: @Composable BarScope.(xIndex: Int, barIndex: Int) -> Unit,
     barWidth: Float = 0.9f,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+    startAnimationUseCase: StartAnimationUseCase =
+        StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            /* chart animation */
+            KoalaPlotTheme.animationSpec,
+        )
 ) {
     val maxBarCount = data.maxOf { it.y.size }
 
     for (barIndex in 0..<maxBarCount) {
-        val layerData = StackToBarEntryAdapter(data, barIndex)
+        val layerData = VerticalStackToBarEntryAdapter(data, barIndex)
         VerticalBarPlot(
             layerData,
             modifier,
@@ -62,26 +67,29 @@ public fun <X, Y, E : VerticalBarPlotStackedPointEntry<X, Y>> XYGraphScope<X, Y>
                 bar(index, barIndex)
             },
             barWidth,
-            animationSpec
+            startAnimationUseCase
         )
     }
 }
 
-private class StackToBarEntryAdapter<X, Y>(val data: List<VerticalBarPlotStackedPointEntry<X, Y>>, val barIndex: Int) :
+private class VerticalStackToBarEntryAdapter<X, Y>(
+    val data: List<VerticalBarPlotStackedPointEntry<X, Y>>,
+    val barIndex: Int
+) :
     AbstractList<VerticalBarPlotEntry<X, Y>>() {
     override val size: Int = data.size
 
     override fun get(index: Int): VerticalBarPlotEntry<X, Y> {
         return object : VerticalBarPlotEntry<X, Y> {
             override val x: X = data[index].x
-            override val y: VerticalBarPosition<Y>
+            override val y: BarPosition<Y>
                 get() = VerticalBarPositionAdapter(data[index], barIndex)
         }
     }
 
     class VerticalBarPositionAdapter<X, Y>(entry: VerticalBarPlotStackedPointEntry<X, Y>, barIndex: Int) :
-        VerticalBarPosition<Y> {
-        override val yMin: Y = if (barIndex == 0) {
+        BarPosition<Y> {
+        override val start: Y = if (barIndex == 0) {
             entry.yOrigin
         } else {
             // barIndex can be greater than entry.y.lastIndex if some other x-axis entries had more
@@ -89,7 +97,7 @@ private class StackToBarEntryAdapter<X, Y>(val data: List<VerticalBarPlotStacked
             entry.y[(barIndex - 1).coerceAtMost(entry.y.lastIndex)]
         }
 
-        override val yMax: Y = entry.y[barIndex.coerceAtMost(entry.y.lastIndex)]
+        override val end: Y = entry.y[barIndex.coerceAtMost(entry.y.lastIndex)]
     }
 }
 
@@ -105,7 +113,12 @@ private class StackToBarEntryAdapter<X, Y>(val data: List<VerticalBarPlotStacked
 public fun <X> XYGraphScope<X, Float>.StackedVerticalBarPlot(
     modifier: Modifier = Modifier,
     barWidth: Float = 0.9f,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+    startAnimationUseCase: StartAnimationUseCase =
+        StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            /* chart animation */
+            KoalaPlotTheme.animationSpec,
+        ),
     content: StackedVerticalBarPlotScope<X>.() -> Unit
 ) {
     val scope = remember(content) {
@@ -158,7 +171,7 @@ public fun <X> XYGraphScope<X, Float>.StackedVerticalBarPlot(
             data.data[xIndex].yb[seriesIndex].second.invoke(this)
         },
         barWidth,
-        animationSpec
+        startAnimationUseCase
     )
 }
 
