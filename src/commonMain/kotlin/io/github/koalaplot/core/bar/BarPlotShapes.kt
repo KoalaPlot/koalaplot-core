@@ -24,7 +24,7 @@ import kotlin.math.max
  * Use in Stacked Bars is discouraged.
  */
 @Stable
-private val PlaneConvexShape: Shape = object : Shape {
+private val DefaultPlanoConvexShape: Shape = object : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
@@ -61,13 +61,13 @@ private val PlaneConvexShape: Shape = object : Shape {
  * Use in Stacked Bars is discouraged.
  */
 @Stable
-private val BiConvexShape: Shape = object : Shape {
+private val DefaultBiConvexShape: Shape = object : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
         density: Density
     ): Outline {
-        val outline = PlaneConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
+        val outline = DefaultPlanoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
 
         val shapeWidth = size.width
         val shapeHeight = size.height
@@ -101,10 +101,10 @@ private val BiConvexShape: Shape = object : Shape {
  * Useful for Single Vertical Bar and Stacked Bars Plot rendering.
  *
  * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
- * @param value The [VerticalBarPlotEntry] that defines the cutouts for the [ConcaveConvexShape].
+ * @param value The [VerticalBarPlotEntry] that defines the cutouts for the [PlanoConvexShape].
  */
 @Stable
-public class ConcaveConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
+public class PlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
     private val xyGraphScope: XYGraphScope<X, Float>,
     private val index: Int,
     private val value: E
@@ -122,7 +122,7 @@ public class ConcaveConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
         val isInverted = value.y.yMax < value.y.yMin
         // Required for proper bar rendering in waterfall charts
         if (index == 0) {
-            val outline = PlaneConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
+            val outline = DefaultPlanoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
 
             outline.path.apply {
                 // Rendering bar in negative direction
@@ -215,26 +215,26 @@ public class ConcaveConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
  * Useful for Single Vertical Bar and Stacked Bars Plot rendering.
  *
  * Primary constructor:
- * @param concaveConvexShape The internal shape logic used for rendering.
- * @param value The [VerticalBarPlotEntry] that defines the cutouts for the [ConcaveConvexShape].
+ * @param planoConvexShape The internal shape logic used for rendering.
+ * @param value The [VerticalBarPlotEntry] that defines the cutouts for the [PlanoConvexShape].
  *
  * Secondary constructor:
  * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
  * @param value The [VerticalBarPlotEntry] used to construct the internal shape as well as the additional convex cutout.
  */
 @Stable
-public class ConvexConcaveConvexShape<X, E : VerticalBarPlotEntry<X, Float>> private constructor(
-    private val concaveConvexShape: ConcaveConvexShape<X, E>,
+public class BiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> private constructor(
+    private val planoConvexShape: PlanoConvexShape<X, E>,
     private val index: Int,
     private val value: E
-) : Shape, XYGraphScope<X, Float> by concaveConvexShape {
+) : Shape, XYGraphScope<X, Float> by planoConvexShape {
 
     public constructor(
         xyGraphScope: XYGraphScope<X, Float>,
         index: Int,
         value: E
     ) : this(
-        ConcaveConvexShape(xyGraphScope, index, value),
+        PlanoConvexShape(xyGraphScope, index, value),
         index,
         value
     )
@@ -252,7 +252,7 @@ public class ConvexConcaveConvexShape<X, E : VerticalBarPlotEntry<X, Float>> pri
         val isInverted = value.y.yMax < value.y.yMin
         // Required for proper bar rendering in waterfall charts
         if (index == 0) {
-            val outline = BiConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
+            val outline = DefaultBiConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
 
             outline.path.apply {
                 // Rendering bar in negative direction
@@ -280,7 +280,7 @@ public class ConvexConcaveConvexShape<X, E : VerticalBarPlotEntry<X, Float>> pri
             // Getting screen's height pixel values from offsets
             val yMaxZeroHeight = offsetToHeight(yMaxZeroOffset)
 
-            val outline = concaveConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
+            val outline = planoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
 
             val cutoutRect = Path().apply {
                 addRect(
