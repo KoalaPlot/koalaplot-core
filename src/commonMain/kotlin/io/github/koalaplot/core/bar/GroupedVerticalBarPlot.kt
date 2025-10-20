@@ -159,10 +159,10 @@ public fun <X, Y, E : VerticalBarPlotGroupedPointEntry<X, Y>> XYGraphScope<X, Y>
             element.y.forEachIndexed { i, verticalBarPosition ->
                 val barMin = (
                     yAxisModel.computeOffset(verticalBarPosition.yMin).coerceIn(0f, 1f) * constraints.maxHeight
-                    )
+                    ).roundToInt()
                 val barMax = (
                     yAxisModel.computeOffset(verticalBarPosition.yMax).coerceIn(0f, 1f) * constraints.maxHeight
-                    )
+                    ).roundToInt()
 
                 val height = abs(barMax - barMin) * beta.value
 
@@ -170,7 +170,7 @@ public fun <X, Y, E : VerticalBarPlotGroupedPointEntry<X, Y>> XYGraphScope<X, Y>
                     Constraints(minWidth = 0, maxWidth = scaledBarWidth).fixedHeight(height.roundToInt())
                 )
                 elementPlaceables.add(p)
-                elementYBarPositions.add(barMin.roundToInt()..barMax.roundToInt())
+                elementYBarPositions.add(barMin..barMax)
             }
         }
 
