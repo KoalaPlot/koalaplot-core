@@ -139,18 +139,26 @@ public class ConcaveConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
         return if (yMaxOffset == yMinOffset) {
             Path().let(Outline::Generic)
         } else {
+            // AxisModel's `computeOffset` method provides relative values between 0 and 1
+            // Mapping offset values to pixel values
             val heightOffsetRatio = size.height / (yMaxOffset - yMinOffset)
             val offsetToHeight = { offset: Float -> offset * heightOffsetRatio }
 
+            // Bars start with a concave path which might go below zero; the respective shape must be cut appropriately
+            // Calculating aforementioned offset values for a bar's max and min value relative to the axis zero line
             val yMinZeroOffset = yMinOffset - yZeroOffset
             val yMaxZeroOffset = yMaxOffset - yZeroOffset
 
+            // Getting screen's height pixel values from offsets
             val yMinZeroHeight = offsetToHeight(yMinZeroOffset)
             val yMaxZeroHeight = offsetToHeight(yMaxZeroOffset)
 
+            // If min and max values are greater than arcRadius, aforementioned below zero compensation is not required
+            // and therefore becomes ineffective
             val yMinZeroArcHeight = max((arcRadius - yMinZeroHeight), 0F)
             val yMaxZeroArcHeight = max((arcRadius - yMaxZeroHeight), 0F)
 
+            // Prevent arc from being drawn below zero by subtracting value in degrees
             val yMaxZeroArcHeightDegrees =
                 asin(yMaxZeroArcHeight / arcRadius).rad.toDegrees().value.toFloat()
 
@@ -261,10 +269,15 @@ public class ConvexConcaveConvexShape<X, E : VerticalBarPlotEntry<X, Float>> pri
         return if (yMaxOffset == yMinOffset) {
             Path().let(Outline::Generic)
         } else {
+            // AxisModel's `computeOffset` method provides relative values between 0 and 1
+            // Mapping offset values to pixel values
             val heightOffsetRatio = size.height / (yMaxOffset - yMinOffset)
             val offsetToHeight = { offset: Float -> offset * heightOffsetRatio }
 
+            // Bars start with a concave path which might go below zero; the respective shape must be cut appropriately
+            // Calculating aforementioned offset values for a bar's max and min value relative to the axis zero line
             val yMaxZeroOffset = yMaxOffset - yZeroOffset
+            // Getting screen's height pixel values from offsets
             val yMaxZeroHeight = offsetToHeight(yMaxZeroOffset)
 
             val outline = concaveConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
