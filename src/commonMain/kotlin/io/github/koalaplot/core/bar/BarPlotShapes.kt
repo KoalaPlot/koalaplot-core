@@ -24,7 +24,7 @@ import kotlin.math.max
  * Use in Stacked Bars is discouraged.
  */
 @Stable
-private val DefaultPlanoConvexShape: Shape = object : Shape {
+private val DefaultVerticalPlanoConvexShape: Shape = object : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
@@ -56,18 +56,53 @@ private val DefaultPlanoConvexShape: Shape = object : Shape {
 }
 
 /**
- * Rectangle shape with convex shaped sides.
- * Useful for Single Vertical Bar Plot rendering.
+ * Rectangle shape with convex shaped side.
+ * Useful for Single Horizontal Bar Plot rendering.
  * Use in Stacked Bars is discouraged.
  */
 @Stable
-private val DefaultBiConvexShape: Shape = object : Shape {
+private val DefaultHorizontalPlanoConvexShape: Shape = object : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
         density: Density
     ): Outline {
-        val outline = DefaultPlanoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
+        val shapeWidth = size.width
+        val shapeHeight = size.height
+        val arcRadius = shapeHeight / 2
+
+        return Path().apply {
+            val rectWidth = max((shapeWidth - arcRadius), 0F)
+            addRect(Size(rectWidth, shapeHeight).toRect())
+
+            val widthRadiusOffset = max((arcRadius - shapeWidth), 0F)
+            val widthRadiusOffsetDegrees =
+                asin(widthRadiusOffset / arcRadius).rad.toDegrees().value.toFloat()
+            addArc(
+                oval = Rect(
+                    offset = Offset(rectWidth - arcRadius - widthRadiusOffset, 0F),
+                    size = Size(shapeHeight, shapeHeight)
+                ),
+                startAngleDegrees = 270F + widthRadiusOffsetDegrees,
+                sweepAngleDegrees = 180F - 2 * widthRadiusOffsetDegrees
+            )
+        }.let(Outline::Generic)
+    }
+}
+
+/**
+ * Rectangle shape with convex shaped sides.
+ * Useful for Single Vertical Bar Plot rendering.
+ * Use in Stacked Bars is discouraged.
+ */
+@Stable
+private val DefaultVerticalBiConvexShape: Shape = object : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        val outline = DefaultVerticalPlanoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
 
         val shapeWidth = size.width
         val shapeHeight = size.height
@@ -97,14 +132,53 @@ private val DefaultBiConvexShape: Shape = object : Shape {
 }
 
 /**
+ * Rectangle shape with convex shaped sides.
+ * Useful for Single Horizontal Bar Plot rendering.
+ * Use in Stacked Bars is discouraged.
+ */
+@Stable
+private val DefaultHorizontalBiConvexShape: Shape = object : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        val outline = DefaultHorizontalPlanoConvexShape
+            .createOutline(size, layoutDirection, density) as Outline.Generic
+
+        val shapeHeight = size.height
+        val arcRadius = shapeHeight / 2
+
+        val cutoutRect = Path().apply {
+            addRect(
+                rect = Rect(
+                    offset = Offset(-arcRadius, 0F),
+                    size = Size(shapeHeight, shapeHeight)
+                )
+            )
+        }
+        val cutoutArc = Path().apply {
+            addArc(
+                oval = Size(shapeHeight, shapeHeight).toRect(),
+                startAngleDegrees = 90F,
+                sweepAngleDegrees = 180F
+            )
+        }
+        val cutout = (cutoutRect - cutoutArc)
+        return (outline.path - cutout).let(Outline::Generic)
+    }
+}
+
+/**
  * Rectangle shape with concave/convex shaped sides.
  * Useful for Single Vertical Bar and Stacked Bars Plot rendering.
  *
  * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
- * @param value The [VerticalBarPlotEntry] that defines the cutouts for the [PlanoConvexShape].
+ * @param index Represents the element index within the series.
+ * @param value The [VerticalBarPlotEntry] that defines the cutouts for the [VerticalPlanoConvexShape].
  */
 @Stable
-public class PlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
+public class VerticalPlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
     private val xyGraphScope: XYGraphScope<X, Float>,
     private val index: Int,
     private val value: E
@@ -119,10 +193,11 @@ public class PlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
         val arcRadius = shapeWidth / 2
 
         // Rendering negative values
-        val isInverted = value.y.yMax < value.y.yMin
+        val isInverted = value.y.end < value.y.start
         // Required for proper bar rendering in waterfall charts
         if (index == 0) {
-            val outline = DefaultPlanoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
+            val outline =
+                DefaultVerticalPlanoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
 
             outline.path.apply {
                 // Rendering bar in negative direction
@@ -133,7 +208,7 @@ public class PlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
             return outline
         }
 
-        val (yZeroOffset, yMinOffset, yMaxOffset) = yAxisModel.yOffsets(value.y.yMin, value.y.yMax)
+        val (yZeroOffset, yMinOffset, yMaxOffset) = yAxisModel.yOffsets(value.y.start, value.y.end)
 
         // Prevent division by zero
         return if (yMaxOffset == yMinOffset) {
@@ -211,20 +286,143 @@ public class PlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
 }
 
 /**
+ * Rectangle shape with concave/convex shaped sides.
+ * Useful for Single Horizontal Bar and Stacked Bars Plot rendering.
+ *
+ * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
+ * @param index Represents the element index within the series.
+ * @param value The [HorizontalBarPlotEntry] that defines the cutouts for the [HorizontalPlanoConvexShape].
+ */
+@Stable
+public class HorizontalPlanoConvexShape<X, E : HorizontalBarPlotEntry<Float, X>>(
+    private val xyGraphScope: XYGraphScope<Float, X>,
+    private val index: Int,
+    private val value: E
+) : Shape, XYGraphScope<Float, X> by xyGraphScope {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        val shapeWidth = size.width
+        val shapeHeight = size.height
+        val arcRadius = shapeHeight / 2
+
+        // Rendering negative values
+        val isInverted = value.x.end < value.x.start
+        // Required for proper bar rendering in waterfall charts
+        if (index == 0) {
+            val outline =
+                DefaultHorizontalPlanoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
+
+            outline.path.apply {
+                // Rendering bar in negative direction
+                if (isInverted) {
+                    inverted(pivotX = shapeWidth / 2F, pivotY = shapeHeight / 2F)
+                }
+            }
+            return outline
+        }
+
+        val (xZeroOffset, xMinOffset, xMaxOffset) = xAxisModel.xOffsets(value.x.start, value.x.end)
+
+        // Prevent division by zero
+        return if (xMaxOffset == xMinOffset) {
+            Path().let(Outline::Generic)
+        } else {
+            // AxisModel's `computeOffset` method provides relative values between 0 and 1
+            // Mapping offset values to pixel values
+            val widthOffsetRatio = size.width / (xMaxOffset - xMinOffset)
+            val offsetToWidth = { offset: Float -> offset * widthOffsetRatio }
+
+            // Bars start with a concave path which might go below zero; the respective shape must be cut appropriately
+            // Calculating aforementioned offset values for a bar's max and min value relative to the axis zero line
+            val xMinZeroOffset = xMinOffset - xZeroOffset
+            val xMaxZeroOffset = xMaxOffset - xZeroOffset
+
+            // Getting screen's width pixel values from offsets
+            val xMinZeroWidth = offsetToWidth(xMinZeroOffset)
+            val xMaxZeroWidth = offsetToWidth(xMaxZeroOffset)
+
+            // If min and max values are greater than arcRadius, aforementioned below zero compensation is not required
+            // and therefore becomes ineffective
+            val xMinZeroArcWidth = max((arcRadius - xMinZeroWidth), 0F)
+            val xMaxZeroArcWidth = max((arcRadius - xMaxZeroWidth), 0F)
+
+            // Prevent arc from being drawn below zero by subtracting value in degrees
+            val xMaxZeroArcWidthDegrees =
+                asin(xMaxZeroArcWidth / arcRadius).rad.toDegrees().value.toFloat()
+
+            Path().apply {
+                (
+                    Path().apply {
+                        val rectWidth = max((shapeWidth - arcRadius), 0F)
+                        val widthRadiusOffset = max((arcRadius - shapeWidth), 0F)
+                        addArc(
+                            oval = Rect(
+                                offset = Offset(rectWidth - arcRadius - widthRadiusOffset, 0F),
+                                size = Size(shapeHeight, shapeHeight)
+                            ),
+                            startAngleDegrees = 270F + xMaxZeroArcWidthDegrees,
+                            sweepAngleDegrees = 180F - 2 * xMaxZeroArcWidthDegrees
+                        )
+                    } - Path().apply {
+                        addArc(
+                            oval = Rect(
+                                offset = Offset(-shapeHeight, 0F),
+                                size = Size(shapeHeight, shapeHeight)
+                            ),
+                            startAngleDegrees = 270F,
+                            sweepAngleDegrees = 180F
+                        )
+                    }
+                    ).let(::addPath)
+
+                (
+                    Path().apply {
+                        addRect(
+                            rect = Rect(
+                                offset = Offset(-arcRadius + xMinZeroArcWidth, 0F),
+                                size = Size(max(shapeWidth - xMinZeroArcWidth, 0F), shapeHeight)
+                            )
+                        )
+                    } - Path().apply {
+                        addArc(
+                            oval = Rect(
+                                offset = Offset(-shapeHeight, 0F),
+                                size = Size(shapeHeight, shapeHeight)
+                            ),
+                            startAngleDegrees = 270F,
+                            sweepAngleDegrees = 180F
+                        )
+                    }
+                    ).let(::addPath)
+                // Rendering bar in negative direction
+                if (isInverted) {
+                    inverted(pivotX = shapeWidth / 2F, pivotY = shapeHeight / 2F)
+                }
+            }.let(Outline::Generic)
+        }
+    }
+}
+
+/**
  * Rectangle shape with concave/convex shaped sides and additional convex cutout at the bottom.
  * Useful for Single Vertical Bar and Stacked Bars Plot rendering.
  *
  * Primary constructor:
  * @param planoConvexShape The internal shape logic used for rendering.
- * @param value The [VerticalBarPlotEntry] that defines the cutouts for the [PlanoConvexShape].
+ * @param index Represents the element index within the series.
+ * @param value The [VerticalBarPlotEntry] that defines the cutouts for the [VerticalPlanoConvexShape].
  *
  * Secondary constructor:
  * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
+ * @param index Represents the element index within the series.
  * @param value The [VerticalBarPlotEntry] used to construct the internal shape as well as the additional convex cutout.
  */
 @Stable
-public class BiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> private constructor(
-    private val planoConvexShape: PlanoConvexShape<X, E>,
+public class VerticalBiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> private constructor(
+    private val planoConvexShape: VerticalPlanoConvexShape<X, E>,
     private val index: Int,
     private val value: E
 ) : Shape, XYGraphScope<X, Float> by planoConvexShape {
@@ -234,7 +432,7 @@ public class BiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> private constr
         index: Int,
         value: E
     ) : this(
-        PlanoConvexShape(xyGraphScope, index, value),
+        VerticalPlanoConvexShape(xyGraphScope, index, value),
         index,
         value
     )
@@ -249,10 +447,10 @@ public class BiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> private constr
         val arcRadius = shapeWidth / 2
 
         // Rendering negative values
-        val isInverted = value.y.yMax < value.y.yMin
+        val isInverted = value.y.end < value.y.start
         // Required for proper bar rendering in waterfall charts
         if (index == 0) {
-            val outline = DefaultBiConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
+            val outline = DefaultVerticalBiConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
 
             outline.path.apply {
                 // Rendering bar in negative direction
@@ -263,7 +461,7 @@ public class BiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> private constr
             return outline
         }
 
-        val (yZeroOffset, yMinOffset, yMaxOffset) = yAxisModel.yOffsets(value.y.yMin, value.y.yMax)
+        val (yZeroOffset, yMinOffset, yMaxOffset) = yAxisModel.yOffsets(value.y.start, value.y.end)
 
         // Prevent division by zero
         return if (yMaxOffset == yMinOffset) {
@@ -311,6 +509,111 @@ public class BiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> private constr
     }
 }
 
+/**
+ * Rectangle shape with concave/convex shaped sides and additional convex cutout at the bottom.
+ * Useful for Single Horizontal Bar and Stacked Bars Plot rendering.
+ *
+ * Primary constructor:
+ * @param planoConvexShape The internal shape logic used for rendering.
+ * @param index Represents the element index within the series.
+ * @param value The [HorizontalBarPlotEntry] that defines the cutouts for the [HorizontalPlanoConvexShape].
+ *
+ * Secondary constructor:
+ * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
+ * @param index Represents the element index within the series.
+ * @param value The [HorizontalBarPlotEntry] used to construct the internal shape
+ * as well as the additional convex cutout.
+ */
+@Stable
+public class HorizontalBiConvexShape<X, E : HorizontalBarPlotEntry<Float, X>> private constructor(
+    private val planoConvexShape: HorizontalPlanoConvexShape<X, E>,
+    private val index: Int,
+    private val value: E
+) : Shape, XYGraphScope<Float, X> by planoConvexShape {
+
+    public constructor(
+        xyGraphScope: XYGraphScope<Float, X>,
+        index: Int,
+        value: E
+    ) : this(
+        HorizontalPlanoConvexShape(xyGraphScope, index, value),
+        index,
+        value
+    )
+
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        val shapeWidth = size.width
+        val shapeHeight = size.height
+        val arcRadius = shapeHeight / 2
+
+        // Rendering negative values
+        val isInverted = value.x.end < value.x.start
+        // Required for proper bar rendering in waterfall charts
+        if (index == 0) {
+            val outline =
+                DefaultHorizontalBiConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
+
+            outline.path.apply {
+                // Rendering bar in negative direction
+                if (isInverted) {
+                    inverted(pivotX = shapeWidth / 2F, pivotY = shapeHeight / 2F)
+                }
+            }
+            return outline
+        }
+
+        val (xZeroOffset, xMinOffset, xMaxOffset) = xAxisModel.xOffsets(value.x.start, value.x.end)
+
+        // Prevent division by zero
+        return if (xMaxOffset == xMinOffset) {
+            Path().let(Outline::Generic)
+        } else {
+            // AxisModel's `computeOffset` method provides relative values between 0 and 1
+            // Mapping offset values to pixel values
+            val widthOffsetRatio = size.width / (xMaxOffset - xMinOffset)
+            val offsetToWidth = { offset: Float -> offset * widthOffsetRatio }
+
+            // Bars start with a concave path which might go below zero; the respective shape must be cut appropriately
+            // Calculating aforementioned offset values for a bar's max and min value relative to the axis zero line
+            val xMinZeroOffset = xMinOffset - xZeroOffset
+            // Getting screen's width pixel values from offsets
+            val xMinZeroWidth = offsetToWidth(xMinZeroOffset)
+
+            val outline = planoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
+
+            val cutoutRect = Path().apply {
+                addRect(
+                    rect = Rect(
+                        offset = Offset(-xMinZeroWidth, 0F),
+                        size = Size(arcRadius, shapeHeight)
+                    )
+                )
+            }
+            val cutoutArc = Path().apply {
+                addArc(
+                    oval = Rect(
+                        offset = Offset(-xMinZeroWidth, 0F),
+                        size = Size(shapeHeight, shapeHeight)
+                    ),
+                    startAngleDegrees = 90F,
+                    sweepAngleDegrees = 180F
+                )
+            }
+            val cutout = (cutoutRect - cutoutArc).apply {
+                // Rendering bar in negative direction
+                if (isInverted) {
+                    inverted(pivotX = shapeWidth / 2F, pivotY = shapeHeight / 2F)
+                }
+            }
+            (outline.path - cutout).let(Outline::Generic)
+        }
+    }
+}
+
 private fun Path.inverted(pivotX: Float, pivotY: Float): Path {
     Matrix().apply {
         resetToPivotedTransform(
@@ -320,6 +623,17 @@ private fun Path.inverted(pivotX: Float, pivotY: Float): Path {
         )
     }.let(::transform)
     return this
+}
+
+private fun AxisModel<Float>.xOffsets(xMin: Float, xMax: Float): XOffsets {
+    val xZeroOffset = computeOffset(0F).coerceIn(0F, 1F)
+    val xMinOffset = computeOffset(xMin).coerceIn(0f, 1f)
+    val xMaxOffset = computeOffset(xMax).coerceIn(0f, 1f)
+    return XOffsets(
+        xZeroOffset = xZeroOffset,
+        xMinOffset = xMinOffset,
+        xMaxOffset = xMaxOffset
+    )
 }
 
 private fun AxisModel<Float>.yOffsets(yMin: Float, yMax: Float): YOffsets {
@@ -332,6 +646,12 @@ private fun AxisModel<Float>.yOffsets(yMin: Float, yMax: Float): YOffsets {
         yMaxOffset = yMaxOffset
     )
 }
+
+private data class XOffsets(
+    val xZeroOffset: Float,
+    val xMinOffset: Float,
+    val xMaxOffset: Float
+)
 
 private data class YOffsets(
     val yZeroOffset: Float,

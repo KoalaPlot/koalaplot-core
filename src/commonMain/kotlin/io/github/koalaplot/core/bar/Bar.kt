@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
+import io.github.koalaplot.core.xygraph.XYGraphScope
 
 /**
  * A default implementation of a bar for bar charts.
@@ -54,10 +55,96 @@ public fun BarScope.DefaultBar(
 /**
  * Factory function to create a Composable that emits a solid colored bar.
  */
-public fun solidBar(
+@Deprecated(
+    message = "Delegates to vertical solid bar. Use explicitly dedicated factory function.",
+    replaceWith = ReplaceWith("verticalSolidBar(color, shape, border)")
+)
+public fun <X, Y> solidBar(
     color: Color,
     shape: Shape = RectangleShape,
     border: BorderStroke? = null,
-): @Composable BarScope.() -> Unit = {
+): DefaultVerticalBarComposable<X, Y> = verticalSolidBar(color, shape, border)
+
+/**
+ * Factory function to create a Composable that emits a solid colored bar.
+ */
+public fun <X, Y> verticalSolidBar(
+    color: Color,
+    shape: Shape = RectangleShape,
+    border: BorderStroke? = null,
+): DefaultVerticalBarComposable<X, Y> = { _, _, _ ->
     DefaultBar(SolidColor(color), shape = shape, border = border)
+}
+
+/**
+ * Factory function to create a Composable that emits a solid colored bar.
+ */
+public fun <X, Y> horizontalSolidBar(
+    color: Color,
+    shape: Shape = RectangleShape,
+    border: BorderStroke? = null,
+): DefaultHorizontalBarComposable<X, Y> = { _, _, _ ->
+    DefaultBar(SolidColor(color), shape = shape, border = border)
+}
+
+/**
+ * Factory function to create a Composable that emits a solid colored bar.
+ * The endings of each bar consist of a concave and a convex shape.
+ */
+public fun <X> XYGraphScope<X, Float>.verticalPlanoConvexBar(
+    color: Color,
+    border: BorderStroke? = null,
+): DefaultVerticalBarComposable<X, Float> = { _, index, value ->
+    DefaultBar(
+        brush = SolidColor(color),
+        shape = VerticalPlanoConvexShape(this@verticalPlanoConvexBar, index, value),
+        border = border
+    )
+}
+
+/**
+ * Factory function to create a Composable that emits a solid colored bar.
+ * The endings of each bar consist of a concave and a convex shape.
+ * There's an additional convex cutout at the bottom of the bar.
+ */
+public fun <X> XYGraphScope<X, Float>.verticalBiConvexBar(
+    color: Color,
+    border: BorderStroke? = null,
+): DefaultVerticalBarComposable<X, Float> = { _, index, value ->
+    DefaultBar(
+        brush = SolidColor(color),
+        shape = VerticalBiConvexShape(this@verticalBiConvexBar, index, value),
+        border = border
+    )
+}
+
+/**
+ * Factory function to create a Composable that emits a solid colored bar.
+ * The endings of each bar consist of a concave and a convex shape.
+ */
+public fun <X> XYGraphScope<Float, X>.horizontalPlanoConvexBar(
+    color: Color,
+    border: BorderStroke? = null,
+): DefaultHorizontalBarComposable<Float, X> = { _, index, value ->
+    DefaultBar(
+        brush = SolidColor(color),
+        shape = HorizontalPlanoConvexShape(this@horizontalPlanoConvexBar, index, value),
+        border = border
+    )
+}
+
+/**
+ * Factory function to create a Composable that emits a solid colored bar.
+ * The endings of each bar consist of a concave and a convex shape.
+ * There's an additional convex cutout at the bottom of the bar.
+ */
+public fun <X> XYGraphScope<Float, X>.horizontalBiConvexBar(
+    color: Color,
+    border: BorderStroke? = null,
+): DefaultHorizontalBarComposable<Float, X> = { _, index, value ->
+    DefaultBar(
+        brush = SolidColor(color),
+        shape = HorizontalBiConvexShape(this@horizontalBiConvexBar, index, value),
+        border = border
+    )
 }

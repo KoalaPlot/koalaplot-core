@@ -55,6 +55,14 @@ public fun <X, Y> horizontalBarPlotEntry(y: Y, xMin: X, xMax: X): HorizontalBarP
 public typealias HorizontalBarComposable<E> = @Composable BarScope.(series: Int, index: Int, value: E) -> Unit
 
 /**
+ * Defines a Composable function used to emit a horizontal bar for [HorizontalBarPlotEntry] values.
+ * Delegates to [HorizontalBarComposable] with [HorizontalBarPlotEntry] as type parameter.
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ */
+public typealias DefaultHorizontalBarComposable<X, Y> = HorizontalBarComposable<HorizontalBarPlotEntry<X, Y>>
+
+/**
  * A HorizontalBarPlot to be used in an XYGraph and that plots a single series of data points as horizontal bars.
  *
  * @param Y The type of the x-axis values
@@ -70,7 +78,7 @@ public fun <Y> XYGraphScope<Float, Y>.HorizontalBarPlot(
     xData: List<Float>,
     yData: List<Y>,
     modifier: Modifier = Modifier,
-    bar: @Composable BarScope.(index: Int) -> Unit,
+    bar: DefaultHorizontalBarComposable<Float, Y>,
     barWidth: Float = 0.9f,
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
@@ -106,7 +114,7 @@ public fun <Y> XYGraphScope<Float, Y>.HorizontalBarPlot(
 public fun <X, Y, E : HorizontalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.HorizontalBarPlot(
     data: List<E>,
     modifier: Modifier = Modifier,
-    bar: @Composable BarScope.(index: Int) -> Unit,
+    bar: DefaultHorizontalBarComposable<X, Y>,
     barWidth: Float = 0.9f,
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
@@ -122,8 +130,8 @@ public fun <X, Y, E : HorizontalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.Horizonta
     GroupedHorizontalBarPlot(
         dataAdapter,
         modifier = modifier,
-        bar = { dataIndex, _, _ ->
-            bar(dataIndex)
+        bar = { series, index, value ->
+            bar(series, index, GroupedEntryToHorizontalEntryAdapter(value))
         },
         maxBarGroupWidth = barWidth,
         startAnimationUseCase = startAnimationUseCase
@@ -151,6 +159,15 @@ private class HorizontalEntryToGroupedEntryAdapter<X, Y>(val entry: HorizontalBa
         }
 }
 
+internal class GroupedEntryToHorizontalEntryAdapter<X, Y>(
+    private val entry: BarPlotGroupedPointEntry<Y, X>
+) : HorizontalBarPlotEntry<X, Y> {
+    override val y: Y
+        get() = entry.i
+    override val x: BarPosition<X>
+        get() = entry.d.first()
+}
+
 /**
  * Creates a Horizontal Bar Plot.
  *
@@ -161,7 +178,7 @@ private class HorizontalEntryToGroupedEntryAdapter<X, Y>(val entry: HorizontalBa
  */
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
-    defaultBar: @Composable BarScope.() -> Unit = solidBar(Color.Blue),
+    defaultBar: DefaultHorizontalBarComposable<X, Y> = horizontalSolidBar(Color.Blue),
     modifier: Modifier = Modifier,
     barWidth: Float = 0.9f,
     startAnimationUseCase: StartAnimationUseCase =
@@ -172,7 +189,7 @@ public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
         ),
     content: HorizontalBarPlotScope<X, Y>.() -> Unit
 ) {
-    val scope = remember(content, defaultBar) { HorizontalBarPlotScopeImpl<X, Y>(defaultBar) }
+    val scope = remember(content, defaultBar) { HorizontalBarPlotScopeImpl(defaultBar) }
     val data = remember(scope) {
         scope.content()
         scope.data.values.toList()
@@ -181,8 +198,8 @@ public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
     HorizontalBarPlot(
         data.map { it.first },
         modifier,
-        {
-            data[it].second.invoke(this)
+        { series, index, value ->
+            data[index].second.invoke(this, series, index, value)
         },
         barWidth,
         startAnimationUseCase
@@ -198,15 +215,15 @@ public interface HorizontalBarPlotScope<X, Y> {
      * [xMin] to [xMax]. An optional [bar] can be provided to customize the Composable used to
      * generate the bar for this specific item.
      */
-    public fun item(y: Y, xMin: X, xMax: X, bar: (@Composable BarScope.() -> Unit)? = null)
+    public fun item(y: Y, xMin: X, xMax: X, bar: (DefaultHorizontalBarComposable<X, Y>)? = null)
 }
 
-internal class HorizontalBarPlotScopeImpl<X, Y>(private val defaultBar: @Composable BarScope.() -> Unit) :
+internal class HorizontalBarPlotScopeImpl<X, Y>(private val defaultBar: DefaultHorizontalBarComposable<X, Y>) :
     HorizontalBarPlotScope<X, Y> {
-    val data: MutableMap<Y, Pair<HorizontalBarPlotEntry<X, Y>, @Composable BarScope.() -> Unit>> =
+    val data: MutableMap<Y, Pair<HorizontalBarPlotEntry<X, Y>, DefaultHorizontalBarComposable<X, Y>>> =
         mutableMapOf()
 
-    override fun item(y: Y, xMin: X, xMax: X, bar: (@Composable BarScope.() -> Unit)?) {
+    override fun item(y: Y, xMin: X, xMax: X, bar: DefaultHorizontalBarComposable<X, Y>?) {
         data[y] = Pair(horizontalBarPlotEntry(y, xMin, xMax), bar ?: defaultBar)
     }
 }

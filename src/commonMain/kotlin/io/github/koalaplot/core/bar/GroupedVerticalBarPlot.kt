@@ -30,7 +30,7 @@ import io.github.koalaplot.core.xygraph.XYGraphScope
 public fun <X, Y, E : BarPlotGroupedPointEntry<X, Y>> XYGraphScope<X, Y>.GroupedVerticalBarPlot(
     data: List<E>,
     modifier: Modifier = Modifier,
-    bar: @Composable BarScope.(dataIndex: Int, groupIndex: Int, entry: E) -> Unit = { i, g, _ ->
+    bar: VerticalBarComposable<E> = { i, g, _ ->
         val colors = remember(data) {
             generateHueColorPalette(data.maxOf { it.d.size })
         }
@@ -97,7 +97,7 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedVerticalBarPlot(
 
     data class EntryWithBars<X, Y>(
         override val i: X,
-        val yb: List<Pair<BarPosition<Y>, @Composable BarScope.() -> Unit>>
+        val yb: List<Pair<BarPosition<Y>, DefaultVerticalBarComposable<X, Y>>>
     ) : BarPlotGroupedPointEntry<X, Y> {
         override val d: List<BarPosition<Y>> = object : AbstractList<BarPosition<Y>>() {
             override val size: Int = yb.size
@@ -131,8 +131,13 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedVerticalBarPlot(
     GroupedVerticalBarPlot(
         data,
         modifier,
-        { xIndex, seriesIndex, _ ->
-            data.data[xIndex].yb[seriesIndex].second.invoke(this)
+        { xIndex, seriesIndex, value ->
+            data.data[xIndex].yb[seriesIndex].second.invoke(
+                this,
+                xIndex,
+                seriesIndex,
+                GroupedEntryToVerticalEntryAdapter(value)
+            )
         },
         maxBarGroupWidth,
         startAnimationUseCase = startAnimationUseCase,
@@ -177,15 +182,18 @@ public interface GroupedVerticalBarPlotScope<X, Y> {
      * bars in this series.
      */
     public fun series(
-        defaultBar: @Composable BarScope.() -> Unit = solidBar(Color.Blue),
+        defaultBar: DefaultVerticalBarComposable<X, Y> = verticalSolidBar(Color.Blue),
         content: VerticalBarPlotScope<X, Y>.() -> Unit
     )
 }
 
 private class GroupedVerticalBarPlotScopeImpl<X, Y> : GroupedVerticalBarPlotScope<X, Y> {
     val series: MutableList<VerticalBarPlotScopeImpl<X, Y>> = mutableListOf()
-    override fun series(defaultBar: @Composable BarScope.() -> Unit, content: VerticalBarPlotScope<X, Y>.() -> Unit) {
-        val scope = VerticalBarPlotScopeImpl<X, Y>(defaultBar)
+    override fun series(
+        defaultBar: DefaultVerticalBarComposable<X, Y>,
+        content: VerticalBarPlotScope<X, Y>.() -> Unit
+    ) {
+        val scope = VerticalBarPlotScopeImpl(defaultBar)
         series.add(scope)
         scope.content()
     }
