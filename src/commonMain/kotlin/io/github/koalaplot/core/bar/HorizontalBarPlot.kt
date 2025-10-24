@@ -9,66 +9,66 @@ import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.xygraph.XYGraphScope
 
 /**
- * Default implementation of a BarChartEntry.
+ * Default implementation of a HorizontalBarPlotEntry
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values
  */
-public data class DefaultVerticalBarPlotEntry<X, Y>(
-    public override val x: X,
-    public override val y: BarPosition<Y>
-) : VerticalBarPlotEntry<X, Y>
+public data class DefaultHorizontalBarPlotEntry<X, Y>(
+    public override val y: Y,
+    public override val x: BarPosition<X>
+) : HorizontalBarPlotEntry<X, Y>
 
 /**
- * An interface that defines a data element to be plotted on a Bar chart.
+ * An interface that defines a data element to be plotted on a Horizontal bar chart.
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values
  */
-public interface VerticalBarPlotEntry<X, Y> {
+public interface HorizontalBarPlotEntry<X, Y> {
     /**
-     * X-axis value at which the bar should be plotted
+     * y-axis value at which the bar should be plotted
      */
-    public val x: X
+    public val y: Y
 
     /**
-     * The y-axis value for the bar.
+     * The x-axis value for the bar position.
      */
-    public val y: BarPosition<Y>
+    public val x: BarPosition<X>
 }
 
 /**
- * Convenience function for creating a VerticalBarPosition.
+ * Convenience function for creating a HorizontalBarPosition.
  */
-public fun <Y> verticalBarPosition(yMin: Y, yMax: Y): BarPosition<Y> = DefaultBarPosition(yMin, yMax)
+public fun <X> horizontalBarPosition(xMin: X, xMax: X): BarPosition<X> = DefaultBarPosition(xMin, xMax)
 
 /**
- * Convenience function for creating a VerticalBarPlotEntry.
+ * Convenience function for creating a HorizontalBarPlotEntry.
  */
-public fun <X, Y> verticalBarPlotEntry(x: X, yMin: Y, yMax: Y): VerticalBarPlotEntry<X, Y> =
-    DefaultVerticalBarPlotEntry(x, verticalBarPosition(yMin, yMax))
+public fun <X, Y> horizontalBarPlotEntry(y: Y, xMin: X, xMax: X): HorizontalBarPlotEntry<X, Y> =
+    DefaultHorizontalBarPlotEntry(y, horizontalBarPosition(xMin, xMax))
 
 /**
- * Defines a Composable function used to emit a vertical bar.
+ * Defines a Composable function used to emit a horizontal bar.
  * The parameter series is the chart data series index.
  * The parameter index is the element index within the series.
  * The parameter value is the value of the element.
  */
-public typealias VerticalBarComposable<E> = @Composable BarScope.(series: Int, index: Int, value: E) -> Unit
+public typealias HorizontalBarComposable<E> = @Composable BarScope.(series: Int, index: Int, value: E) -> Unit
 
 /**
- * A VerticalBarPlot to be used in an XYGraph and that plots a single series of data points as vertical bars.
+ * A HorizontalBarPlot to be used in an XYGraph and that plots a single series of data points as horizontal bars.
  *
- * @param X The type of the x-axis values
- * @param xData X-axis data points for where to plot the bars on the XYGraph. The size of xData and yData must match.
- * @param yData y-axis data points for each bar. Assumes each bar starts at 0.
+ * @param Y The type of the x-axis values
+ * @param xData x-axis data points for each bar. Assumes each bar starts at 0.
+ * @param yData y-axis data points for where to plot the bars on the XYGraph. The size of xData and yData must match.
  * @param bar Composable function to emit a bar for each data element, given the index of the point in the data and
  * the value of the data point.
  * @param barWidth The fraction of space between adjacent x-axis bars that may be used. Must be between 0 and 1,
  * defaults to 0.9.
  */
 @Composable
-public fun <X> XYGraphScope<X, Float>.VerticalBarPlot(
-    xData: List<X>,
-    yData: List<Float>,
+public fun <Y> XYGraphScope<Float, Y>.HorizontalBarPlot(
+    xData: List<Float>,
+    yData: List<Y>,
     modifier: Modifier = Modifier,
     bar: @Composable BarScope.(index: Int) -> Unit,
     barWidth: Float = 0.9f,
@@ -80,9 +80,9 @@ public fun <X> XYGraphScope<X, Float>.VerticalBarPlot(
         )
 ) {
     require(xData.size == yData.size) { "xData and yData must be the same size." }
-    VerticalBarPlot(
-        xData.mapIndexed { index, x ->
-            DefaultVerticalBarPlotEntry(x, DefaultBarPosition(0f, yData[index]))
+    HorizontalBarPlot(
+        yData.mapIndexed { index, y ->
+            DefaultHorizontalBarPlotEntry(y, DefaultBarPosition(0f, xData[index]))
         },
         modifier,
         bar,
@@ -92,7 +92,7 @@ public fun <X> XYGraphScope<X, Float>.VerticalBarPlot(
 }
 
 /**
- * A VerticalBarPlot to be used in an XYGraph and that plots data points as vertical bars.
+ * A HorizontalBarPlot to be used in an XYGraph and that plots data points as horizontal bars.
  *
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values
@@ -103,7 +103,7 @@ public fun <X> XYGraphScope<X, Float>.VerticalBarPlot(
  * defaults to 0.9.
  */
 @Composable
-public fun <X, Y, E : VerticalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.VerticalBarPlot(
+public fun <X, Y, E : HorizontalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.HorizontalBarPlot(
     data: List<E>,
     modifier: Modifier = Modifier,
     bar: @Composable BarScope.(index: Int) -> Unit,
@@ -116,11 +116,10 @@ public fun <X, Y, E : VerticalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.VerticalBar
         )
 ) {
     val dataAdapter = remember(data) {
-        VerticalEntryToGroupedEntryListAdapter(data)
+        HorizontalEntryToGroupedEntryListAdapter(data)
     }
 
-    // Delegate to the GroupedVerticalBarPlot - non-grouped is like grouped but with only 1 group per x-axis position
-    GroupedVerticalBarPlot(
+    GroupedHorizontalBarPlot(
         dataAdapter,
         modifier = modifier,
         bar = { dataIndex, _, _ ->
@@ -131,29 +130,29 @@ public fun <X, Y, E : VerticalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.VerticalBar
     )
 }
 
-private class VerticalEntryToGroupedEntryListAdapter<X, Y>(
-    val data: List<VerticalBarPlotEntry<X, Y>>
-) : AbstractList<BarPlotGroupedPointEntry<X, Y>>() {
+private class HorizontalEntryToGroupedEntryListAdapter<X, Y>(
+    val data: List<HorizontalBarPlotEntry<X, Y>>
+) : AbstractList<BarPlotGroupedPointEntry<Y, X>>() {
     override val size: Int
         get() = data.size
 
-    override fun get(index: Int): BarPlotGroupedPointEntry<X, Y> {
-        return VerticalEntryToGroupedEntryAdapter(data[index])
+    override fun get(index: Int): BarPlotGroupedPointEntry<Y, X> {
+        return HorizontalEntryToGroupedEntryAdapter(data[index])
     }
 }
 
-private class VerticalEntryToGroupedEntryAdapter<X, Y>(val entry: VerticalBarPlotEntry<X, Y>) :
-    BarPlotGroupedPointEntry<X, Y> {
-    override val i: X = entry.x
-    override val d: List<BarPosition<Y>>
-        get() = object : AbstractList<BarPosition<Y>>() {
+private class HorizontalEntryToGroupedEntryAdapter<X, Y>(val entry: HorizontalBarPlotEntry<X, Y>) :
+    BarPlotGroupedPointEntry<Y, X> {
+    override val i: Y = entry.y
+    override val d: List<BarPosition<X>>
+        get() = object : AbstractList<BarPosition<X>>() {
             override val size: Int = 1
-            override fun get(index: Int): BarPosition<Y> = entry.y
+            override fun get(index: Int): BarPosition<X> = entry.x
         }
 }
 
 /**
- * Creates a Vertical Bar Plot.
+ * Creates a Horizontal Bar Plot.
  *
  * @param defaultBar A Composable to provide the bar if not specified on an individually added item.
  * @param barWidth The fraction of space between adjacent x-axis bars that may be used. Must be between 0 and 1,
@@ -161,7 +160,7 @@ private class VerticalEntryToGroupedEntryAdapter<X, Y>(val entry: VerticalBarPlo
  * @param content A block which describes the content for the plot.
  */
 @Composable
-public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot(
+public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
     defaultBar: @Composable BarScope.() -> Unit = solidBar(Color.Blue),
     modifier: Modifier = Modifier,
     barWidth: Float = 0.9f,
@@ -171,15 +170,15 @@ public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot(
             /* chart animation */
             KoalaPlotTheme.animationSpec,
         ),
-    content: VerticalBarPlotScope<X, Y>.() -> Unit
+    content: HorizontalBarPlotScope<X, Y>.() -> Unit
 ) {
-    val scope = remember(content, defaultBar) { VerticalBarPlotScopeImpl<X, Y>(defaultBar) }
+    val scope = remember(content, defaultBar) { HorizontalBarPlotScopeImpl<X, Y>(defaultBar) }
     val data = remember(scope) {
         scope.content()
         scope.data.values.toList()
     }
 
-    VerticalBarPlot(
+    HorizontalBarPlot(
         data.map { it.first },
         modifier,
         {
@@ -191,23 +190,23 @@ public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot(
 }
 
 /**
- * Scope item to allow adding items to a [VerticalBarPlot].
+ * Scope item to allow adding items to a [HorizontalBarPlot].
  */
-public interface VerticalBarPlotScope<X, Y> {
+public interface HorizontalBarPlotScope<X, Y> {
     /**
-     * Adds an item at the specified [x] axis coordinate, with vertical extent spanning from
-     * [yMin] to [yMax]. An optional [bar] can be provided to customize the Composable used to
+     * Adds an item at the specified [y] axis coordinate, with horizontal extent spanning from
+     * [xMin] to [xMax]. An optional [bar] can be provided to customize the Composable used to
      * generate the bar for this specific item.
      */
-    public fun item(x: X, yMin: Y, yMax: Y, bar: (@Composable BarScope.() -> Unit)? = null)
+    public fun item(y: Y, xMin: X, xMax: X, bar: (@Composable BarScope.() -> Unit)? = null)
 }
 
-internal class VerticalBarPlotScopeImpl<X, Y>(private val defaultBar: @Composable BarScope.() -> Unit) :
-    VerticalBarPlotScope<X, Y> {
-    val data: MutableMap<X, Pair<VerticalBarPlotEntry<X, Y>, @Composable BarScope.() -> Unit>> =
+internal class HorizontalBarPlotScopeImpl<X, Y>(private val defaultBar: @Composable BarScope.() -> Unit) :
+    HorizontalBarPlotScope<X, Y> {
+    val data: MutableMap<Y, Pair<HorizontalBarPlotEntry<X, Y>, @Composable BarScope.() -> Unit>> =
         mutableMapOf()
 
-    override fun item(x: X, yMin: Y, yMax: Y, bar: (@Composable BarScope.() -> Unit)?) {
-        data[x] = Pair(verticalBarPlotEntry(x, yMin, yMax), bar ?: defaultBar)
+    override fun item(y: Y, xMin: X, xMax: X, bar: (@Composable BarScope.() -> Unit)?) {
+        data[y] = Pair(horizontalBarPlotEntry(y, xMin, xMax), bar ?: defaultBar)
     }
 }
