@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html class="no-js">
+<html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>XYGraphScope</title>
     <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
-    <script>var pathToRoot = "../../../";</script>
-    <script>document.documentElement.classList.replace("no-js","js");</script>
+        <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
-    if (storage == null) {
+      if (storage == null) {
         const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
         if (osDarkSchemePreferred === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    } else {
+      } else {
         const savedDarkMode = JSON.parse(storage)
-        if(savedDarkMode === true) {
-            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
         }
-    }
+      }
     </script>
 <script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
@@ -25,22 +25,20 @@
 <link href="../../../styles/main.css" rel="Stylesheet">
 <link href="../../../styles/prism.css" rel="Stylesheet">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
 <link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
 <script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
 <script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer="defer"></script>
-<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
 <link href="../../../images/logo-icon.svg">
 <link href="../../../styles/logo-styles.css" rel="Stylesheet">
 </head>
 <body>
-    <div class="root">
-    <nav class="navigation theme-dark" id="navigation-wrapper">
-            <a class="library-name--link" href="../../../index.html">
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+            <a class="library-name--link" href="../../../index.html" tabindex="1">
                     Koala Plot Core
             </a>
         <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle"
@@ -50,8 +48,8 @@
         <div class="library-version" id="library-version">
 0.10.0-dev        </div>
         <div class="navigation-controls">
-        <div class="filter-section filter-section_loading" id="filter-section">
-                <button class="platform-tag platform-selector common-like" data-active=""
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true"
                         data-filter=":/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox"
@@ -61,9 +59,9 @@
                         aria-expanded="false"
                         aria-label="Toggle source sets"
                 ></button>
-                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox">
-                    <div class="dropdown--header"><span>Platform filter</span>
-                        <button class="button" data-role="dropdown-toggle" aria-label="Close platform filter">
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
@@ -78,7 +76,7 @@
                 </ul>
                 <div class="dropdown--overlay"></div>
             </div>
-        </div>
+        </ul>
             <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button"
                     type="button">Switch theme
             </button>
@@ -86,39 +84,41 @@
                 API
             </div>
         </div>
-    </nav>
-        <div id="container">
-            <div class="sidebar" id="leftColumn">
-                <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
-                    <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
-                        data-role="dropdown-listbox">
-                        <div class="dropdown--header">
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config='{"defaultSize": 280, "minSize": 200, "maxSize": 400}'>
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list"
+                    data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
                             <span>
                                     Koala Plot Core
                             </span>
-                            <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
-                                <i class="ui-kit-icon ui-kit-icon_cross"></i>
-                            </button>
-                        </div>
-                        <div class="sidebar--inner" id="sideMenu"></div>
-                    </ul>
-                    <div class="dropdown--overlay"></div>
-                </div>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
             </div>
-            <div id="main">
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
 <div class="main-content" data-page-type="classlike" id="content" pageIds="Koala Plot Core::io.github.koalaplot.core.xygraph/XYGraphScope///PointingToDeclaration//1558683979">
   <div class="breadcrumbs"><a href="../../../index.html">Koala Plot Core</a><span class="delimiter">/</span><a href="../index.html">io.github.koalaplot.core.xygraph</a><span class="delimiter">/</span><span class="current">XYGraphScope</span></div>
   <div class="cover ">
     <h1 class="cover"><span>XYGraph</span><wbr></wbr><span><span>Scope</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><a href="index.html">X</a><span class="token punctuation">, </span><a href="index.html">Y</a><span class="token operator">&gt;</span> : <a href="../../io.github.koalaplot.core.util/-hoverable-element-area-scope/index.html">HoverableElementAreaScope</a></div><p class="paragraph">A scope for XY plots providing axis and state context.</p><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.koalaplot.core.bar/-vertical-plano-convex-shape/index.html">VerticalPlanoConvexShape</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.koalaplot.core.bar/-horizontal-plano-convex-shape/index.html">HorizontalPlanoConvexShape</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.koalaplot.core.bar/-vertical-bi-convex-shape/index.html">VerticalBiConvexShape</a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.koalaplot.core.bar/-horizontal-bi-convex-shape/index.html">HorizontalBiConvexShape</a></div></span></div><div></div></div></div></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">XYGraphScope</a><span class="token operator">&lt;</span><a href="index.html">X</a><span class="token punctuation">, </span><a href="index.html">Y</a><span class="token operator">&gt;</span> : <a href="../../io.github.koalaplot.core.util/-hoverable-element-area-scope/index.html">HoverableElementAreaScope</a></div><p class="paragraph">A scope for XY plots providing axis and state context.</p><h4 class="tableheader">Inheritors</h4><div class="table"><div class="table-row table-row_content" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.koalaplot.core.bar/-vertical-plano-convex-shape/index.html">VerticalPlanoConvexShape</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.koalaplot.core.bar/-horizontal-plano-convex-shape/index.html">HorizontalPlanoConvexShape</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.koalaplot.core.bar/-vertical-bi-convex-shape/index.html">VerticalBiConvexShape</a></div></span></div><div></div></div></div><div class="table-row table-row_content" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../io.github.koalaplot.core.bar/-horizontal-bi-convex-shape/index.html">HorizontalBiConvexShape</a></div></span></div><div></div></div></div></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
     <div class="tabs-section-body">
       <div data-togglable="PROPERTY">
-        <h2 class="">Properties</h2>
+        <h2 class="tableheader">Properties</h2>
         <div class="table"><a data-name="899925688%2FProperties%2F1558683979" anchor-label="xAxisModel" id="899925688%2FProperties%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="x-axis-model.html"><span>x</span><wbr></wbr><span>Axis</span><wbr></wbr><span><span>Model</span></span></a></div>
@@ -133,7 +133,7 @@
             </div>
           </div>
 <a data-name="-2070224304%2FProperties%2F1558683979" anchor-label="xAxisState" id="-2070224304%2FProperties%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="x-axis-state.html"><span>x</span><wbr></wbr><span>Axis</span><wbr></wbr><span><span>State</span></span></a></div>
@@ -148,7 +148,7 @@
             </div>
           </div>
 <a data-name="-1669560711%2FProperties%2F1558683979" anchor-label="yAxisModel" id="-1669560711%2FProperties%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="y-axis-model.html"><span>y</span><wbr></wbr><span>Axis</span><wbr></wbr><span><span>Model</span></span></a></div>
@@ -163,7 +163,7 @@
             </div>
           </div>
 <a data-name="-344743407%2FProperties%2F1558683979" anchor-label="yAxisState" id="-344743407%2FProperties%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="y-axis-state.html"><span>y</span><wbr></wbr><span>Axis</span><wbr></wbr><span><span>State</span></span></a></div>
@@ -180,9 +180,9 @@
         </div>
       </div>
       <div data-togglable="FUNCTION">
-        <h2 class="">Functions</h2>
+        <h2 class="tableheader">Functions</h2>
         <div class="table"><a data-name="207543377%2FFunctions%2F1558683979" anchor-label="AreaPlot" id="207543377%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.line/-area-plot.html"><span>Area</span><wbr></wbr><span><span>Plot</span></span></a></div>
@@ -197,7 +197,7 @@
             </div>
           </div>
 <a data-name="776639936%2FFunctions%2F1558683979" anchor-label="GroupedHorizontalBarPlot" id="776639936%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.bar/-grouped-horizontal-bar-plot.html"><span>Grouped</span><wbr></wbr><span>Horizontal</span><wbr></wbr><span>Bar</span><wbr></wbr><span><span>Plot</span></span></a></div>
@@ -224,7 +224,7 @@
             </div>
           </div>
 <a data-name="-84091246%2FFunctions%2F1558683979" anchor-label="GroupedVerticalBarPlot" id="-84091246%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.bar/-grouped-vertical-bar-plot.html"><span>Grouped</span><wbr></wbr><span>Vertical</span><wbr></wbr><span>Bar</span><wbr></wbr><span><span>Plot</span></span></a></div>
@@ -251,7 +251,7 @@
             </div>
           </div>
 <a data-name="218281193%2FFunctions%2F1558683979" anchor-label="HorizontalBarPlot" id="218281193%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.bar/-horizontal-bar-plot.html"><span>Horizontal</span><wbr></wbr><span>Bar</span><wbr></wbr><span><span>Plot</span></span></a></div>
@@ -278,7 +278,7 @@
             </div>
           </div>
 <a data-name="-848124325%2FFunctions%2F1558683979" anchor-label="horizontalBiConvexBar" id="-848124325%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.bar/horizontal-bi-convex-bar.html"><span>horizontal</span><wbr></wbr><span>Bi</span><wbr></wbr><span>Convex</span><wbr></wbr><span><span>Bar</span></span></a></div>
@@ -293,7 +293,7 @@
             </div>
           </div>
 <a data-name="-922513297%2FFunctions%2F1558683979" anchor-label="HorizontalLineAnnotation" id="-922513297%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-horizontal-line-annotation.html"><span>Horizontal</span><wbr></wbr><span>Line</span><wbr></wbr><span><span>Annotation</span></span></a></div>
@@ -308,7 +308,7 @@
             </div>
           </div>
 <a data-name="-1750196376%2FFunctions%2F1558683979" anchor-label="horizontalPlanoConvexBar" id="-1750196376%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.bar/horizontal-plano-convex-bar.html"><span>horizontal</span><wbr></wbr><span>Plano</span><wbr></wbr><span>Convex</span><wbr></wbr><span><span>Bar</span></span></a></div>
@@ -323,7 +323,7 @@
             </div>
           </div>
 <a data-name="1736316809%2FFunctions%2F1558683979" anchor-label="hoverableElement" id="1736316809%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.util/-hoverable-element-area-scope/hoverable-element.html"><span>hoverable</span><wbr></wbr><span><span>Element</span></span></a></div>
@@ -338,7 +338,7 @@
             </div>
           </div>
 <a data-name="1115549521%2FFunctions%2F1558683979" anchor-label="LinePlot" id="1115549521%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.line/-line-plot.html"><span>Line</span><wbr></wbr><span><span>Plot</span></span></a></div>
@@ -353,7 +353,7 @@
             </div>
           </div>
 <a data-name="-1620878309%2FFunctions%2F1558683979" anchor-label="scale" id="-1620878309%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="scale.html"><span><span>scale</span></span></a></div>
@@ -368,7 +368,7 @@
             </div>
           </div>
 <a data-name="381261771%2FFunctions%2F1558683979" anchor-label="StackedAreaPlot" id="381261771%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.line/-stacked-area-plot.html"><span>Stacked</span><wbr></wbr><span>Area</span><wbr></wbr><span><span>Plot</span></span></a></div>
@@ -383,7 +383,7 @@
             </div>
           </div>
 <a data-name="-2024462975%2FFunctions%2F1558683979" anchor-label="StackedHorizontalBarPlot" id="-2024462975%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.bar/-stacked-horizontal-bar-plot.html"><span>Stacked</span><wbr></wbr><span>Horizontal</span><wbr></wbr><span>Bar</span><wbr></wbr><span><span>Plot</span></span></a></div>
@@ -406,7 +406,7 @@
             </div>
           </div>
 <a data-name="-1444237157%2FFunctions%2F1558683979" anchor-label="StackedVerticalBarPlot" id="-1444237157%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.bar/-stacked-vertical-bar-plot.html"><span>Stacked</span><wbr></wbr><span>Vertical</span><wbr></wbr><span>Bar</span><wbr></wbr><span><span>Plot</span></span></a></div>
@@ -429,7 +429,7 @@
             </div>
           </div>
 <a data-name="1520220491%2FFunctions%2F1558683979" anchor-label="StairstepPlot" id="1520220491%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.line/-stairstep-plot.html"><span>Stairstep</span><wbr></wbr><span><span>Plot</span></span></a></div>
@@ -444,7 +444,7 @@
             </div>
           </div>
 <a data-name="1206329617%2FFunctions%2F1558683979" anchor-label="VerticalBarPlot" id="1206329617%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.bar/-vertical-bar-plot.html"><span>Vertical</span><wbr></wbr><span>Bar</span><wbr></wbr><span><span>Plot</span></span></a></div>
@@ -471,7 +471,7 @@
             </div>
           </div>
 <a data-name="1252142713%2FFunctions%2F1558683979" anchor-label="verticalBiConvexBar" id="1252142713%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.bar/vertical-bi-convex-bar.html"><span>vertical</span><wbr></wbr><span>Bi</span><wbr></wbr><span>Convex</span><wbr></wbr><span><span>Bar</span></span></a></div>
@@ -486,7 +486,7 @@
             </div>
           </div>
 <a data-name="-172171427%2FFunctions%2F1558683979" anchor-label="VerticalLineAnnotation" id="-172171427%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-vertical-line-annotation.html"><span>Vertical</span><wbr></wbr><span>Line</span><wbr></wbr><span><span>Annotation</span></span></a></div>
@@ -501,7 +501,7 @@
             </div>
           </div>
 <a data-name="-352063766%2FFunctions%2F1558683979" anchor-label="verticalPlanoConvexBar" id="-352063766%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../../io.github.koalaplot.core.bar/vertical-plano-convex-bar.html"><span>vertical</span><wbr></wbr><span>Plano</span><wbr></wbr><span>Convex</span><wbr></wbr><span><span>Bar</span></span></a></div>
@@ -516,7 +516,7 @@
             </div>
           </div>
 <a data-name="-835640208%2FFunctions%2F1558683979" anchor-label="XYAnnotation" id="-835640208%2FFunctions%2F1558683979" data-filterable-set=":/commonMain"></a>
-          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
+          <div class="table-row table-row_content" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":/commonMain" data-filterable-set=":/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
                   <div><a href="../-x-y-annotation.html"><span><span>XYAnnotation</span></span></a></div>
@@ -536,17 +536,21 @@
   </div>
 </div>
     <div class="footer">
-        <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
-        <span>© 2025 Copyright</span>
-        <span class="pull-right">
-            <span>Generated by </span>
-            <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
-                <span>dokka</span>
-            </a>
-        </span>
-    </div>
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2025 Copyright</div>
+                </div>
             </div>
         </div>
     </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
