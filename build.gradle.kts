@@ -103,7 +103,7 @@ kotlin {
 
 android {
     namespace = "io.github.koalaplot"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 23

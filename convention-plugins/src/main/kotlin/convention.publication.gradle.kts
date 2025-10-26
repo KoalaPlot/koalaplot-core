@@ -37,26 +37,16 @@ val javadocJar by tasks.registering(Jar::class) {
 
 fun getExtraString(name: String) = ext[name]?.toString()
 
-val isMac = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
-
-// When on MacOS, only publish ios artifacts
 tasks.withType<AbstractPublishToMaven>().configureEach {
-    onlyIf {
-        (isMac && name.contains("ios", ignoreCase = true)) || !isMac || name.endsWith("ToMavenLocal")
-    }
-
     // Fix errors related to declared dependencies between publishing tasks and signing tasks
     dependsOn.add("signAndroidReleasePublication")
     dependsOn.add("signJsPublication")
     dependsOn.add("signDesktopPublication")
     dependsOn.add("signKotlinMultiplatformPublication")
     dependsOn.add("signWasmJsPublication")
-
-    if (name.contains("ios", ignoreCase = true)) {
-        dependsOn.add("signIosArm64Publication")
-        dependsOn.add("signIosSimulatorArm64Publication")
-        dependsOn.add("signIosX64Publication")
-    }
+    dependsOn.add("signIosArm64Publication")
+    dependsOn.add("signIosSimulatorArm64Publication")
+    dependsOn.add("signIosX64Publication")
 }
 
 publishing {
@@ -67,8 +57,10 @@ publishing {
         // Provide artifacts information required by Maven Central
         pom {
             name.set("koalaplot-core")
-            description.set("Koala Plot is a Compose Multiplatform based charting and " +
-                    "plotting library written in Kotlin")
+            description.set(
+                "Koala Plot is a Compose Multiplatform based charting and " +
+                    "plotting library written in Kotlin"
+            )
             url.set("https://github.com/KoalaPlot/koalaplot-core")
 
             licenses {

@@ -15,7 +15,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Update dependencies: Compose to 1.8.2, Kotlin to 2.2.10
+- Update dependencies: Compose to 1.9.1, Kotlin to 2.2.21, agp to 8.13.0, android compile sdk to 36
 - VerticalBarPosition renamed to BarPosition
 - DefaultVerticalBarPosition renamed to DefaultBarPosition
 - DefaultVerticalBar renamed to DefaultBar
