@@ -30,7 +30,7 @@ import io.github.koalaplot.core.xygraph.XYGraphScope
 public fun <X, Y, E : BarPlotGroupedPointEntry<Y, X>> XYGraphScope<X, Y>.GroupedHorizontalBarPlot(
     data: List<E>,
     modifier: Modifier = Modifier,
-    bar: @Composable BarScope.(dataIndex: Int, groupIndex: Int, entry: E) -> Unit = { i, g, _ ->
+    bar: HorizontalBarComposable<E> = { i, g, _ ->
         val colors = remember(data) {
             generateHueColorPalette(data.maxOf { it.d.size })
         }
@@ -97,7 +97,7 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedHorizontalBarPlot(
 
     data class EntryWithBars<X, Y>(
         override val i: Y,
-        val xb: List<Pair<BarPosition<X>, @Composable BarScope.() -> Unit>>
+        val xb: List<Pair<BarPosition<X>, DefaultHorizontalBarComposable<X, Y>>>
     ) : BarPlotGroupedPointEntry<Y, X> {
         override val d: List<BarPosition<X>> = object : AbstractList<BarPosition<X>>() {
             override val size: Int = xb.size
@@ -131,8 +131,13 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedHorizontalBarPlot(
     GroupedHorizontalBarPlot(
         data,
         modifier,
-        { xIndex, seriesIndex, _ ->
-            data.data[xIndex].xb[seriesIndex].second.invoke(this)
+        { xIndex, seriesIndex, value ->
+            data.data[xIndex].xb[seriesIndex].second.invoke(
+                this,
+                xIndex,
+                seriesIndex,
+                GroupedEntryToHorizontalEntryAdapter(value)
+            )
         },
         maxBarGroupWidth,
         startAnimationUseCase = startAnimationUseCase,
@@ -180,15 +185,18 @@ public interface GroupedHorizontalBarPlotScope<X, Y> {
      * bars in this series.
      */
     public fun series(
-        defaultBar: @Composable BarScope.() -> Unit = solidBar(Color.Blue),
+        defaultBar: DefaultHorizontalBarComposable<X, Y> = horizontalSolidBar(Color.Blue),
         content: HorizontalBarPlotScope<X, Y>.() -> Unit
     )
 }
 
 private class GroupedHorizontalBarPlotScopeImpl<X, Y> : GroupedHorizontalBarPlotScope<X, Y> {
     val series: MutableList<HorizontalBarPlotScopeImpl<X, Y>> = mutableListOf()
-    override fun series(defaultBar: @Composable BarScope.() -> Unit, content: HorizontalBarPlotScope<X, Y>.() -> Unit) {
-        val scope = HorizontalBarPlotScopeImpl<X, Y>(defaultBar)
+    override fun series(
+        defaultBar: DefaultHorizontalBarComposable<X, Y>,
+        content: HorizontalBarPlotScope<X, Y>.() -> Unit
+    ) {
+        val scope = HorizontalBarPlotScopeImpl(defaultBar)
         series.add(scope)
         scope.content()
     }

@@ -29,7 +29,7 @@ class VerticalBarChartTest {
                             DefaultBarPosition(0f, 10f)
                         )
                     ),
-                    bar = {}
+                    bar = { _, _, _ -> }
                 )
             }
         }
