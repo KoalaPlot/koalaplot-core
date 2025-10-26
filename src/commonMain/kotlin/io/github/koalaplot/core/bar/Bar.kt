@@ -89,7 +89,7 @@ public fun <X, Y> horizontalSolidBar(
 
 /**
  * Factory function to create a Composable that emits a solid colored bar.
- * The endings of each bar consist of a concave and a convex shape.
+ * Each bar features a planar starting side and a convex ending side.
  */
 public fun <X> XYGraphScope<X, Float>.verticalPlanoConvexBar(
     color: Color,
@@ -104,7 +104,7 @@ public fun <X> XYGraphScope<X, Float>.verticalPlanoConvexBar(
 
 /**
  * Factory function to create a Composable that emits a solid colored bar.
- * The endings of each bar consist of a concave and a convex shape.
+ * Each bar features a convex shape on both its starting and ending sides.
  * There's an additional convex cutout at the bottom of the bar.
  */
 public fun <X> XYGraphScope<X, Float>.verticalBiConvexBar(
@@ -120,7 +120,7 @@ public fun <X> XYGraphScope<X, Float>.verticalBiConvexBar(
 
 /**
  * Factory function to create a Composable that emits a solid colored bar.
- * The endings of each bar consist of a concave and a convex shape.
+ * Each bar features a planar shape at one end and a convex shape at the other.
  */
 public fun <X> XYGraphScope<Float, X>.horizontalPlanoConvexBar(
     color: Color,
@@ -135,7 +135,7 @@ public fun <X> XYGraphScope<Float, X>.horizontalPlanoConvexBar(
 
 /**
  * Factory function to create a Composable that emits a solid colored bar.
- * The endings of each bar consist of a concave and a convex shape.
+ * Each bar features a convex shape on both its starting and ending sides.
  * There's an additional convex cutout at the bottom of the bar.
  */
 public fun <X> XYGraphScope<Float, X>.horizontalBiConvexBar(

@@ -170,7 +170,7 @@ private val DefaultHorizontalBiConvexShape: Shape = object : Shape {
 }
 
 /**
- * Rectangle shape with concave/convex shaped sides.
+ * Rectangle shape with planar/convex shaped sides.
  * Useful for Single Vertical Bar and Stacked Bars Plot rendering.
  *
  * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
@@ -286,7 +286,7 @@ public class VerticalPlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
 }
 
 /**
- * Rectangle shape with concave/convex shaped sides.
+ * Rectangle shape with planar/convex shaped sides.
  * Useful for Single Horizontal Bar and Stacked Bars Plot rendering.
  *
  * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
@@ -407,7 +407,7 @@ public class HorizontalPlanoConvexShape<X, E : HorizontalBarPlotEntry<Float, X>>
 }
 
 /**
- * Rectangle shape with concave/convex shaped sides and additional convex cutout at the bottom.
+ * Rectangle shape with convex shaped sides and an additional convex cutout at the bottom.
  * Useful for Single Vertical Bar and Stacked Bars Plot rendering.
  *
  * Primary constructor:
@@ -510,7 +510,7 @@ public class VerticalBiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> privat
 }
 
 /**
- * Rectangle shape with concave/convex shaped sides and additional convex cutout at the bottom.
+ * Rectangle shape with convex shaped sides and an additional convex cutout at the bottom.
  * Useful for Single Horizontal Bar and Stacked Bars Plot rendering.
  *
  * Primary constructor:
