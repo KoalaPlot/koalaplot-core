@@ -21,12 +21,84 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.deg
+import io.github.koalaplot.core.util.min
+import io.github.koalaplot.core.util.moveTo
 import io.github.koalaplot.core.util.polarToCartesian
 import io.github.koalaplot.core.util.rad
 import io.github.koalaplot.core.util.toDegrees
+import io.github.koalaplot.core.util.toRadians
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.max
+import kotlin.math.sin
+
+/**
+ * A semicircle shaped pie chart slice implementation that can form full slices as well as slices
+ * with a "hole" for donut charts. Each slice features a convex shape on both its starting and ending sides.
+ *
+ * It is intended to be used in donut charts where the holeSize is significantly greater than 0;
+ * otherwise, the resulting slice shape may appear visually unbalanced.
+ *
+ * @receiver Provides drawing and interaction parameters for the slice scope
+ * @param color The Color of the Slice
+ * @param modifier The modifier to be applied to this item
+ * @param hoverElement Content to show when the mouse/pointer hovers over the slice
+ * @param clickable If clicking should be enabled.
+ * @param antiAlias Set to true if the slice should be drawn with anti-aliasing, false otherwise
+ * @param gap Specifies the gap between slices. It is the angular distance, in degrees, between the
+ * start/stop values the slice represents and where the slice is actually drawn. Cannot be negative.
+ * @param onClick handler of clicks on the slice
+ */
+@ExperimentalKoalaPlotApi
+@Composable
+public fun PieSliceScope.BiConvexSlice(
+    color: Color,
+    modifier: Modifier = Modifier,
+    hoverElement: @Composable () -> Unit = {},
+    clickable: Boolean = false,
+    antiAlias: Boolean = false,
+    gap: Float = 0.0f,
+    onClick: () -> Unit = {}
+) {
+    require(gap >= 0F) { "gap cannot be negative" }
+    val shape = BiConvexSlice(
+        pieSliceData.startAngle.toDegrees().value.toFloat() + gap,
+        pieSliceData.angle.toDegrees().value.toFloat() - 2 * gap,
+        innerRadius,
+        outerRadius
+    )
+
+    Box(
+        modifier = modifier.fillMaxSize()
+            .drawWithContent {
+                drawIntoCanvas {
+                    val path = (shape.createOutline(size, layoutDirection, this) as Outline.Generic).path
+
+                    // draw slice
+                    it.drawPath(
+                        path,
+                        Paint().apply {
+                            isAntiAlias = antiAlias
+                            this.color = color
+                        }
+                    )
+                }
+                drawContent()
+            }.clip(shape)
+            .then(
+                if (clickable) {
+                    Modifier.clickable(
+                        enabled = true,
+                        role = Role.Button,
+                        onClick = onClick
+                    )
+                } else {
+                    Modifier
+                }
+            )
+            .hoverableElement(hoverElement)
+    ) {}
+}
 
 /**
  * A semicircle shaped pie chart slice implementation that can form full slices as well as slices
@@ -91,6 +163,109 @@ public fun PieSliceScope.ConcaveConvexSlice(
             )
             .hoverableElement(hoverElement)
     ) {}
+}
+
+/**
+ * Creates a pie chart slice shape with a total angular extent of [angle] degrees with an
+ * optional holeSize that is specified as a percentage of the overall slice radius.
+ * The pie diameter is equal to the Shape's size width. The slice is positioned with its vertex
+ * at the center.
+ *
+ * Each slice features a convex shape on both its starting and ending sides.
+ * For very small values, the slice gradually transitions into a shrinking circle to ensure accurate rendering
+ * and maintain the intended visual appearance.
+ */
+private class BiConvexSlice(
+    private val startAngle: Float,
+    private val angle: Float,
+    private val innerRadius: Float = 0.5F,
+    private val outerRadius: Float = 1.0F
+) : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        val radius = size.width / 2F * outerRadius
+        val holeRadius = size.width / 2F * innerRadius
+        val center = Offset(size.width / 2F, size.width / 2F)
+
+        val innerRect = Rect(center, holeRadius)
+        val outerRect = Rect(center, radius)
+
+        // Gap can lead to negative sweep angle which causes rendering issues
+        val sweepAngle = max(0F, angle)
+        val innerCircleRadius = (radius - holeRadius) / 2F
+        val innerCircleCenterRadius = (radius + holeRadius) / 2F
+
+        val innerCircleDegrees =
+            asin(innerCircleRadius / innerCircleCenterRadius).rad.toDegrees().value.toFloat()
+
+        val outerPieSweepAngle = max(sweepAngle - 2 * innerCircleDegrees, 0F)
+        val outerPie = Path().apply {
+            moveTo(center)
+            arcTo(
+                rect = outerRect,
+                startAngleDegrees = startAngle + innerCircleDegrees,
+                sweepAngleDegrees = outerPieSweepAngle,
+                forceMoveTo = false
+            )
+        }
+
+        val innerPieSweepAngle = max(sweepAngle - 2 * innerCircleDegrees, 0F)
+        val innerPie = Path().apply {
+            moveTo(center)
+            arcTo(
+                rect = innerRect,
+                startAngleDegrees = startAngle + innerCircleDegrees,
+                sweepAngleDegrees = innerPieSweepAngle,
+                forceMoveTo = false
+            )
+        }
+
+        // The following calculations ensure that for very small sweep angles (thin slices),
+        // the donut slice gradually transitions into a smaller circular shape.
+        // This prevents rendering artifacts and keeps the shape visually consistent.
+        // As a result, the slice consists of two convex arcs forming a smooth circular shape.
+        val maxInnerCircleRadius =
+            sin((sweepAngle / 2).deg.toRadians().value).toFloat() * innerCircleCenterRadius
+
+        val resultingInnerCircleRadius =
+            min(innerCircleRadius, maxInnerCircleRadius)
+
+        val resultingInnerCircleDegrees =
+            min(innerCircleDegrees, sweepAngle / 2)
+
+        val convexPaths = Path().apply {
+            addArc(
+                oval = Rect(
+                    center = center + polarToCartesian(
+                        radius = innerCircleCenterRadius,
+                        angle = (startAngle + resultingInnerCircleDegrees).deg
+                    ),
+                    radius = resultingInnerCircleRadius
+                ),
+                startAngleDegrees = startAngle + resultingInnerCircleDegrees,
+                sweepAngleDegrees = -InnerCircleSweepAngleDegrees
+            )
+            addArc(
+                oval = Rect(
+                    center = center + polarToCartesian(
+                        radius = innerCircleCenterRadius,
+                        angle = (startAngle + sweepAngle - resultingInnerCircleDegrees).deg
+                    ),
+                    radius = resultingInnerCircleRadius
+                ),
+                startAngleDegrees = startAngle + sweepAngle - resultingInnerCircleDegrees,
+                sweepAngleDegrees = InnerCircleSweepAngleDegrees
+            )
+        }
+
+        return Path().apply {
+            addPath(outerPie - innerPie)
+            addPath(convexPaths)
+        }.let(Outline::Generic)
+    }
 }
 
 /**
