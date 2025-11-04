@@ -20,6 +20,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - DefaultVerticalBarPosition renamed to DefaultBarPosition
 - DefaultVerticalBar renamed to DefaultBar
 - VerticalBarPlotGroupedPointEntry renamed to BarPlotGroupedPointEntry and changed names of member values
+- Deprecated HoverableElementArea and its associated hoverableElement Modifier. Use ToolTipArea or ToolTipBox instead.
 
 ## [0.9.1]
 

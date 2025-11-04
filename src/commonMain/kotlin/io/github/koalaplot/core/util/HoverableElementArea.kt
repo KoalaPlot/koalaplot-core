@@ -42,6 +42,7 @@ private class Sender(private val onMessageReceived: (@Composable () -> Unit, Boo
  * displayed hovered element will be confined to the bounds of the parent HoverableElementArea but
  * may display over multiple children.
  */
+@Deprecated("Use ToolTipArea or ToolTipBox instead.")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 public fun HoverableElementArea(
@@ -122,7 +123,9 @@ private fun Modifier.pointerPosition(key1: Any?, update: (Offset) -> Unit): Modi
  * Scope for the HoverableElementArea providing the hoverableElement [Modifier] to enable
  * hovering element functionality and to specify the [Composable] to be displayed on hover.
  */
+@Deprecated("Use ToolTipArea or ToolTipBox instead.")
 public interface HoverableElementAreaScope {
+    @Deprecated("Use ToolTipArea or ToolTipBox instead.")
     public fun Modifier.hoverableElement(element: @Composable () -> Unit): Modifier
 }
 
