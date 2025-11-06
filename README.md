@@ -10,11 +10,8 @@ allowing you to build great looking interactive charts for
 [Android](https://developer.android.com/jetpack/compose), desktop, ios, and web using a single API and code base.
 
 Try out
-the [web version of the samples](https://koalaplot.github.io/koalaplot-samples/wasmJs/productionExecutable/index.html)
-for a quick look at the possibilities when using Koala Plot. Note that this uses
-the [alpha Kotlin wasm Compose web-canvas](https://kotlinlang.org/docs/wasm-overview.html) capability, and you'll
-need a browser supporting the [wasm garbage collection feature](https://github.com/WebAssembly/gc). For more information
-see [https://kotl.in/wasm_help](https://kotl.in/wasm_help).
+the [web version of the samples](https://koalaplot.github.io/koalaplot-samples/productionExecutable/index.html)
+for a quick look at the possibilities when using Koala Plot.
 
 This project is in a pre-release experimental/alpha state. We encourage you to give it a try, make suggestions for
 improvement, and even [contribute](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTRIBUTING.md)! It is
