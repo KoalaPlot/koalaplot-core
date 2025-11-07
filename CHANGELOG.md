@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.0]
 
 ### Added
 
@@ -15,11 +15,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Update dependencies: Compose to 1.9.1, Kotlin to 2.2.21, agp to 8.13.0, android compile sdk to 36
+- Update dependencies: Compose to 1.9.2, Kotlin to 2.2.21, agp to 8.13.0, android compile sdk to 36
 - VerticalBarPosition renamed to BarPosition
 - DefaultVerticalBarPosition renamed to DefaultBarPosition
 - DefaultVerticalBar renamed to DefaultBar
 - VerticalBarPlotGroupedPointEntry renamed to BarPlotGroupedPointEntry and changed names of member values
+- Deprecated HoverableElementArea and its associated hoverableElement Modifier. Use ToolTipArea or ToolTipBox instead.
 
 ## [0.9.1]
 

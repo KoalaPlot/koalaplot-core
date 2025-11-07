@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.koalaplot/koalaplot-core?color=278ec7)](https://central.sonatype.com/artifact/io.github.koalaplot/koalaplot-core)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.1.0-278ec7.svg?logo=kotlin)](http://kotlinlang.org)
-[![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](https://koalaplot.github.io/koalaplot-core/api/0.9.1/)
+[![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](https://koalaplot.github.io/koalaplot-core/api/0.10.0/)
 [![License MIT](https://img.shields.io/badge/license-MIT-278ec7.svg)](https://github.com/KoalaPlot/koalaplot-core/tree/main/LICENSE.txt)
 
 # Koala Plot
@@ -10,11 +10,8 @@ allowing you to build great looking interactive charts for
 [Android](https://developer.android.com/jetpack/compose), desktop, ios, and web using a single API and code base.
 
 Try out
-the [web version of the samples](https://koalaplot.github.io/koalaplot-samples/wasmJs/productionExecutable/index.html)
-for a quick look at the possibilities when using Koala Plot. Note that this uses
-the [alpha Kotlin wasm Compose web-canvas](https://kotlinlang.org/docs/wasm-overview.html) capability, and you'll
-need a browser supporting the [wasm garbage collection feature](https://github.com/WebAssembly/gc). For more information
-see [https://kotl.in/wasm_help](https://kotl.in/wasm_help).
+the [web version of the samples](https://koalaplot.github.io/koalaplot-samples/productionExecutable/index.html)
+for a quick look at the possibilities when using Koala Plot.
 
 This project is in a pre-release experimental/alpha state. We encourage you to give it a try, make suggestions for
 improvement, and even [contribute](https://github.com/KoalaPlot/koalaplot-core/blob/main/CONTRIBUTING.md)! It is
@@ -75,7 +72,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("io.github.koalaplot:koalaplot-core:0.9.1")
+    implementation("io.github.koalaplot:koalaplot-core:0.10.0")
 }
 ```
 
@@ -106,8 +103,8 @@ BulletGraphs {
 
 # Documentation
 
-- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.9.1)
-- [Release 0.9.1](https://koalaplot.github.io/koalaplot-core/api/0.9.1)
+- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.10.0)
+- [Release 0.10.0](https://koalaplot.github.io/koalaplot-core/api/0.10.0)
 
 Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples) for code examples.
 
