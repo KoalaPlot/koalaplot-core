@@ -35,6 +35,31 @@ import io.github.koalaplot.core.util.HoverableElementAreaScope
  */
 @ExperimentalKoalaPlotApi
 @Composable
+public fun <T> PolarGraphScope<T>.PolarPlotSeries2(
+    data: List<PolarPoint<Float, T>>,
+    modifier: Modifier = Modifier,
+    lineStyle: LineStyle? = null,
+    areaStyle: AreaStyle? = null,
+    symbols: (@Composable (PolarPoint<Float, T>) -> Unit)? = null,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+) {
+    PolarPlotSeries(data, modifier, lineStyle, areaStyle, { symbols?.invoke(it) }, animationSpec)
+}
+
+/**
+ * Plots a series on a [PolarGraph].
+ *
+ * @param data Data points to display.
+ * @param lineStyle Styling for line segments that interconnect the data points. Defaults to null for no lines.
+ * @param areaStyle Styling for filling the area created by lines that interconnect the data points. Defaults
+ * to null for no fill. If lineStyle is null and areaStyle is not null, the area will be filled without interconnecting
+ * lines.
+ * @param symbols [Composable] providing for the symbol to draw at each data point. Use null, the default, for no
+ * symbols.
+ */
+@Deprecated("Use PolarPlotSeries2 instead", replaceWith = ReplaceWith("PolarPlotSeries2"))
+@ExperimentalKoalaPlotApi
+@Composable
 public fun <T> PolarGraphScope<T>.PolarPlotSeries(
     data: List<PolarPoint<Float, T>>,
     modifier: Modifier = Modifier,
