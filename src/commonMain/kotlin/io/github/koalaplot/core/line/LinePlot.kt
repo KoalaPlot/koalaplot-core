@@ -29,6 +29,7 @@ import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
 import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraphScope
+import kotlin.math.min
 
 /**
  * A line plot that draws data as points and lines on an XYGraph.
@@ -505,9 +506,9 @@ private fun <X, Y, P : Point<X, Y>> XYGraphScope<X, Y>.Symbols(
             val size = Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat())
 
             layout(constraints.maxWidth, constraints.maxHeight) {
-                data.indices.forEach {
-                    val p = measurables[it].measure(constraints.copy(minWidth = 0, minHeight = 0))
-                    var position = scale(data[it], size)
+                for (index in 0 until min(data.size, measurables.size)) {
+                    val p = measurables[index].measure(constraints.copy(minWidth = 0, minHeight = 0))
+                    var position = scale(data[index], size)
                     position -= Offset(p.width / 2f, p.height / 2f)
                     p.place(position.x.toInt(), position.y.toInt())
                 }
