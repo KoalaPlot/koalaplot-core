@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.koalaplot/koalaplot-core?color=278ec7)](https://central.sonatype.com/artifact/io.github.koalaplot/koalaplot-core)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.1.0-278ec7.svg?logo=kotlin)](http://kotlinlang.org)
-[![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](https://koalaplot.github.io/koalaplot-core/api/0.10.1/)
+[![Dokka docs](https://img.shields.io/badge/docs-dokka-278ec7)](https://koalaplot.github.io/koalaplot-core/api/0.10.2/)
 [![License MIT](https://img.shields.io/badge/license-MIT-278ec7.svg)](https://github.com/KoalaPlot/koalaplot-core/tree/main/LICENSE.txt)
 
 # Koala Plot
@@ -72,7 +72,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("io.github.koalaplot:koalaplot-core:0.10.1")
+    implementation("io.github.koalaplot:koalaplot-core:0.10.2")
 }
 ```
 
@@ -103,8 +103,8 @@ BulletGraphs {
 
 # Documentation
 
-- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.10.1)
-- [Release 0.10.1](https://koalaplot.github.io/koalaplot-core/api/0.10.1)
+- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.10.2)
+- [Release 0.10.2](https://koalaplot.github.io/koalaplot-core/api/0.10.2)
 
 Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples) for code examples.
 
