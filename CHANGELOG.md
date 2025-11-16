@@ -11,6 +11,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - CategoryAxisOffset to have more control over CategoryAxisModel's positioning of categories relative to the origin.
 
+### Fixed
+
+- Incorrect padding on y-axis labels for XYPlot overload that uses a String producer for axis labels instead of a
+  Composable.
+
 ## [0.10.2]
 
 ### Fixed

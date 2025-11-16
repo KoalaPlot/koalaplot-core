@@ -720,7 +720,7 @@ public fun <X, Y> XYGraph(
                 yAxisLabels(it),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 2.dp)
+                modifier = Modifier.padding(end = 2.dp)
             )
         },
         yAxisTitle = {
