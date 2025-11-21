@@ -209,8 +209,8 @@ private fun <X, Y> Modifier.onPointerMove(
             if (event.type == PointerEventType.Move) {
                 val change = event.changes.last()
                 onPointerMove?.invoke(
-                    xAxisModel.offsetToValue(change.position.x / size.width),
-                    yAxisModel.offsetToValue(1f - change.position.y / size.height)
+                    xAxisModel.offsetToValue((change.position.x / size.width).coerceIn(0f, 1f)),
+                    yAxisModel.offsetToValue(1f - (change.position.y / size.height).coerceIn(0f, 1f))
                 )
             }
         }

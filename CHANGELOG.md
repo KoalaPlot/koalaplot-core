@@ -15,6 +15,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Incorrect padding on y-axis labels for XYPlot overload that uses a String producer for axis labels instead of a
   Composable.
+- XYGraph pointer tracking would throw an exception if the pointer event had a position outside the bounds of the
+  component.
 
 ## [0.10.2]
 
