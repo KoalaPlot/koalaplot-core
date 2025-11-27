@@ -59,12 +59,11 @@ borders, shapes, user interaction, etc. Web support is provided by the Compose-w
 
 # Getting Started
 
-1. Add the mavenCentral and compose repositories to your project's build.gradle.kts
+1. Add the mavenCentral repository to your project's build.gradle.kts
 
 ```kotlin
 repositories {
     mavenCentral()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 ```
 
@@ -72,7 +71,7 @@ repositories {
 
 ```kotlin
 dependencies {
-    implementation("io.github.koalaplot:koalaplot-core:0.10.2")
+    implementation("io.github.koalaplot:koalaplot-core:0.10.3")
 }
 ```
 
@@ -103,8 +102,8 @@ BulletGraphs {
 
 # Documentation
 
-- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.10.2)
-- [Release 0.10.2](https://koalaplot.github.io/koalaplot-core/api/0.10.2)
+- [Latest build](https://koalaplot.github.io/koalaplot-core/api/0.10.3)
+- [Release 0.10.2](https://koalaplot.github.io/koalaplot-core/api/0.10.3)
 
 Also see the [sample repository](https://github.com/KoalaPlot/koalaplot-samples) for code examples.
 
