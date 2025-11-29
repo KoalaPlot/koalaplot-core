@@ -73,7 +73,7 @@ public fun rememberAxisStyle(
 
 internal class AxisDelegate<T> private constructor(
     private val axisState: AxisState,
-    private val tickValues: TickValues<T>,
+    val tickValues: TickValues<T>,
     val orientation: AxisOrientation,
     val style: AxisStyle,
 ) : AxisState by axisState, TickValues<T> by tickValues {

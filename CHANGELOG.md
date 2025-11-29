@@ -10,6 +10,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - CategoryAxisOffset to have more control over CategoryAxisModel's positioning of categories relative to the origin.
+- AxisContent and GridStyle to shorten the function signature of XYGraph.
+
+### Changed
+ 
+- Deprecated XYGraph overload that does not use AxisContent and GridStyle.
+- Update dependencies: Compose 1.9.3, AGP 8.13.1
 
 ### Fixed
 
