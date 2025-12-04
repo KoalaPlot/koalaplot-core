@@ -41,7 +41,8 @@ advice if you have questions.
 
 ### Multiplatform & Compose Centric
 
-Koala Plot is a multiplatform plotting and charting library with an objective to maintain the same interface
+Koala Plot is a multiplatform plotting and charting library with an objective to maintain the same
+interface
 and feature set across all supported platforms. Therefore, new contributions should address any
 platform differences in order to eliminate platform variations in the publicly exposed API.
 
@@ -219,21 +220,21 @@ request can be ultimately accepted.
 * Reference issues and pull requests liberally after the first line
 * When only changing documentation, include `[ci skip]` in the commit title
 * Consider starting the commit message with an applicable emoji:
-    * :art: `:art:` when improving the format/structure of the code
-    * :racehorse: `:racehorse:` when improving performance
-    * :non-potable_water: `:non-potable_water:` when plugging memory leaks
-    * :memo: `:memo:` when writing docs
-    * :penguin: `:penguin:` when fixing something on Linux
-    * :apple: `:apple:` when fixing something on macOS
-    * :checkered_flag: `:checkered_flag:` when fixing something on Windows
-    * :bug: `:bug:` when fixing a bug
-    * :fire: `:fire:` when removing code or files
-    * :green_heart: `:green_heart:` when fixing the CI build
-    * :white_check_mark: `:white_check_mark:` when adding tests
-    * :lock: `:lock:` when dealing with security
-    * :arrow_up: `:arrow_up:` when upgrading dependencies
-    * :arrow_down: `:arrow_down:` when downgrading dependencies
-    * :shirt: `:shirt:` when removing linter warnings
+  * :art: `:art:` when improving the format/structure of the code
+  * :racehorse: `:racehorse:` when improving performance
+  * :non-potable_water: `:non-potable_water:` when plugging memory leaks
+  * :memo: `:memo:` when writing docs
+  * :penguin: `:penguin:` when fixing something on Linux
+  * :apple: `:apple:` when fixing something on macOS
+  * :checkered_flag: `:checkered_flag:` when fixing something on Windows
+  * :bug: `:bug:` when fixing a bug
+  * :fire: `:fire:` when removing code or files
+  * :green_heart: `:green_heart:` when fixing the CI build
+  * :white_check_mark: `:white_check_mark:` when adding tests
+  * :lock: `:lock:` when dealing with security
+  * :arrow_up: `:arrow_up:` when upgrading dependencies
+  * :arrow_down: `:arrow_down:` when downgrading dependencies
+  * :shirt: `:shirt:` when removing linter warnings
 
 ### Kotlin Styleguide & Coding Standards
 
@@ -243,15 +244,18 @@ minor changes, notably to align
 with [Compose conventions](https://github.com/androidx/androidx/blob/androidx-main/compose/docs/compose-api-guidelines.md)
 .
 
-All code is scanned using [detekt](https://detekt.dev/),
-including [ktlint](https://ktlint.github.io/), to enforce code standards, best practices,
-and formatting. Use of .editorconfig and
-the [Detekt IDEA Plugin](https://plugins.jetbrains.com/plugin/10761-detekt) helps to provide
-real-time violation feedback in the IDE, but please also run the detekt job directly to ensure
-compliance before submitting a pull request.
+All code is scanned using [detekt](https://detekt.dev/) and [ktlint](https://ktlint.github.io/),
+with additional [Compose rules](https://mrmans0n.github.io/compose-rules/), to
+enforce code standards, best practices, and formatting. Use of
+the [Detekt Plugin](https://plugins.jetbrains.com/plugin/10761-detekt),
+and
+the [ktlint-intellij-plugin](https://pinterest.github.io/ktlint/latest/install/setup/#ktlint-intellij-plugin-for-direct-feedback-while-coding)
+are recommended to provide
+real-time violation feedback in the IDE, but please also run the check task directly to
+ensure compliance before submitting a pull request.
 
 ```
-./gradlew detekt
+./gradlew check
 ```
 
 When introducing new public API or changes to existing public API, please be thoughtful about
