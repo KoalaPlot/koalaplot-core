@@ -28,30 +28,35 @@ private val DefaultVerticalPlanoConvexShape: Shape = object : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val shapeWidth = size.width
         val shapeHeight = size.height
         val arcRadius = shapeWidth / 2
 
-        return Path().apply {
-            val rectHeight = max((shapeHeight - arcRadius), 0F)
-            addRect(
-                rect = Rect(
-                    offset = Offset(0F, arcRadius),
-                    size = Size(shapeWidth, rectHeight)
+        return Path()
+            .apply {
+                val rectHeight = max((shapeHeight - arcRadius), 0F)
+                addRect(
+                    rect = Rect(
+                        offset = Offset(0F, arcRadius),
+                        size = Size(shapeWidth, rectHeight),
+                    ),
                 )
-            )
 
-            val heightRadiusOffset = max((arcRadius - shapeHeight), 0F)
-            val heightRadiusOffsetDegrees =
-                asin(heightRadiusOffset / arcRadius).rad.toDegrees().value.toFloat()
-            addArc(
-                oval = Size(shapeWidth, shapeWidth).toRect(),
-                startAngleDegrees = 180F + heightRadiusOffsetDegrees,
-                sweepAngleDegrees = 180F - 2 * heightRadiusOffsetDegrees
-            )
-        }.let(Outline::Generic)
+                val heightRadiusOffset = max((arcRadius - shapeHeight), 0F)
+                val heightRadiusOffsetDegrees =
+                    asin(heightRadiusOffset / arcRadius)
+                        .rad
+                        .toDegrees()
+                        .value
+                        .toFloat()
+                addArc(
+                    oval = Size(shapeWidth, shapeWidth).toRect(),
+                    startAngleDegrees = 180F + heightRadiusOffsetDegrees,
+                    sweepAngleDegrees = 180F - 2 * heightRadiusOffsetDegrees,
+                )
+            }.let(Outline::Generic)
     }
 }
 
@@ -65,28 +70,33 @@ private val DefaultHorizontalPlanoConvexShape: Shape = object : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val shapeWidth = size.width
         val shapeHeight = size.height
         val arcRadius = shapeHeight / 2
 
-        return Path().apply {
-            val rectWidth = max((shapeWidth - arcRadius), 0F)
-            addRect(Size(rectWidth, shapeHeight).toRect())
+        return Path()
+            .apply {
+                val rectWidth = max((shapeWidth - arcRadius), 0F)
+                addRect(Size(rectWidth, shapeHeight).toRect())
 
-            val widthRadiusOffset = max((arcRadius - shapeWidth), 0F)
-            val widthRadiusOffsetDegrees =
-                asin(widthRadiusOffset / arcRadius).rad.toDegrees().value.toFloat()
-            addArc(
-                oval = Rect(
-                    offset = Offset(rectWidth - arcRadius - widthRadiusOffset, 0F),
-                    size = Size(shapeHeight, shapeHeight)
-                ),
-                startAngleDegrees = 270F + widthRadiusOffsetDegrees,
-                sweepAngleDegrees = 180F - 2 * widthRadiusOffsetDegrees
-            )
-        }.let(Outline::Generic)
+                val widthRadiusOffset = max((arcRadius - shapeWidth), 0F)
+                val widthRadiusOffsetDegrees =
+                    asin(widthRadiusOffset / arcRadius)
+                        .rad
+                        .toDegrees()
+                        .value
+                        .toFloat()
+                addArc(
+                    oval = Rect(
+                        offset = Offset(rectWidth - arcRadius - widthRadiusOffset, 0F),
+                        size = Size(shapeHeight, shapeHeight),
+                    ),
+                    startAngleDegrees = 270F + widthRadiusOffsetDegrees,
+                    sweepAngleDegrees = 180F - 2 * widthRadiusOffsetDegrees,
+                )
+            }.let(Outline::Generic)
     }
 }
 
@@ -100,7 +110,7 @@ private val DefaultVerticalBiConvexShape: Shape = object : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val outline = DefaultVerticalPlanoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
 
@@ -112,18 +122,18 @@ private val DefaultVerticalBiConvexShape: Shape = object : Shape {
             addRect(
                 rect = Rect(
                     offset = Offset(0F, shapeHeight - arcRadius),
-                    size = Size(shapeWidth, shapeWidth)
-                )
+                    size = Size(shapeWidth, shapeWidth),
+                ),
             )
         }
         val cutoutArc = Path().apply {
             addArc(
                 oval = Rect(
                     offset = Offset(0F, shapeHeight - shapeWidth),
-                    size = Size(shapeWidth, shapeWidth)
+                    size = Size(shapeWidth, shapeWidth),
                 ),
                 startAngleDegrees = 0F,
-                sweepAngleDegrees = 180F
+                sweepAngleDegrees = 180F,
             )
         }
         val cutout = (cutoutRect - cutoutArc)
@@ -141,7 +151,7 @@ private val DefaultHorizontalBiConvexShape: Shape = object : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val outline = DefaultHorizontalPlanoConvexShape
             .createOutline(size, layoutDirection, density) as Outline.Generic
@@ -153,15 +163,15 @@ private val DefaultHorizontalBiConvexShape: Shape = object : Shape {
             addRect(
                 rect = Rect(
                     offset = Offset(-arcRadius, 0F),
-                    size = Size(shapeHeight, shapeHeight)
-                )
+                    size = Size(shapeHeight, shapeHeight),
+                ),
             )
         }
         val cutoutArc = Path().apply {
             addArc(
                 oval = Size(shapeHeight, shapeHeight).toRect(),
                 startAngleDegrees = 90F,
-                sweepAngleDegrees = 180F
+                sweepAngleDegrees = 180F,
             )
         }
         val cutout = (cutoutRect - cutoutArc)
@@ -181,12 +191,13 @@ private val DefaultHorizontalBiConvexShape: Shape = object : Shape {
 public class VerticalPlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
     private val xyGraphScope: XYGraphScope<X, Float>,
     private val index: Int,
-    private val value: E
-) : Shape, XYGraphScope<X, Float> by xyGraphScope {
+    private val value: E,
+) : Shape,
+    XYGraphScope<X, Float> by xyGraphScope {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val shapeWidth = size.width
         val shapeHeight = size.height
@@ -235,52 +246,57 @@ public class VerticalPlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
 
             // Prevent arc from being drawn below zero by subtracting value in degrees
             val yMaxZeroArcHeightDegrees =
-                asin(yMaxZeroArcHeight / arcRadius).rad.toDegrees().value.toFloat()
+                asin(yMaxZeroArcHeight / arcRadius)
+                    .rad
+                    .toDegrees()
+                    .value
+                    .toFloat()
 
-            Path().apply {
-                (
-                    Path().apply {
-                        addArc(
-                            oval = Size(shapeWidth, shapeWidth).toRect(),
-                            startAngleDegrees = 180F + yMaxZeroArcHeightDegrees,
-                            sweepAngleDegrees = 180F - 2 * yMaxZeroArcHeightDegrees
-                        )
-                    } - Path().apply {
-                        addArc(
-                            oval = Rect(
-                                offset = Offset(0F, shapeHeight),
-                                size = Size(shapeWidth, shapeWidth)
-                            ),
-                            startAngleDegrees = 180F,
-                            sweepAngleDegrees = 180F
-                        )
-                    }
-                    ).let(::addPath)
-
-                (
-                    Path().apply {
-                        addRect(
-                            rect = Rect(
-                                offset = Offset(0F, arcRadius),
-                                size = Size(shapeWidth, max(shapeHeight - yMinZeroArcHeight, 0F))
+            Path()
+                .apply {
+                    (
+                        Path().apply {
+                            addArc(
+                                oval = Size(shapeWidth, shapeWidth).toRect(),
+                                startAngleDegrees = 180F + yMaxZeroArcHeightDegrees,
+                                sweepAngleDegrees = 180F - 2 * yMaxZeroArcHeightDegrees,
                             )
-                        )
-                    } - Path().apply {
-                        addArc(
-                            oval = Rect(
-                                offset = Offset(0F, shapeHeight),
-                                size = Size(shapeWidth, shapeWidth)
-                            ),
-                            startAngleDegrees = 180F,
-                            sweepAngleDegrees = 180F
-                        )
-                    }
+                        } - Path().apply {
+                            addArc(
+                                oval = Rect(
+                                    offset = Offset(0F, shapeHeight),
+                                    size = Size(shapeWidth, shapeWidth),
+                                ),
+                                startAngleDegrees = 180F,
+                                sweepAngleDegrees = 180F,
+                            )
+                        }
                     ).let(::addPath)
-                // Rendering bar in negative direction
-                if (isInverted) {
-                    inverted(pivotX = shapeWidth / 2F, pivotY = shapeHeight / 2F)
-                }
-            }.let(Outline::Generic)
+
+                    (
+                        Path().apply {
+                            addRect(
+                                rect = Rect(
+                                    offset = Offset(0F, arcRadius),
+                                    size = Size(shapeWidth, max(shapeHeight - yMinZeroArcHeight, 0F)),
+                                ),
+                            )
+                        } - Path().apply {
+                            addArc(
+                                oval = Rect(
+                                    offset = Offset(0F, shapeHeight),
+                                    size = Size(shapeWidth, shapeWidth),
+                                ),
+                                startAngleDegrees = 180F,
+                                sweepAngleDegrees = 180F,
+                            )
+                        }
+                    ).let(::addPath)
+                    // Rendering bar in negative direction
+                    if (isInverted) {
+                        inverted(pivotX = shapeWidth / 2F, pivotY = shapeHeight / 2F)
+                    }
+                }.let(Outline::Generic)
         }
     }
 }
@@ -297,12 +313,13 @@ public class VerticalPlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
 public class HorizontalPlanoConvexShape<X, E : HorizontalBarPlotEntry<Float, X>>(
     private val xyGraphScope: XYGraphScope<Float, X>,
     private val index: Int,
-    private val value: E
-) : Shape, XYGraphScope<Float, X> by xyGraphScope {
+    private val value: E,
+) : Shape,
+    XYGraphScope<Float, X> by xyGraphScope {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val shapeWidth = size.width
         val shapeHeight = size.height
@@ -351,57 +368,55 @@ public class HorizontalPlanoConvexShape<X, E : HorizontalBarPlotEntry<Float, X>>
 
             // Prevent arc from being drawn below zero by subtracting value in degrees
             val xMaxZeroArcWidthDegrees =
-                asin(xMaxZeroArcWidth / arcRadius).rad.toDegrees().value.toFloat()
+                asin(xMaxZeroArcWidth / arcRadius)
+                    .rad
+                    .toDegrees()
+                    .value
+                    .toFloat()
 
-            Path().apply {
-                (
-                    Path().apply {
-                        val rectWidth = max((shapeWidth - arcRadius), 0F)
-                        val widthRadiusOffset = max((arcRadius - shapeWidth), 0F)
-                        addArc(
-                            oval = Rect(
-                                offset = Offset(rectWidth - arcRadius - widthRadiusOffset, 0F),
-                                size = Size(shapeHeight, shapeHeight)
-                            ),
-                            startAngleDegrees = 270F + xMaxZeroArcWidthDegrees,
-                            sweepAngleDegrees = 180F - 2 * xMaxZeroArcWidthDegrees
-                        )
-                    } - Path().apply {
-                        addArc(
-                            oval = Rect(
-                                offset = Offset(-shapeHeight, 0F),
-                                size = Size(shapeHeight, shapeHeight)
-                            ),
-                            startAngleDegrees = 270F,
-                            sweepAngleDegrees = 180F
-                        )
-                    }
-                    ).let(::addPath)
-
-                (
-                    Path().apply {
-                        addRect(
-                            rect = Rect(
-                                offset = Offset(-arcRadius + xMinZeroArcWidth, 0F),
-                                size = Size(max(shapeWidth - xMinZeroArcWidth, 0F), shapeHeight)
+            Path()
+                .apply {
+                    (
+                        Path().apply {
+                            val rectWidth = max((shapeWidth - arcRadius), 0F)
+                            val widthRadiusOffset = max((arcRadius - shapeWidth), 0F)
+                            addArc(
+                                oval = Rect(
+                                    offset = Offset(rectWidth - arcRadius - widthRadiusOffset, 0F),
+                                    size = Size(shapeHeight, shapeHeight),
+                                ),
+                                startAngleDegrees = 270F + xMaxZeroArcWidthDegrees,
+                                sweepAngleDegrees = 180F - 2 * xMaxZeroArcWidthDegrees,
                             )
-                        )
-                    } - Path().apply {
-                        addArc(
-                            oval = Rect(
-                                offset = Offset(-shapeHeight, 0F),
-                                size = Size(shapeHeight, shapeHeight)
-                            ),
-                            startAngleDegrees = 270F,
-                            sweepAngleDegrees = 180F
-                        )
-                    }
+                        } - Path().apply {
+                            addArc(
+                                oval = Rect(offset = Offset(-shapeHeight, 0F), size = Size(shapeHeight, shapeHeight)),
+                                startAngleDegrees = 270F,
+                                sweepAngleDegrees = 180F,
+                            )
+                        }
                     ).let(::addPath)
-                // Rendering bar in negative direction
-                if (isInverted) {
-                    inverted(pivotX = shapeWidth / 2F, pivotY = shapeHeight / 2F)
-                }
-            }.let(Outline::Generic)
+                    (
+                        Path().apply {
+                            addRect(
+                                rect = Rect(
+                                    offset = Offset(-arcRadius + xMinZeroArcWidth, 0F),
+                                    size = Size(max(shapeWidth - xMinZeroArcWidth, 0F), shapeHeight),
+                                ),
+                            )
+                        } - Path().apply {
+                            addArc(
+                                oval = Rect(offset = Offset(-shapeHeight, 0F), size = Size(shapeHeight, shapeHeight)),
+                                startAngleDegrees = 270F,
+                                sweepAngleDegrees = 180F,
+                            )
+                        }
+                    ).let(::addPath)
+                    // Rendering bar in negative direction
+                    if (isInverted) {
+                        inverted(pivotX = shapeWidth / 2F, pivotY = shapeHeight / 2F)
+                    }
+                }.let(Outline::Generic)
         }
     }
 }
@@ -424,23 +439,23 @@ public class HorizontalPlanoConvexShape<X, E : HorizontalBarPlotEntry<Float, X>>
 public class VerticalBiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> private constructor(
     private val planoConvexShape: VerticalPlanoConvexShape<X, E>,
     private val index: Int,
-    private val value: E
-) : Shape, XYGraphScope<X, Float> by planoConvexShape {
-
+    private val value: E,
+) : Shape,
+    XYGraphScope<X, Float> by planoConvexShape {
     public constructor(
         xyGraphScope: XYGraphScope<X, Float>,
         index: Int,
-        value: E
+        value: E,
     ) : this(
         VerticalPlanoConvexShape(xyGraphScope, index, value),
         index,
-        value
+        value,
     )
 
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val shapeWidth = size.width
         val shapeHeight = size.height
@@ -484,18 +499,18 @@ public class VerticalBiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> privat
                 addRect(
                     rect = Rect(
                         offset = Offset(0F, yMaxZeroHeight - arcRadius),
-                        size = Size(shapeWidth, shapeWidth)
-                    )
+                        size = Size(shapeWidth, shapeWidth),
+                    ),
                 )
             }
             val cutoutArc = Path().apply {
                 addArc(
                     oval = Rect(
                         offset = Offset(0F, yMaxZeroHeight - shapeWidth),
-                        size = Size(shapeWidth, shapeWidth)
+                        size = Size(shapeWidth, shapeWidth),
                     ),
                     startAngleDegrees = 0F,
-                    sweepAngleDegrees = 180F
+                    sweepAngleDegrees = 180F,
                 )
             }
             val cutout = (cutoutRect - cutoutArc).apply {
@@ -528,23 +543,23 @@ public class VerticalBiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> privat
 public class HorizontalBiConvexShape<X, E : HorizontalBarPlotEntry<Float, X>> private constructor(
     private val planoConvexShape: HorizontalPlanoConvexShape<X, E>,
     private val index: Int,
-    private val value: E
-) : Shape, XYGraphScope<Float, X> by planoConvexShape {
-
+    private val value: E,
+) : Shape,
+    XYGraphScope<Float, X> by planoConvexShape {
     public constructor(
         xyGraphScope: XYGraphScope<Float, X>,
         index: Int,
-        value: E
+        value: E,
     ) : this(
         HorizontalPlanoConvexShape(xyGraphScope, index, value),
         index,
-        value
+        value,
     )
 
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val shapeWidth = size.width
         val shapeHeight = size.height
@@ -589,18 +604,18 @@ public class HorizontalBiConvexShape<X, E : HorizontalBarPlotEntry<Float, X>> pr
                 addRect(
                     rect = Rect(
                         offset = Offset(-xMinZeroWidth, 0F),
-                        size = Size(arcRadius, shapeHeight)
-                    )
+                        size = Size(arcRadius, shapeHeight),
+                    ),
                 )
             }
             val cutoutArc = Path().apply {
                 addArc(
                     oval = Rect(
                         offset = Offset(-xMinZeroWidth, 0F),
-                        size = Size(shapeHeight, shapeHeight)
+                        size = Size(shapeHeight, shapeHeight),
                     ),
                     startAngleDegrees = 90F,
-                    sweepAngleDegrees = 180F
+                    sweepAngleDegrees = 180F,
                 )
             }
             val cutout = (cutoutRect - cutoutArc).apply {
@@ -614,47 +629,57 @@ public class HorizontalBiConvexShape<X, E : HorizontalBarPlotEntry<Float, X>> pr
     }
 }
 
-private fun Path.inverted(pivotX: Float, pivotY: Float): Path {
-    Matrix().apply {
-        resetToPivotedTransform(
-            pivotX = pivotX,
-            pivotY = pivotY,
-            rotationZ = 180F
-        )
-    }.let(::transform)
+private fun Path.inverted(
+    pivotX: Float,
+    pivotY: Float,
+): Path {
+    Matrix()
+        .apply {
+            resetToPivotedTransform(
+                pivotX = pivotX,
+                pivotY = pivotY,
+                rotationZ = 180F,
+            )
+        }.let(::transform)
     return this
 }
 
-private fun AxisModel<Float>.xOffsets(xMin: Float, xMax: Float): XOffsets {
+private fun AxisModel<Float>.xOffsets(
+    xMin: Float,
+    xMax: Float,
+): XOffsets {
     val xZeroOffset = computeOffset(0F).coerceIn(0F, 1F)
     val xMinOffset = computeOffset(xMin).coerceIn(0f, 1f)
     val xMaxOffset = computeOffset(xMax).coerceIn(0f, 1f)
     return XOffsets(
         xZeroOffset = xZeroOffset,
         xMinOffset = xMinOffset,
-        xMaxOffset = xMaxOffset
+        xMaxOffset = xMaxOffset,
     )
 }
 
-private fun AxisModel<Float>.yOffsets(yMin: Float, yMax: Float): YOffsets {
+private fun AxisModel<Float>.yOffsets(
+    yMin: Float,
+    yMax: Float,
+): YOffsets {
     val yZeroOffset = computeOffset(0F).coerceIn(0F, 1F)
     val yMinOffset = computeOffset(yMin).coerceIn(0f, 1f)
     val yMaxOffset = computeOffset(yMax).coerceIn(0f, 1f)
     return YOffsets(
         yZeroOffset = yZeroOffset,
         yMinOffset = yMinOffset,
-        yMaxOffset = yMaxOffset
+        yMaxOffset = yMaxOffset,
     )
 }
 
 private data class XOffsets(
     val xZeroOffset: Float,
     val xMinOffset: Float,
-    val xMaxOffset: Float
+    val xMaxOffset: Float,
 )
 
 private data class YOffsets(
     val yZeroOffset: Float,
     val yMinOffset: Float,
-    val yMaxOffset: Float
+    val yMaxOffset: Float,
 )

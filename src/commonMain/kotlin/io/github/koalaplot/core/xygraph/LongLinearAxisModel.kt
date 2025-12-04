@@ -39,7 +39,7 @@ public class LongLinearAxisModel(
     private val maxViewExtent: Long = ((range.last - range.first)),
     private val minimumMajorTickIncrement: Long = (
         (range.last - range.first) * MinimumMajorTickIncrementDefault
-        ).toLong(),
+    ).toLong(),
     override val minimumMajorTickSpacing: Dp = 50.dp,
     private val minorTickCount: Int = 4,
     private val inverted: Boolean = false,
@@ -71,7 +71,7 @@ public class LongLinearAxisModel(
         (
             (point - currentRange.value.start) /
                 (currentRange.value.endInclusive - currentRange.value.start)
-            ).toFloat()
+        ).toFloat()
     }
 
     // Function used to compute the inverse of offsetComputer. Set as a variable to avoid an
@@ -87,7 +87,7 @@ public class LongLinearAxisModel(
                 (
                     (currentRange.value.endInclusive - point) /
                         (currentRange.value.endInclusive - currentRange.value.start)
-                    ).toFloat()
+                ).toFloat()
             }
 
             offsetToValueFunction = { offset ->
@@ -95,13 +95,13 @@ public class LongLinearAxisModel(
                 (
                     currentRange.value.endInclusive -
                         offset * (currentRange.value.endInclusive - currentRange.value.start)
-                    ).roundToLong()
+                ).roundToLong()
             }
         }
     }
 
     private var currentRange = mutableStateOf(
-        range.first.toDouble()..(range.first + maxViewExtent).toDouble()
+        range.first.toDouble()..(range.first + maxViewExtent).toDouble(),
     )
     public override val viewRange: State<ClosedRange<Double>> = currentRange
 
@@ -114,7 +114,10 @@ public class LongLinearAxisModel(
 
     override fun computeTickValues(axisLength: Dp): TickValues<Long> = tickCalculator.computeTickValues(axisLength)
 
-    override fun zoom(zoomFactor: Float, pivot: Float) {
+    override fun zoom(
+        zoomFactor: Float,
+        pivot: Float,
+    ) {
         if (zoomFactor == 1f) return
 
         require(zoomFactor > 0) { "Zoom amount must be greater than 0" }
@@ -208,7 +211,7 @@ private class LongTickCalculator(
     private val currentRange: MutableState<ClosedFloatingPointRange<Double>>,
     private val minimumMajorTickIncrement: Long,
     private val minorTickCount: Int,
-    private val inverted: Boolean
+    private val inverted: Boolean,
 ) {
     /**
      * Computes major tick values based on a minimum tick spacing that is a
@@ -242,7 +245,7 @@ private class LongTickCalculator(
         val majorTickValues = computeMajorTickValues(minTickSpacing)
         val minorTickValues = computeMinorTickValues(
             majorTickValues,
-            computeMajorTickSpacing(minTickSpacing)
+            computeMajorTickSpacing(minTickSpacing),
         )
         return object : TickValues<Long> {
             override val majorTickValues = if (inverted) majorTickValues.reversed() else majorTickValues
@@ -267,7 +270,10 @@ private class LongTickCalculator(
         return tickSpacing
     }
 
-    private fun computeMinorTickValues(majorTickValues: List<Long>, majorTickSpacing: Long): List<Long> = buildList {
+    private fun computeMinorTickValues(
+        majorTickValues: List<Long>,
+        majorTickSpacing: Long,
+    ): List<Long> = buildList {
         if (minorTickCount > 0 && majorTickValues.isNotEmpty()) {
             val minorIncrement = majorTickSpacing / (minorTickCount + 1)
 

@@ -101,7 +101,10 @@ public class FloatLinearAxisModel(
 
     override fun computeTickValues(axisLength: Dp): TickValues<Float> = tickCalculator.computeTickValues(axisLength)
 
-    override fun zoom(zoomFactor: Float, pivot: Float) {
+    override fun zoom(
+        zoomFactor: Float,
+        pivot: Float,
+    ) {
         if (zoomFactor == 1f) return
 
         require(zoomFactor > 0) { "Zoom amount must be greater than 0" }
@@ -227,7 +230,7 @@ private class FloatTickCalculator(
         val majorTickValues = computeMajorTickValues(minTickSpacing)
         val minorTickValues = computeMinorTickValues(
             majorTickValues,
-            computeMajorTickSpacing(minTickSpacing)
+            computeMajorTickSpacing(minTickSpacing),
         )
         return object : TickValues<Float> {
             override val majorTickValues = if (inverted) majorTickValues.reversed() else majorTickValues
@@ -254,7 +257,7 @@ private class FloatTickCalculator(
 
     private fun computeMinorTickValues(
         majorTickValues: List<Float>,
-        majorTickSpacing: Float
+        majorTickSpacing: Float,
     ): List<Float> = buildList {
         if (minorTickCount > 0 && majorTickValues.isNotEmpty()) {
             val minorIncrement = majorTickSpacing / (minorTickCount + 1)

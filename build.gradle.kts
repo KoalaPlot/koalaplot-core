@@ -8,16 +8,13 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.dokka)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint.gradle)
     id("convention.publication")
 }
 
 repositories {
     google()
     mavenCentral()
-}
-
-dependencies {
-    detektPlugins(libs.detekt.formatting)
 }
 
 group = "io.github.koalaplot"
@@ -133,15 +130,17 @@ dokka {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    detekt {
-        source.setFrom("src")
-        parallel = true
-        config.setFrom("$rootDir/detekt.yml")
-        buildUponDefaultConfig = true
-    }
+detekt {
+    source.setFrom("src/androidMain", "src/commonMain", "src/desktopMain", "src/iosMain", "src/jsMain", "src/wasmJsMain")
+    parallel = true
+    config.setFrom("$rootDir/detekt.yml")
+    buildUponDefaultConfig = true
 }
 
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    exclude("**/desktopTest/**")
+ktlint {
+    version.set("1.8.0")
+}
+
+dependencies {
+    ktlintRuleset(libs.ktlint.compose)
 }

@@ -36,14 +36,14 @@ public fun <X, Y, E : BarPlotGroupedPointEntry<Y, X>> XYGraphScope<X, Y>.Grouped
         }
         DefaultBar(
             brush = SolidColor(colors[g]),
-            modifier = Modifier.fillMaxWidth(KoalaPlotTheme.sizes.barWidth)
+            modifier = Modifier.fillMaxWidth(KoalaPlotTheme.sizes.barWidth),
         )
     },
     maxBarGroupWidth: Float = 0.9f,
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */
+            // chart animation
             KoalaPlotTheme.animationSpec,
         ),
 ) {
@@ -68,7 +68,7 @@ public fun <X, Y, E : BarPlotGroupedPointEntry<Y, X>> XYGraphScope<X, Y>.Grouped
                 }
             }
         },
-        measurePolicy = BarPlotMeasurePolicyHorizontal(this, data, maxBarGroupWidth, beta)
+        measurePolicy = BarPlotMeasurePolicyHorizontal(this, data, maxBarGroupWidth, beta),
     )
 }
 
@@ -86,8 +86,11 @@ public fun <X, Y, E : BarPlotGroupedPointEntry<Y, X>> XYGraphScope<X, Y>.Grouped
 public fun <X, Y> XYGraphScope<X, Y>.GroupedHorizontalBarPlot(
     modifier: Modifier = Modifier,
     maxBarGroupWidth: Float = 0.9f,
-    startAnimationUseCase: StartAnimationUseCase,
-    content: GroupedHorizontalBarPlotScope<X, Y>.() -> Unit
+    startAnimationUseCase: StartAnimationUseCase = StartAnimationUseCase(
+        executionType = StartAnimationUseCase.ExecutionType.Default,
+        KoalaPlotTheme.animationSpec,
+    ),
+    content: GroupedHorizontalBarPlotScope<X, Y>.() -> Unit,
 ) {
     val scope = remember(content) {
         val scope = GroupedHorizontalBarPlotScopeImpl<X, Y>()
@@ -97,10 +100,11 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedHorizontalBarPlot(
 
     data class EntryWithBars<X, Y>(
         override val i: Y,
-        val xb: List<Pair<BarPosition<X>, DefaultHorizontalBarComposable<X, Y>>>
+        val xb: List<Pair<BarPosition<X>, DefaultHorizontalBarComposable<X, Y>>>,
     ) : BarPlotGroupedPointEntry<Y, X> {
         override val d: List<BarPosition<X>> = object : AbstractList<BarPosition<X>>() {
             override val size: Int = xb.size
+
             override fun get(index: Int): BarPosition<X> = xb[index].first
         }
     }
@@ -121,9 +125,8 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedHorizontalBarPlot(
         }
 
         override val size: Int = data.size
-        override fun get(index: Int): BarPlotGroupedPointEntry<Y, X> {
-            return data[index]
-        }
+
+        override fun get(index: Int): BarPlotGroupedPointEntry<Y, X> = data[index]
     }
 
     val data = remember(scope) { DataHolder() }
@@ -136,7 +139,7 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedHorizontalBarPlot(
                 this,
                 xIndex,
                 seriesIndex,
-                GroupedEntryToHorizontalEntryAdapter(value)
+                GroupedEntryToHorizontalEntryAdapter(value),
             )
         },
         maxBarGroupWidth,
@@ -159,17 +162,17 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedHorizontalBarPlot(
     modifier: Modifier = Modifier,
     maxBarGroupWidth: Float = 0.9f,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
-    content: GroupedHorizontalBarPlotScope<X, Y>.() -> Unit
+    content: GroupedHorizontalBarPlotScope<X, Y>.() -> Unit,
 ) {
     GroupedHorizontalBarPlot(
         modifier = modifier,
         maxBarGroupWidth = maxBarGroupWidth,
         startAnimationUseCase = StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */
+            // chart animation
             animationSpec,
         ),
-        content = content
+        content = content,
     )
 }
 
@@ -186,15 +189,16 @@ public interface GroupedHorizontalBarPlotScope<X, Y> {
      */
     public fun series(
         defaultBar: DefaultHorizontalBarComposable<X, Y> = horizontalSolidBar(Color.Blue),
-        content: HorizontalBarPlotScope<X, Y>.() -> Unit
+        content: HorizontalBarPlotScope<X, Y>.() -> Unit,
     )
 }
 
 private class GroupedHorizontalBarPlotScopeImpl<X, Y> : GroupedHorizontalBarPlotScope<X, Y> {
     val series: MutableList<HorizontalBarPlotScopeImpl<X, Y>> = mutableListOf()
+
     override fun series(
         defaultBar: DefaultHorizontalBarComposable<X, Y>,
-        content: HorizontalBarPlotScope<X, Y>.() -> Unit
+        content: HorizontalBarPlotScope<X, Y>.() -> Unit,
     ) {
         val scope = HorizontalBarPlotScopeImpl(defaultBar)
         series.add(scope)

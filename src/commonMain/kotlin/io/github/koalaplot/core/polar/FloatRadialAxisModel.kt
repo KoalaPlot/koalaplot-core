@@ -34,9 +34,7 @@ public class FloatRadialAxisModel constructor(
     private val sortedTickValues = tickValues.sorted()
     private val range = sortedTickValues.last() - sortedTickValues.first()
 
-    public override fun computeOffset(point: Float): Float {
-        return (point - sortedTickValues.first()) / range
-    }
+    public override fun computeOffset(point: Float): Float = (point - sortedTickValues.first()) / range
 }
 
 @Composable

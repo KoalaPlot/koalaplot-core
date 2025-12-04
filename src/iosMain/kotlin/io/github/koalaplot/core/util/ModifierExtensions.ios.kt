@@ -32,13 +32,13 @@ internal actual fun Modifier.onGestureInput(
         panFlingHandler = PanFlingHandlerImpl(
             panFlingBehavior = PanFlingBehavior(
                 animationSpec = SplineBasedFloatDecayAnimationSpec(density = this),
-            )
+            ),
         ),
         zoomHandler = if (gestureConfig.independentZoomEnabled) {
             StickyAxisZoomHandler(minTouchesDistance)
         } else {
             LockedRatioZoomHandler()
-        }
+        },
     )
     gesturesHandler.detectTransformGestures(
         scope = this,

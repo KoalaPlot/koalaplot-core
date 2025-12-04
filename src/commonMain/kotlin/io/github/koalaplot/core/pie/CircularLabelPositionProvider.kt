@@ -33,7 +33,9 @@ public sealed interface PieLabelPlacement {
      *
      * @param radius Radial position of the label Composable relative to the slice outer radius, between 0 and 1
      */
-    public data class Internal(val radius: Float = 0.7f) : PieLabelPlacement {
+    public data class Internal(
+        val radius: Float = 0.7f,
+    ) : PieLabelPlacement {
         init {
             require(radius > 0f && radius < 1f) { "radius must be between 0 and 1" }
         }
@@ -45,7 +47,9 @@ public sealed interface PieLabelPlacement {
      *
      * @param radius Radial position of the label Composable relative to the slice outer radius, between 0 and 1
      */
-    public data class InternalOrExternal(val radius: Float = 0.7f) : PieLabelPlacement {
+    public data class InternalOrExternal(
+        val radius: Float = 0.7f,
+    ) : PieLabelPlacement {
         init {
             require(radius > 0f && radius < 1f) { "radius must be between 0 and 1" }
         }
@@ -71,13 +75,11 @@ public class CircularLabelPositionProvider(
         pieDiameter: Float,
         holeSize: Float,
         placeables: List<Placeable>,
-        pieSliceData: List<PieSliceData>
-    ): List<LabelPosition> {
-        return computeLabelPositions(
-            PieParameters(pieDiameter, holeSize, labelPlacement),
-            groupLabels(placeables, pieSliceData)
-        )
-    }
+        pieSliceData: List<PieSliceData>,
+    ): List<LabelPosition> = computeLabelPositions(
+        PieParameters(pieDiameter, holeSize, labelPlacement),
+        groupLabels(placeables, pieSliceData),
+    )
 
     // Group slice labels by their quadrant, with related data
     private fun groupLabels(
@@ -100,13 +102,16 @@ public class CircularLabelPositionProvider(
         return sliceGroups
     }
 
-    private class YState(var last: Float, var max: Float)
+    private class YState(
+        var last: Float,
+        var max: Float,
+    )
 
     private fun computeInQuadrant(
         pieParameters: PieParameters,
         sliceLabelData: SliceLabelData,
         quadrant: Quadrant,
-        yState: YState
+        yState: YState,
     ): LabelPosition {
         var pos1: LabelPosition? = null
         if (pieParameters.labelPlacement !is PieLabelPlacement.External) {
@@ -186,7 +191,7 @@ public class CircularLabelPositionProvider(
         } else {
             min(
                 labelDiameter / 2f * sin(angle).toFloat() - placeable.height / 2.0F,
-                lastY - placeable.height
+                lastY - placeable.height,
             )
         }
         val labelBottom = labelTop + placeable.height
@@ -275,7 +280,7 @@ public class CircularLabelPositionProvider(
 
         val labelCenter = polarToCartesian(
             outerRadius * radius,
-            pieSliceData.startAngle + (pieSliceData.angle.toDegrees().value / 2f).deg
+            pieSliceData.startAngle + (pieSliceData.angle.toDegrees().value / 2f).deg,
         )
 
         // test if the 4 corners of the placeable are contained within the slice area
@@ -303,7 +308,7 @@ public class CircularLabelPositionProvider(
         innerRadius: Float,
         outerRadius: Float,
         pieSliceData: PieSliceData,
-        pt: PolarCoordinate
+        pt: PolarCoordinate,
     ): Boolean {
         // normalize start angle to between 0 and 360
         val startNorm = ((pieSliceData.startAngle.toDegrees().value % 360.0) + 360.0) % 360.0
@@ -323,11 +328,14 @@ public class CircularLabelPositionProvider(
  * clockwise.
  */
 @Suppress("MagicNumber")
-internal enum class Quadrant(val angleRange: ClosedFloatingPointRange<Float>) {
+internal enum class Quadrant(
+    val angleRange: ClosedFloatingPointRange<Float>,
+) {
     NorthEast(-90f..0f),
     SouthEast(0f..90f),
     SouthWest(90f..180f),
-    NorthWest(180f..270f);
+    NorthWest(180f..270f),
+    ;
 
     companion object {
         /**
@@ -344,17 +352,11 @@ internal enum class Quadrant(val angleRange: ClosedFloatingPointRange<Float>) {
     }
 }
 
-private fun Quadrant.isWest(): Boolean {
-    return this == Quadrant.NorthWest || this == Quadrant.SouthWest
-}
+private fun Quadrant.isWest(): Boolean = this == Quadrant.NorthWest || this == Quadrant.SouthWest
 
-private fun Quadrant.isSouth(): Boolean {
-    return this == Quadrant.SouthWest || this == Quadrant.SouthEast
-}
+private fun Quadrant.isSouth(): Boolean = this == Quadrant.SouthWest || this == Quadrant.SouthEast
 
-private fun Quadrant.isNorth(): Boolean {
-    return this == Quadrant.NorthWest || this == Quadrant.NorthEast
-}
+private fun Quadrant.isNorth(): Boolean = this == Quadrant.NorthWest || this == Quadrant.NorthEast
 
 private data class SliceLabelData(
     val index: Int,
@@ -366,5 +368,5 @@ private data class SliceLabelData(
 private data class PieParameters(
     val pieDiameter: Float,
     val holeSize: Float,
-    val labelPlacement: PieLabelPlacement
+    val labelPlacement: PieLabelPlacement,
 )

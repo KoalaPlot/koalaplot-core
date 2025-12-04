@@ -49,7 +49,7 @@ class PieChartTest {
                     assert(it <= pieData.lastIndex) {
                         "$it not less than or equal to ${pieData.lastIndex}"
                     }
-                }
+                },
             )
         }
 
@@ -73,7 +73,7 @@ class PieChartTest {
                     assert(it <= pieData.lastIndex) {
                         "$it not less than or equal to ${pieData.lastIndex}"
                     }
-                }
+                },
             )
         }
         composeTestRule.waitForIdle()

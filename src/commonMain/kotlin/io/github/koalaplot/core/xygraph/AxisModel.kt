@@ -56,7 +56,10 @@ public interface AxisModel<T> {
      * of the AxisState. That is, to zoom about a particular point, pivot should be the value
      * returned by [computeOffset].
      */
-    public fun zoom(zoomFactor: Float, pivot: Float) {}
+    public fun zoom(
+        zoomFactor: Float,
+        pivot: Float,
+    ) {}
 
     /**
      * Asks the AxisState to compute new ranges and tick values after panning, if the axis
@@ -66,7 +69,5 @@ public interface AxisModel<T> {
      * the axis by 10% of its current range, increasing the values. Negative values will pan by
      * decreasing the minimum and maximum axis range.
      */
-    public fun pan(amount: Float): Boolean {
-        return false
-    }
+    public fun pan(amount: Float): Boolean = false
 }

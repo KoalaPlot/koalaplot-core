@@ -19,13 +19,12 @@ import io.github.koalaplot.core.util.ZoomFactor
  * the zoom change is ignored
  */
 internal class LockedRatioZoomHandler : ZoomHandler {
-
     override fun handle(
         size: IntSize,
         event: PointerEvent,
         isHorizontalZoom: Boolean,
         gestureConfig: GestureConfig,
-        onZoomChange: (size: IntSize, centroid: Offset, zoom: ZoomFactor) -> Unit
+        onZoomChange: (size: IntSize, centroid: Offset, zoom: ZoomFactor) -> Unit,
     ): Boolean {
         val zoomChange = if (!gestureConfig.zoomXEnabled || !gestureConfig.zoomYEnabled) {
             ZoomFactor.NeutralPoint

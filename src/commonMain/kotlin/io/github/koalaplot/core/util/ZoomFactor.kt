@@ -13,8 +13,9 @@ internal fun ZoomFactor(x: Float, y: Float) = ZoomFactor(packFloats(x, y))
 
 @Immutable
 @JvmInline
-internal value class ZoomFactor(private val packedValue: Long) {
-
+internal value class ZoomFactor(
+    private val packedValue: Long,
+) {
     @Stable
     val x: Float
         get() {
@@ -39,7 +40,10 @@ internal value class ZoomFactor(private val packedValue: Long) {
     @Stable
     operator fun component2(): Float = y
 
-    fun copy(x: Float = this.x, y: Float = this.y) = ZoomFactor(x, y)
+    fun copy(
+        x: Float = this.x,
+        y: Float = this.y,
+    ) = ZoomFactor(x, y)
 
     companion object {
         const val NeutralPoint = 1.0f

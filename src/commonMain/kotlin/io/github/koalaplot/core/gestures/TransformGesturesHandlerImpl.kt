@@ -38,7 +38,6 @@ internal class TransformGesturesHandlerImpl(
     private val panFlingHandler: PanFlingHandler,
     private val zoomHandler: ZoomHandler,
 ) : TransformGesturesHandler {
-
     private var flingJob: Job? = null
 
     override suspend fun detectTransformGestures(

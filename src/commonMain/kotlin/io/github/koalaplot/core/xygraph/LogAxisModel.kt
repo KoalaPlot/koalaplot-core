@@ -14,21 +14,20 @@ private val MinorTickScale = 2..9
  * exponents with a base of 10. For example a range of -1..3 represents an axis range of 0.1 to 1000
  * (10^-1..10^3).
  */
-public class LogAxisModel(private val range: ClosedRange<Int>) : AxisModel<Float> {
+public class LogAxisModel(
+    private val range: ClosedRange<Int>,
+) : AxisModel<Float> {
     init {
         require(range.endInclusive > range.start) { "Axis end must be greater than start" }
     }
 
-    override fun computeOffset(point: Float): Float {
-        return (
-            (log(point.toDouble(), Base) - range.start) /
-                (range.endInclusive - range.start)
-            ).toFloat()
-    }
+    override fun computeOffset(point: Float): Float = (
+        (log(point.toDouble(), Base) - range.start) /
+            (range.endInclusive - range.start)
+    ).toFloat()
 
-    override fun offsetToValue(offset: Float): Float {
-        return Base.pow((offset * (range.endInclusive - range.start) + range.start).toDouble()).toFloat()
-    }
+    override fun offsetToValue(offset: Float): Float =
+        Base.pow((offset * (range.endInclusive - range.start) + range.start).toDouble()).toFloat()
 
     private fun computeMinorTickValues(majorTickValues: List<Float>): List<Float> = buildList {
         for (tick in 0 until majorTickValues.lastIndex) {

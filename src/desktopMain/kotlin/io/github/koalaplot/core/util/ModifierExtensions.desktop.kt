@@ -28,46 +28,50 @@ internal actual fun Modifier.onGestureInput(
     gestureConfig: GestureConfig,
     onZoomChange: (size: IntSize, centroid: Offset, zoom: ZoomFactor) -> Unit,
     onPanChange: (size: IntSize, pan: Offset) -> Boolean,
-): Modifier = this then Modifier
-    .onPointerEvent(PointerEventType.Move) { event ->
-        if (!gestureConfig.panEnabled) return@onPointerEvent
-        val change = event.changes.lastOrNull() ?: return@onPointerEvent
+): Modifier =
+    this then
+        Modifier
+            .onPointerEvent(PointerEventType.Move) { event ->
+                if (!gestureConfig.panEnabled) return@onPointerEvent
+                val change = event.changes.lastOrNull() ?: return@onPointerEvent
 
-        val pan = (change.position - change.previousPosition)
-            .applyPanLocks(gestureConfig.panXEnabled, gestureConfig.panYEnabled)
+                val pan =
+                    (change.position - change.previousPosition)
+                        .applyPanLocks(gestureConfig.panXEnabled, gestureConfig.panYEnabled)
 
-        if (pan == Offset.Zero) return@onPointerEvent
-        if (onPanChange(size, pan)) change.consume()
-    }
-    .onPointerEvent(PointerEventType.Scroll) { event ->
-        val change = event.changes.lastOrNull() ?: return@onPointerEvent
-        val isZoomEvent = event.keyboardModifiers.isCtrlPressed
+                if (pan == Offset.Zero) return@onPointerEvent
+                if (onPanChange(size, pan)) change.consume()
+            }.onPointerEvent(PointerEventType.Scroll) { event ->
+                val change = event.changes.lastOrNull() ?: return@onPointerEvent
+                val isZoomEvent = event.keyboardModifiers.isCtrlPressed
 
-        if (isZoomEvent && gestureConfig.zoomEnabled) {
-            val (scrollX, scrollY) = change.scrollDelta
-            val rawZoom = if (!gestureConfig.independentZoomEnabled) {
-                val maxZoomDeviation = getMaxZoomDeviation(
-                    normalizeScrollDeltaToZoom(scrollX),
-                    normalizeScrollDeltaToZoom(scrollY),
-                )
-                ZoomFactor(maxZoomDeviation, maxZoomDeviation)
-            } else {
-                ZoomFactor(normalizeScrollDeltaToZoom(scrollX), normalizeScrollDeltaToZoom(scrollY))
+                if (isZoomEvent && gestureConfig.zoomEnabled) {
+                    val (scrollX, scrollY) = change.scrollDelta
+                    val rawZoom =
+                        if (!gestureConfig.independentZoomEnabled) {
+                            val maxZoomDeviation =
+                                getMaxZoomDeviation(
+                                    normalizeScrollDeltaToZoom(scrollX),
+                                    normalizeScrollDeltaToZoom(scrollY),
+                                )
+                            ZoomFactor(maxZoomDeviation, maxZoomDeviation)
+                        } else {
+                            ZoomFactor(normalizeScrollDeltaToZoom(scrollX), normalizeScrollDeltaToZoom(scrollY))
+                        }
+
+                    val zoom = rawZoom.applyZoomLocks(gestureConfig.zoomXEnabled, gestureConfig.zoomYEnabled)
+
+                    if (zoom == ZoomFactor.Neutral) return@onPointerEvent
+                    onZoomChange(size, change.position, zoom)
+                    change.consume()
+                } else if (gestureConfig.panEnabled) {
+                    val rawPan = change.scrollDelta * -64.dp.toPx()
+                    val pan = rawPan.applyPanLocks(gestureConfig.panXEnabled, gestureConfig.panYEnabled)
+
+                    if (pan == Offset.Zero) return@onPointerEvent
+                    if (onPanChange(size, pan)) change.consume()
+                }
             }
-
-            val zoom = rawZoom.applyZoomLocks(gestureConfig.zoomXEnabled, gestureConfig.zoomYEnabled)
-
-            if (zoom == ZoomFactor.Neutral) return@onPointerEvent
-            onZoomChange(size, change.position, zoom)
-            change.consume()
-        } else if (gestureConfig.panEnabled) {
-            val rawPan = change.scrollDelta * -64.dp.toPx()
-            val pan = rawPan.applyPanLocks(gestureConfig.panXEnabled, gestureConfig.panYEnabled)
-
-            if (pan == Offset.Zero) return@onPointerEvent
-            if (onPanChange(size, pan)) change.consume()
-        }
-    }
 
 /**
  * Returns a normalized scroll value that can be used as a zoom value. In `Desktop`, `JS` and `wasmJS`,
@@ -77,6 +81,4 @@ internal actual fun Modifier.onGestureInput(
  * since the resulting value can be either `-1` or `1`.
  * @param value Scroll Value
  */
-internal fun normalizeScrollDeltaToZoom(value: Float): Float {
-    return (ZoomFactor.NeutralPoint - value).coerceIn(ScrollDeltaMin..ScrollDeltaMax)
-}
+internal fun normalizeScrollDeltaToZoom(value: Float): Float = (ZoomFactor.NeutralPoint - value).coerceIn(ScrollDeltaMin..ScrollDeltaMax)

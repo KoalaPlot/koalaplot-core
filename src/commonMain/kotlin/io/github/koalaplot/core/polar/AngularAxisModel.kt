@@ -18,7 +18,7 @@ public interface AngularAxisModel<T> {
      */
     public enum class AngleDirection {
         CLOCKWISE,
-        COUNTERCLOCKWISE
+        COUNTERCLOCKWISE,
     }
 
     /**
@@ -65,7 +65,7 @@ public interface AngularAxisModel<T> {
 public data class CategoryAngularAxisModel<T>(
     private val categories: List<T>,
     public override val angleDirection: AngularAxisModel.AngleDirection = AngularAxisModel.AngleDirection.CLOCKWISE,
-    public override val angleZero: AngularAxisModel.AngleZero = AngularAxisModel.AngleZero.TWELVE_OCLOCK
+    public override val angleZero: AngularAxisModel.AngleZero = AngularAxisModel.AngleZero.TWELVE_OCLOCK,
 ) : AngularAxisModel<T> {
     override fun getTickValues(): List<T> = categories
 
@@ -83,11 +83,10 @@ public data class CategoryAngularAxisModel<T>(
 public fun <T> rememberCategoryAngularAxisModel(
     categories: List<T>,
     angleDirection: AngularAxisModel.AngleDirection = AngularAxisModel.AngleDirection.CLOCKWISE,
-    angleZero: AngularAxisModel.AngleZero = AngularAxisModel.AngleZero.TWELVE_OCLOCK
-): CategoryAngularAxisModel<T> =
-    remember(categories, angleDirection, angleZero) {
-        CategoryAngularAxisModel(categories, angleDirection, angleZero)
-    }
+    angleZero: AngularAxisModel.AngleZero = AngularAxisModel.AngleZero.TWELVE_OCLOCK,
+): CategoryAngularAxisModel<T> = remember(categories, angleDirection, angleZero) {
+    CategoryAngularAxisModel(categories, angleDirection, angleZero)
+}
 
 /**
  * An [AngularAxisModel] that uses [AngularValue]s of either Radians or Degrees.
@@ -102,7 +101,7 @@ public data class AngularValueAxisModel(
         }
     },
     override val angleDirection: AngularAxisModel.AngleDirection = AngularAxisModel.AngleDirection.COUNTERCLOCKWISE,
-    override val angleZero: AngularAxisModel.AngleZero = AngularAxisModel.AngleZero.THREE_OCLOCK
+    override val angleZero: AngularAxisModel.AngleZero = AngularAxisModel.AngleZero.THREE_OCLOCK,
 ) : AngularAxisModel<AngularValue> {
     override fun getTickValues(): List<AngularValue> = tickValues
 
@@ -118,6 +117,5 @@ public fun rememberAngularValueAxisModel(
         }
     },
     angleDirection: AngularAxisModel.AngleDirection = AngularAxisModel.AngleDirection.COUNTERCLOCKWISE,
-    angleZero: AngularAxisModel.AngleZero = AngularAxisModel.AngleZero.THREE_OCLOCK
-): AngularValueAxisModel =
-    remember(tickValues, angleDirection, angleZero) { AngularValueAxisModel(tickValues, angleDirection, angleZero) }
+    angleZero: AngularAxisModel.AngleZero = AngularAxisModel.AngleZero.THREE_OCLOCK,
+): AngularValueAxisModel = remember(tickValues, angleDirection, angleZero) { AngularValueAxisModel(tickValues, angleDirection, angleZero) }

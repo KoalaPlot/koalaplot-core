@@ -27,7 +27,7 @@ public fun <X, Y> XYGraphScope<X, Y>.XYAnnotation(
         modifier = modifier.fillMaxSize(),
         content = {
             Box { content() }
-        }
+        },
     ) { measurables: List<Measurable>, constraints: Constraints ->
         layout(constraints.maxWidth, constraints.maxHeight) {
             val size = Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat())
@@ -56,9 +56,10 @@ public fun <X, Y> XYGraphScope<X, Y>.XYAnnotation(
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.VerticalLineAnnotation(
     location: X,
-    lineStyle: LineStyle
+    lineStyle: LineStyle,
+    modifier: Modifier = Modifier,
 ) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas(modifier = modifier.fillMaxSize()) {
         val x = xAxisModel.computeOffset(location) * size.width
 
         drawLine(
@@ -69,7 +70,7 @@ public fun <X, Y> XYGraphScope<X, Y>.VerticalLineAnnotation(
             pathEffect = lineStyle.pathEffect,
             alpha = lineStyle.alpha,
             colorFilter = lineStyle.colorFilter,
-            blendMode = lineStyle.blendMode
+            blendMode = lineStyle.blendMode,
         )
     }
 }
@@ -80,9 +81,10 @@ public fun <X, Y> XYGraphScope<X, Y>.VerticalLineAnnotation(
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.HorizontalLineAnnotation(
     location: Y,
-    lineStyle: LineStyle
+    lineStyle: LineStyle,
+    modifier: Modifier = Modifier,
 ) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas(modifier = modifier.fillMaxSize()) {
         val y = yAxisModel.computeOffset(location) * size.height
 
         drawLine(
@@ -93,7 +95,7 @@ public fun <X, Y> XYGraphScope<X, Y>.HorizontalLineAnnotation(
             pathEffect = lineStyle.pathEffect,
             alpha = lineStyle.alpha,
             colorFilter = lineStyle.colorFilter,
-            blendMode = lineStyle.blendMode
+            blendMode = lineStyle.blendMode,
         )
     }
 }

@@ -27,20 +27,20 @@ public sealed interface AngularValue
  * An [AngularValue] in units of Degrees.
  */
 @JvmInline
-public value class Degrees(public val value: Double) : AngularValue {
-    public override fun toString(): String {
-        return value.toString()
-    }
+public value class Degrees(
+    public val value: Double,
+) : AngularValue {
+    public override fun toString(): String = value.toString()
 }
 
 /**
  * An [AngularValue] in units of Radians.
  */
 @JvmInline
-public value class Radians(public val value: Double) : AngularValue {
-    public override fun toString(): String {
-        return value.toString()
-    }
+public value class Radians(
+    public val value: Double,
+) : AngularValue {
+    public override fun toString(): String = value.toString()
 }
 
 /**
@@ -82,57 +82,66 @@ public inline val Int.deg: Degrees get() = Degrees(this.toDouble())
 /**
  * Returns an [AngularValue] as [Radians].
  */
-public fun AngularValue.toRadians(): Radians {
-    return when (this) {
-        is Radians -> this
-        is Degrees -> toRadians()
-    }
+public fun AngularValue.toRadians(): Radians = when (this) {
+    is Radians -> this
+    is Degrees -> toRadians()
 }
 
 /**
  * Returns an [AngularValue] as [Degrees].
  */
-public fun AngularValue.toDegrees(): Degrees {
-    return when (this) {
-        is Radians -> toDegrees()
-        is Degrees -> this
-    }
+public fun AngularValue.toDegrees(): Degrees = when (this) {
+    is Radians -> toDegrees()
+    is Degrees -> this
 }
 
 /**
  * Polar to cartesian coordinate transformation.
  */
-internal fun polarToCartesian(radius: Float, angle: Degrees): Offset = polarToCartesian(radius, angle.toRadians())
+internal fun polarToCartesian(
+    radius: Float,
+    angle: Degrees,
+): Offset = polarToCartesian(radius, angle.toRadians())
 
 /**
  * Polar to cartesian coordinate transformation.
  */
-internal fun polarToCartesian(radius: Float, angle: Radians): Offset {
-    return Offset((radius * cos(angle.value)).toFloat(), (radius * sin(angle.value)).toFloat())
-}
+internal fun polarToCartesian(
+    radius: Float,
+    angle: Radians,
+): Offset = Offset((radius * cos(angle.value)).toFloat(), (radius * sin(angle.value)).toFloat())
 
-internal fun polarToCartesian(radius: Float, angle: AngularValue): Offset {
-    return polarToCartesian(radius, angle.toRadians())
-}
+internal fun polarToCartesian(
+    radius: Float,
+    angle: AngularValue,
+): Offset = polarToCartesian(radius, angle.toRadians())
 
 internal fun cos(angle: AngularValue): Double = cos(angle.toRadians().value)
+
 internal fun sin(angle: AngularValue): Double = sin(angle.toRadians().value)
 
 internal operator fun Degrees.plus(other: Degrees): Degrees = Degrees(this.value + other.value)
+
 internal operator fun Degrees.minus(other: Degrees): Degrees = Degrees(this.value - other.value)
+
 internal operator fun Degrees.div(other: Float): Degrees = Degrees(this.value / other)
 
 internal operator fun Radians.plus(other: Radians): Radians = Radians(this.value + other.value)
+
 internal operator fun Radians.minus(other: Radians): Radians = Radians(this.value - other.value)
+
 internal operator fun Radians.div(other: Float): Radians = Radians(this.value / other)
 
-internal operator fun AngularValue.plus(other: AngularValue): AngularValue =
-    Degrees(this.toDegrees().value + other.toDegrees().value)
-internal operator fun AngularValue.minus(other: AngularValue): AngularValue =
-    Degrees(this.toDegrees().value - other.toDegrees().value)
+internal operator fun AngularValue.plus(other: AngularValue): AngularValue = Degrees(this.toDegrees().value + other.toDegrees().value)
+
+internal operator fun AngularValue.minus(other: AngularValue): AngularValue = Degrees(this.toDegrees().value - other.toDegrees().value)
+
 internal operator fun AngularValue.div(other: Float): AngularValue = Degrees(this.toDegrees().value / other)
 
-internal data class PolarCoordinate(val radius: Float, val angle: AngularValue)
+internal data class PolarCoordinate(
+    val radius: Float,
+    val angle: AngularValue,
+)
 
 /**
  * Cartesian to polar coordinate transformation.
@@ -155,7 +164,10 @@ internal fun cartesianToPolar(offset: Offset): PolarCoordinate {
  * Computes the 2 possible angles, in radians, that correspond to the provided y coordinate
  * and radius.
  */
-internal fun y2theta(y: Float, radius: Float): Pair<Float, Float> {
+internal fun y2theta(
+    y: Float,
+    radius: Float,
+): Pair<Float, Float> {
     val theta = asin(y / radius)
     return Pair(theta, (PI - theta).toFloat())
 }
@@ -163,9 +175,7 @@ internal fun y2theta(y: Float, radius: Float): Pair<Float, Float> {
 /**
  * Returns the edge-length of a square circumscribed by a circle with the provided [diameter].
  */
-internal fun circumscribedSquareSize(diameter: Float): Float {
-    return diameter / sqrt(2.0f)
-}
+internal fun circumscribedSquareSize(diameter: Float): Float = diameter / sqrt(2.0f)
 
 internal fun Path.moveTo(offset: Offset) {
     moveTo(offset.x, offset.y)
@@ -179,9 +189,7 @@ internal fun Path.lineTo(offset: Offset) {
  * Creates constraints with a fixed width and original height.
  */
 @Stable
-internal fun Constraints.fixedWidth(
-    width: Int
-): Constraints {
+internal fun Constraints.fixedWidth(width: Int): Constraints {
     require(width >= 0) {
         "width($width) must be >= 0"
     }
@@ -192,9 +200,7 @@ internal fun Constraints.fixedWidth(
  * Creates constraints with a fixed height and original width.
  */
 @Stable
-internal fun Constraints.fixedHeight(
-    height: Int
-): Constraints {
+internal fun Constraints.fixedHeight(height: Int): Constraints {
     require(height >= 0) {
         "height($height) must be >= 0"
     }

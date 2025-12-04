@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.movableContentOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import io.github.koalaplot.core.legend.LegendLocation
@@ -26,8 +28,10 @@ public fun ChartLayout(
     title: @Composable () -> Unit = {},
     legend: @Composable () -> Unit = {},
     legendLocation: LegendLocation = KoalaPlotTheme.legendLocation,
-    content: @Composable () -> Unit = {}
+    content: @Composable () -> Unit = {},
 ) {
+    val content = remember { movableContentOf { content() } }
+
     Column(modifier = modifier) {
         Box(modifier = Modifier.align(Alignment.CenterHorizontally)) {
             title.invoke()

@@ -14,13 +14,9 @@ import kotlin.math.sqrt
  * Utility functions related to vector type operations.
  */
 
-internal operator fun IntSize.minus(other: IntSize): IntSize {
-    return IntSize(this.width - other.width, this.height - other.height)
-}
+internal operator fun IntSize.minus(other: IntSize): IntSize = IntSize(this.width - other.width, this.height - other.height)
 
-internal fun IntSize.length(): Float {
-    return sqrt((width * width + height * height).toDouble()).toFloat()
-}
+internal fun IntSize.length(): Float = sqrt((width * width + height * height).toDouble()).toFloat()
 
 internal fun IntOffset.toVector(): Vector = Vector(x.toFloat(), y.toFloat())
 
@@ -29,7 +25,9 @@ internal fun Vector.toIntOffset(): IntOffset {
     return IntOffset(values[0].toInt(), values[1].toInt())
 }
 
-internal data class Vector(val values: List<Float>) {
+internal data class Vector(
+    val values: List<Float>,
+) {
     /**
      * Creates a new 2d vector.
      */
@@ -40,9 +38,7 @@ internal data class Vector(val values: List<Float>) {
     // vector * scalar
     internal operator fun times(scalar: Float): Vector = Vector(values.map { it * scalar })
 
-    internal operator fun div(f: Float): Vector {
-        return times(1 / f)
-    }
+    internal operator fun div(f: Float): Vector = times(1 / f)
 
     /**
      * Dot product of 2 vectors.
@@ -61,7 +57,7 @@ internal data class Vector(val values: List<Float>) {
         return Vector(
             values.mapIndexed { index, i ->
                 i + vector.values[index]
-            }
+            },
         )
     }
 
@@ -70,17 +66,15 @@ internal data class Vector(val values: List<Float>) {
         return Vector(
             values.mapIndexed { index, i ->
                 i - vector.values[index]
-            }
+            },
         )
     }
 
-    internal fun norm(): Float {
-        return sqrt(
-            values.fold(0f) { acc, fl ->
-                acc + fl * fl
-            }
-        )
-    }
+    internal fun norm(): Float = sqrt(
+        values.fold(0f) { acc, fl ->
+            acc + fl * fl
+        },
+    )
 }
 
 // scalar * vector
@@ -95,7 +89,7 @@ internal fun IntOffset.rotate(angle: Int): IntOffset {
     val angleRad = angle * Deg2Rad
     return IntOffset(
         (x * cos(angleRad) - y * sin(angleRad)).roundToInt(),
-        (x * sin(angleRad) + y * cos(angleRad)).roundToInt()
+        (x * sin(angleRad) + y * cos(angleRad)).roundToInt(),
     )
 }
 
@@ -108,11 +102,14 @@ internal fun Vector.rotate(angle: Float): Vector {
     val angleRad = angle * Deg2Rad
     return Vector(
         (values[0] * cos(angleRad) - values[1] * sin(angleRad)).toFloat(),
-        (values[0] * sin(angleRad) + values[1] * cos(angleRad)).toFloat()
+        (values[0] * sin(angleRad) + values[1] * cos(angleRad)).toFloat(),
     )
 }
 
 /**
  * Computes the unit vector representing a line between the two points [p1] and [p2].
  */
-internal fun line(p1: Vector, p2: Vector): Vector = (p2 - p1) / (p2 - p1).norm()
+internal fun line(
+    p1: Vector,
+    p2: Vector,
+): Vector = (p2 - p1) / (p2 - p1).norm()

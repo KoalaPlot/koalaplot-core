@@ -8,7 +8,6 @@ import androidx.compose.ui.unit.IntSize
  * Interface for handling pan fling gestures
  */
 internal interface PanFlingHandler {
-
     /**
      * Processes a pan fling gesture with the given parameters
      *

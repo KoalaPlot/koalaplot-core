@@ -58,16 +58,12 @@ internal fun <X, Y> List<Point<X, Y>>.toXList(): List<X> = object : AbstractList
     override val size: Int
         get() = this@toXList.size
 
-    override fun get(index: Int): X {
-        return this@toXList[index].x
-    }
+    override fun get(index: Int): X = this@toXList[index].x
 }
 
 internal fun <X, Y> List<Point<X, Y>>.toYList(): List<Y> = object : AbstractList<Y>() {
     override val size: Int
         get() = this@toYList.size
 
-    override fun get(index: Int): Y {
-        return this@toYList[index].y
-    }
+    override fun get(index: Int): Y = this@toYList[index].y
 }

@@ -18,20 +18,20 @@ class FloatLinearAxisModelTest {
             500.dp,
             listOf(
                 0f,
-                10f
-            )
+                10f,
+            ),
         )
         testLinearAxisMajorTicks(
             0f..10f,
             50.dp,
             500.dp,
-            List(11) { it * 1f }
+            List(11) { it * 1f },
         )
         testLinearAxisMajorTicks(
             0f..10f,
             100.dp,
             500.dp,
-            List(6) { it * 2f }
+            List(6) { it * 2f },
         )
     }
 
@@ -43,20 +43,20 @@ class FloatLinearAxisModelTest {
             500.dp,
             listOf(
                 -10f,
-                0f
-            )
+                0f,
+            ),
         )
         testLinearAxisMajorTicks(
             -10f..0f,
             50.dp,
             500.dp,
-            List(11) { it * -1f }.reversed()
+            List(11) { it * -1f }.reversed(),
         )
         testLinearAxisMajorTicks(
             -10f..0f,
             100.dp,
             500.dp,
-            List(6) { it * -2f }.reversed()
+            List(6) { it * -2f }.reversed(),
         )
     }
 
@@ -68,20 +68,20 @@ class FloatLinearAxisModelTest {
             500.dp,
             listOf(
                 0f,
-                1f
-            )
+                1f,
+            ),
         )
         testLinearAxisMajorTicks(
             0f..1f,
             50.dp,
             500.dp,
-            List(11) { it * 0.1f }
+            List(11) { it * 0.1f },
         )
         testLinearAxisMajorTicks(
             0f..1f,
             100.dp,
             500.dp,
-            List(6) { it * 0.2f }
+            List(6) { it * 0.2f },
         )
     }
 
@@ -93,20 +93,20 @@ class FloatLinearAxisModelTest {
             500.dp,
             listOf(
                 0f,
-                100f
-            )
+                100f,
+            ),
         )
         testLinearAxisMajorTicks(
             0f..100f,
             50.dp,
             500.dp,
-            List(11) { it * 10f }
+            List(11) { it * 10f },
         )
         testLinearAxisMajorTicks(
             0f..100f,
             100.dp,
             500.dp,
-            List(6) { it * 20f }
+            List(6) { it * 20f },
         )
     }
 
@@ -116,16 +116,17 @@ class FloatLinearAxisModelTest {
             10f..90f,
             50.dp,
             500.dp,
-            List(9) { it * 10f + 10f }
+            List(9) { it * 10f + 10f },
         )
         testLinearAxisMajorTicks(
             10f..90f,
             100.dp,
             500.dp,
-            List(4) { it * 20f + 20f }
+            List(4) { it * 20f + 20f },
         )
     }
 
+    @Suppress("ktlint:standard:argument-list-wrapping")
     @Test
     fun testComputeMinorTickValues() {
         testLinearAxisMinorTicks(
@@ -141,8 +142,8 @@ class FloatLinearAxisModelTest {
                 12.4f, 12.8f, 13.2f, 13.6f,
                 14.4f, 14.8f, 15.2f, 15.6f,
                 16.4f, 16.8f, 17.2f, 17.6f,
-                18.4f, 18.8f, 19.2f, 19.6f
-            )
+                18.4f, 18.8f, 19.2f, 19.6f,
+            ),
         )
     }
 
@@ -175,7 +176,7 @@ class FloatLinearAxisModelTest {
         val testPoints = listOf(
             30f to 0.3f,
             0f to 0.0f,
-            100f to 1.0f
+            100f to 1.0f,
         )
 
         FloatLinearAxisModel(0f..100f, minViewExtent = 10f, maxViewExtent = 100f).let { axisModel ->
@@ -196,7 +197,7 @@ class FloatLinearAxisModelTest {
         val testPoints = listOf(
             0.3f to 30f,
             0.0f to 0f,
-            1.0f to 100f
+            1.0f to 100f,
         )
 
         FloatLinearAxisModel(0f..100f, minViewExtent = 10f, maxViewExtent = 100f).let { axisModel ->
@@ -217,7 +218,7 @@ private fun testLinearAxisMajorTicks(
     range: ClosedFloatingPointRange<Float>,
     minTickSpacing: Dp,
     axisLength: Dp,
-    expected: List<Float>
+    expected: List<Float>,
 ) {
     val axis = FloatLinearAxisModel(range, minimumMajorTickSpacing = minTickSpacing)
     val ticks = axis.computeTickValues(axisLength).majorTickValues

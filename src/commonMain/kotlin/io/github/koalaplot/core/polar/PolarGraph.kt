@@ -59,7 +59,10 @@ public interface PolarGraphScope<T> : HoverableElementAreaScope {
      * Transforms the provided [point] from polar plot axis coordinates to cartesian coordinates for on-screen
      * drawing, provided a [size] of the drawing area.
      */
-    public fun polarToCartesian(point: PolarPoint<Float, T>, size: Size): Offset
+    public fun polarToCartesian(
+        point: PolarPoint<Float, T>,
+        size: Size,
+    ): Offset
 }
 
 /**
@@ -69,7 +72,7 @@ public interface PolarGraphScope<T> : HoverableElementAreaScope {
  */
 public enum class RadialGridType {
     CIRCLES,
-    LINES
+    LINES,
 }
 
 /**
@@ -87,7 +90,7 @@ public data class PolarGraphProperties(
     val angularAxisGridLineStyle: LineStyle?,
     val angularLabelGap: Dp,
     val radialLabelGap: Dp,
-    val background: AreaStyle?
+    val background: AreaStyle?,
 )
 
 /**
@@ -97,6 +100,8 @@ public object PolarGraphDefaults {
     /**
      * Default values for [PolarGraphProperties].
      */
+    @Suppress("ComposableNaming")
+    @Deprecated("Use polarGraphPropertyDefaults", ReplaceWith("polarGraphPropertyDefaults()"))
     @Composable
     public fun PolarGraphPropertyDefaults(): PolarGraphProperties = PolarGraphProperties(
         CIRCLES,
@@ -104,7 +109,20 @@ public object PolarGraphDefaults {
         KoalaPlotTheme.axis.majorGridlineStyle,
         KoalaPlotTheme.sizes.gap,
         KoalaPlotTheme.sizes.gap,
-        null
+        null,
+    )
+
+    /**
+     * Default values for [PolarGraphProperties].
+     */
+    @Composable
+    public fun polarGraphPropertyDefaults(): PolarGraphProperties = PolarGraphProperties(
+        CIRCLES,
+        KoalaPlotTheme.axis.majorGridlineStyle,
+        KoalaPlotTheme.axis.majorGridlineStyle,
+        KoalaPlotTheme.sizes.gap,
+        KoalaPlotTheme.sizes.gap,
+        null,
     )
 }
 
@@ -130,15 +148,17 @@ public fun <T> PolarGraph(
     angularAxisLabels: @Composable (T) -> Unit,
     modifier: Modifier = Modifier,
     polarGraphProperties: PolarGraphProperties = PolarGraphDefaults.PolarGraphPropertyDefaults(),
-    content: @Composable PolarGraphScope<T>.() -> Unit
+    content: @Composable PolarGraphScope<T>.() -> Unit,
 ) {
     HoverableElementArea(modifier = modifier) {
         val scope = object : PolarGraphScope<T>, HoverableElementAreaScope by this {
             override val radialAxisModel = radialAxisModel
             override val angularAxisModel = angularAxisModel
-            override fun polarToCartesian(point: PolarPoint<Float, T>, size: Size): Offset {
-                return polarToCartesianPlot(point, angularAxisModel, radialAxisModel, size)
-            }
+
+            override fun polarToCartesian(
+                point: PolarPoint<Float, T>,
+                size: Size,
+            ): Offset = polarToCartesianPlot(point, angularAxisModel, radialAxisModel, size)
         }
 
         Layout(
@@ -161,11 +181,11 @@ public fun <T> PolarGraph(
                             clipPath(clipPath) {
                                 this@drawWithContent.drawContent()
                             }
-                        }
+                        },
                     ) { scope.content() }
                 }
             },
-            measurePolicy = PolarGraphMeasurePolicy(angularAxisModel, radialAxisModel, polarGraphProperties)
+            measurePolicy = PolarGraphMeasurePolicy(angularAxisModel, radialAxisModel, polarGraphProperties),
         )
     }
 }
@@ -197,7 +217,7 @@ private fun <T> polarToCartesianPlot(
     point: PolarPoint<Float, T>,
     angularAxisModel: AngularAxisModel<T>,
     radialAxisModel: FloatRadialAxisModel,
-    size: Size
+    size: Size,
 ): Offset {
     // Transform the angle to screen coordinates.
     val theta = angularAxisModel.toPolarAngle(angularAxisModel.computeOffset(point.theta))
@@ -209,15 +229,16 @@ private fun <T> polarToCartesianPlot(
 private class PolarGraphMeasurePolicy<T>(
     private val angularAxisModel: AngularAxisModel<T>,
     private val radialAxisModel: FloatRadialAxisModel,
-    private val plotProperties: PolarGraphProperties
+    private val plotProperties: PolarGraphProperties,
 ) : MultiContentMeasurePolicy {
     private val gridIndex = 0
     private val radialAxisIndex = 1
     private val angularAxisIndex = 2
     private val contentIndex = 3
+
     override fun MeasureScope.measure(
         measurables: List<List<Measurable>>,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
         val grid = measurables[gridIndex][0]
         val radialAxisLabelMeasurables = measurables[radialAxisIndex]
@@ -239,13 +260,13 @@ private class PolarGraphMeasurePolicy<T>(
                     (
                         constraints.maxWidth / 2.0 -
                             (plotRadius + plotProperties.angularLabelGap.toPx()) * abs(cos(offset))
-                        ).toInt(),
+                    ).toInt(),
                     0,
                     (
                         constraints.maxHeight / 2.0 -
                             (plotRadius + plotProperties.angularLabelGap.toPx()) * abs(sin(offset))
-                        ).toInt()
-                )
+                    ).toInt(),
+                ),
             )
         }
 
@@ -258,13 +279,13 @@ private class PolarGraphMeasurePolicy<T>(
 
         val radialAxisLabelPlaceables = radialAxisLabelMeasurables.map {
             it.measure(
-                Constraints(0, plotRadius.toInt(), 0, (plotRadius / radialAxisLabelMeasurables.size).toInt())
+                Constraints(0, plotRadius.toInt(), 0, (plotRadius / radialAxisLabelMeasurables.size).toInt()),
             )
         }
 
         val plotSize = calculatePlotSize(
             plotRadius + plotProperties.angularLabelGap.toPx(),
-            angularAxisLabelPlaceables.map { Size(it.width.toFloat(), it.height.toFloat()) }
+            angularAxisLabelPlaceables.map { Size(it.width.toFloat(), it.height.toFloat()) },
         )
 
         return layout(plotSize.width.roundToInt(), plotSize.height.roundToInt()) {
@@ -278,10 +299,10 @@ private class PolarGraphMeasurePolicy<T>(
                 val labelOffset = Offset(
                     (
                         plotSize.width / 2.0f + (plotRadius + plotProperties.angularLabelGap.toPx()) * cos(angle)
-                        ).toFloat(),
+                    ).toFloat(),
                     (
                         plotSize.height / 2.0f + (plotRadius + plotProperties.angularLabelGap.toPx()) * sin(angle)
-                        ).toFloat()
+                    ).toFloat(),
                 ) + computeLabelPositionOffset(angle, label)
 
                 angularAxisLabelPlaceables[index].place(labelOffset.x.toInt(), labelOffset.y.toInt())
@@ -291,7 +312,7 @@ private class PolarGraphMeasurePolicy<T>(
                 val radius = radialAxisModel.computeOffset(radialAxisModel.tickValues[index]) * plotRadius
                 placeable.place(
                     (plotSize.width / 2f + plotProperties.radialLabelGap.toPx()).toInt(),
-                    ((plotSize.height - placeable.height) / 2f - radius).toInt()
+                    ((plotSize.height - placeable.height) / 2f - radius).toInt(),
                 )
             }
         }
@@ -303,13 +324,16 @@ private class PolarGraphMeasurePolicy<T>(
      *
      * @param plotRadius The radius of the outside edge of the plot grid + label gap.
      */
-    private fun calculatePlotSize(plotRadius: Float, labelSizes: List<Size>): Size {
+    private fun calculatePlotSize(
+        plotRadius: Float,
+        labelSizes: List<Size>,
+    ): Size {
         val rects = doRadialLabelLayout(
             plotRadius,
             angularAxisModel.getTickValues().map {
                 angularAxisModel.toPolarAngle(angularAxisModel.computeOffset(it))
             },
-            labelSizes
+            labelSizes,
         )
 
         var maxX = plotRadius
@@ -341,16 +365,16 @@ private class PolarGraphMeasurePolicy<T>(
     private fun calculatePlotRadius(
         labelGap: Float, // Label gap in pixels
         constraints: Constraints,
-        angularAxisLabelMeasurables: List<Measurable>
+        angularAxisLabelMeasurables: List<Measurable>,
     ): Float = calculatePlotRadius(
         labelGap,
         constraints,
         angularAxisLabelMeasurables.map {
             Size(
                 it.maxIntrinsicWidth(constraints.maxHeight / 2).toFloat(),
-                it.maxIntrinsicHeight(constraints.maxWidth / 2).toFloat()
+                it.maxIntrinsicHeight(constraints.maxWidth / 2).toFloat(),
             )
-        }
+        },
     )
 
     /**
@@ -361,19 +385,19 @@ private class PolarGraphMeasurePolicy<T>(
     private fun calculatePlotRadius(
         labelGap: Float, // Label gap in pixels
         constraints: Constraints,
-        angularAxisLabelPlaceables: List<Placeable>
+        angularAxisLabelPlaceables: List<Placeable>,
     ): Float = calculatePlotRadius(
         labelGap,
         constraints,
         angularAxisLabelPlaceables.map {
             Size(it.width.toFloat(), it.height.toFloat())
-        }
+        },
     )
 
     private fun calculatePlotRadius(
         labelGap: Float, // Label gap in pixels
         constraints: Constraints,
-        sizes: List<Size>
+        sizes: List<Size>,
     ): Float {
         val maxR =
             maximize(0.0, min(constraints.maxWidth, constraints.maxHeight) / 2.0, tolerance = 1E-4) { radius ->
@@ -391,9 +415,10 @@ private class PolarGraphMeasurePolicy<T>(
      * @param angle Angle in radians
      * @param label Label to have its offset computed
      */
-    private fun computeLabelPositionOffset(angle: AngularValue, label: Placeable): Offset {
-        return computeLabelPositionOffset(angle, Size(label.width.toFloat(), label.height.toFloat()))
-    }
+    private fun computeLabelPositionOffset(
+        angle: AngularValue,
+        label: Placeable,
+    ): Offset = computeLabelPositionOffset(angle, Size(label.width.toFloat(), label.height.toFloat()))
 
     /**
      * Computes how much a label should be offset to place it's anchor
@@ -402,18 +427,19 @@ private class PolarGraphMeasurePolicy<T>(
      * @param angle Angle in radians
      * @param label Size of the label to have its offset computed
      */
-    private fun computeLabelPositionOffset(angle: AngularValue, label: Size): Offset {
-        return when {
-            topSector.contains(angle) -> Offset(-label.width / 2f, -label.height)
-            bottomSector.contains(angle) -> Offset(-label.width / 2.0f, 0f)
-            rightSector.contains(angle) -> Offset(0f, -label.height / 2.0f)
-            leftSector.contains(angle) -> Offset(-label.width, -label.height / 2.0f)
-            topRightSector.contains(angle) -> Offset(0f, -label.height)
-            bottomRightSector.contains(angle) -> Offset(0f, 0f)
-            bottomLeftSector.contains(angle) -> Offset(-label.width, 0f)
-            topLeftSector.contains(angle) -> Offset(-label.width, -label.height)
-            else -> Offset(0f, 0f) // shouldn't happen
-        }
+    private fun computeLabelPositionOffset(
+        angle: AngularValue,
+        label: Size,
+    ): Offset = when {
+        topSector.contains(angle) -> Offset(-label.width / 2f, -label.height)
+        bottomSector.contains(angle) -> Offset(-label.width / 2.0f, 0f)
+        rightSector.contains(angle) -> Offset(0f, -label.height / 2.0f)
+        leftSector.contains(angle) -> Offset(-label.width, -label.height / 2.0f)
+        topRightSector.contains(angle) -> Offset(0f, -label.height)
+        bottomRightSector.contains(angle) -> Offset(0f, 0f)
+        bottomLeftSector.contains(angle) -> Offset(-label.width, 0f)
+        topLeftSector.contains(angle) -> Offset(-label.width, -label.height)
+        else -> Offset(0f, 0f) // shouldn't happen
     }
 
     /**
@@ -424,7 +450,7 @@ private class PolarGraphMeasurePolicy<T>(
     private fun doRadialLabelLayout(
         radius: Float,
         labelAngles: List<AngularValue>,
-        labelSizes: List<Size>
+        labelSizes: List<Size>,
     ): List<Rect> = buildList {
         labelAngles.forEachIndexed { index, angle ->
             val labelOffset = polarToCartesian(radius, angle) + computeLabelPositionOffset(angle, labelSizes[index])
@@ -447,7 +473,10 @@ private class PolarGraphMeasurePolicy<T>(
  * Represents an angular sector of the full circle as a section between a min and max angle. Provides
  * for testing if an angle falls within the sector.
  */
-private data class AngularSector(val minAngle: AngularValue, val maxAngle: AngularValue) {
+private data class AngularSector(
+    val minAngle: AngularValue,
+    val maxAngle: AngularValue,
+) {
     val normalizedMin = normalize(minAngle.toDegrees().value)
     val normalizedMax = normalize(maxAngle.toDegrees().value)
 
@@ -485,6 +514,22 @@ private data class AngularSector(val minAngle: AngularValue, val maxAngle: Angul
  * @param content Content to display on the plot, see [PolarPlotSeries].
  */
 @ExperimentalKoalaPlotApi
+@Deprecated(
+    "Use PolarGraph overload with modifier in correct position.",
+    replaceWith = ReplaceWith(
+        """PolarGraph(
+            radialAxisModel,
+            angularAxisModel,
+            modifier,
+            radialAxisLabelText,
+            angularAxisLabelText,
+            polarGraphProperties,
+            content,
+        )
+    """,
+    ),
+)
+@Suppress("compose:param-order-check", "ktlint:compose:param-order-check")
 @Composable
 public fun <T> PolarGraph(
     radialAxisModel: FloatRadialAxisModel,
@@ -492,8 +537,43 @@ public fun <T> PolarGraph(
     radialAxisLabelText: (Float) -> String = { it.toString() },
     angularAxisLabelText: (T) -> String = { it.toString() },
     modifier: Modifier = Modifier,
-    polarGraphProperties: PolarGraphProperties = PolarGraphDefaults.PolarGraphPropertyDefaults(),
-    content: @Composable PolarGraphScope<T>.() -> Unit
+    polarGraphProperties: PolarGraphProperties = PolarGraphDefaults.polarGraphPropertyDefaults(),
+    content: @Composable PolarGraphScope<T>.() -> Unit,
+) {
+    PolarGraph(
+        radialAxisModel,
+        angularAxisModel,
+        modifier,
+        radialAxisLabelText,
+        angularAxisLabelText,
+        polarGraphProperties,
+        content,
+    )
+}
+
+/**
+ * A Graph using polar coordinates - a radial axis and an angular axis.
+ * Multiple series of data can be plotted on a polar graph as lines and/or shaded regions with or without
+ * symbols at each plotted point.
+ *
+ * @param T The data type for the angular axis
+ * @param radialAxisModel Provides the radial axis coordinate system
+ * @param angularAxisModel An [AngularAxisModel] providing the angular axis coordinate system
+ * @param radialAxisLabelText Provides strings for radial axis labels.
+ * @param angularAxisLabelText Provides strings for angular axis labels.
+ * @param polarGraphProperties Properties to customize plot styling.
+ * @param content Content to display on the plot, see [PolarPlotSeries].
+ */
+@ExperimentalKoalaPlotApi
+@Composable
+public fun <T> PolarGraph(
+    radialAxisModel: FloatRadialAxisModel,
+    angularAxisModel: AngularAxisModel<T>,
+    modifier: Modifier = Modifier,
+    radialAxisLabelText: (Float) -> String = { it.toString() },
+    angularAxisLabelText: (T) -> String = { it.toString() },
+    polarGraphProperties: PolarGraphProperties = PolarGraphDefaults.polarGraphPropertyDefaults(),
+    content: @Composable PolarGraphScope<T>.() -> Unit,
 ) {
     PolarGraph(
         radialAxisModel,
@@ -502,18 +582,18 @@ public fun <T> PolarGraph(
             Text(
                 radialAxisLabelText(it),
                 color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
             )
         },
         angularAxisLabels = {
             Text(
                 angularAxisLabelText(it),
                 color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
             )
         },
         modifier,
         polarGraphProperties,
-        content
+        content,
     )
 }

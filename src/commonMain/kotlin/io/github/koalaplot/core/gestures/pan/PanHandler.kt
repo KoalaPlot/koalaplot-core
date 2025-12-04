@@ -10,7 +10,6 @@ import io.github.koalaplot.core.gestures.GestureConfig
  * Interface for handling pan gestures
  */
 internal interface PanHandler {
-
     /**
      * Handles a pan gesture event
      *

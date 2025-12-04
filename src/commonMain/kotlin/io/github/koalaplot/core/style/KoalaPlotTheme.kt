@@ -34,13 +34,13 @@ public fun KoalaPlotTheme(
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
     axis: Axis = KoalaPlotTheme.axis,
     legendLocation: LegendLocation = KoalaPlotTheme.legendLocation,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
         LocalSizes provides sizes,
         LocalAnimationSpec provides animationSpec,
         LocalAxis provides axis,
-        LocalLegendLocation provides legendLocation
+        LocalLegendLocation provides legendLocation,
     ) {
         content()
     }
@@ -81,7 +81,7 @@ public object KoalaPlotTheme {
 public data class Sizes(
     val symbol: Dp = 8.dp,
     val gap: Dp = 8.dp,
-    val barWidth: Float = 0.8f
+    val barWidth: Float = 0.8f,
 )
 
 /**
@@ -112,12 +112,12 @@ public data class Axis(
     val xyGraphTickPosition: TickPosition = TickPosition.Outside,
     val majorGridlineStyle: LineStyle? = LineStyle(
         SolidColor(Color.LightGray),
-        strokeWidth = 0.dp
+        strokeWidth = 0.dp,
     ),
     val minorGridlineStyle: LineStyle? = LineStyle(
         SolidColor(Color.LightGray),
-        strokeWidth = 0.dp
-    )
+        strokeWidth = 0.dp,
+    ),
 )
 
 internal val LocalAxis = staticCompositionLocalOf { Axis() }

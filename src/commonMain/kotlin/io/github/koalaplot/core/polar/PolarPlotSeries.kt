@@ -41,7 +41,7 @@ public fun <T> PolarGraphScope<T>.PolarPlotSeries2(
     lineStyle: LineStyle? = null,
     areaStyle: AreaStyle? = null,
     symbols: (@Composable (PolarPoint<Float, T>) -> Unit)? = null,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
     PolarPlotSeries(data, modifier, lineStyle, areaStyle, { symbols?.invoke(it) }, animationSpec)
 }
@@ -66,7 +66,7 @@ public fun <T> PolarGraphScope<T>.PolarPlotSeries(
     lineStyle: LineStyle? = null,
     areaStyle: AreaStyle? = null,
     symbols: (@Composable HoverableElementAreaScope.(PolarPoint<Float, T>) -> Unit)? = null,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
     if (data.isEmpty()) return
 
@@ -91,7 +91,7 @@ public fun <T> PolarGraphScope<T>.PolarPlotSeries(
                     areaStyle.brush,
                     areaStyle.alpha,
                     colorFilter = areaStyle.colorFilter,
-                    blendMode = areaStyle.blendMode
+                    blendMode = areaStyle.blendMode,
                 )
             }
             if (lineStyle != null) {
@@ -101,7 +101,7 @@ public fun <T> PolarGraphScope<T>.PolarPlotSeries(
                     lineStyle.alpha,
                     style = Stroke(lineStyle.strokeWidth.toPx(), pathEffect = lineStyle.pathEffect),
                     colorFilter = lineStyle.colorFilter,
-                    blendMode = lineStyle.blendMode
+                    blendMode = lineStyle.blendMode,
                 )
             }
         }
@@ -129,7 +129,7 @@ private fun <T> PolarGraphScope<T>.Symbols(
                 data.indices.forEach {
                     Box { symbol.invoke(this@Symbols, data[it]) }
                 }
-            }
+            },
         ) { measurables: List<Measurable>, constraints: Constraints ->
             val size = Size(constraints.maxWidth.toFloat(), constraints.maxHeight.toFloat())
 

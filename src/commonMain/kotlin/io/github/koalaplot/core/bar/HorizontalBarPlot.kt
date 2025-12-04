@@ -1,5 +1,6 @@
 package io.github.koalaplot.core.bar
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -15,7 +16,7 @@ import io.github.koalaplot.core.xygraph.XYGraphScope
  */
 public data class DefaultHorizontalBarPlotEntry<X, Y>(
     public override val y: Y,
-    public override val x: BarPosition<X>
+    public override val x: BarPosition<X>,
 ) : HorizontalBarPlotEntry<X, Y>
 
 /**
@@ -38,13 +39,19 @@ public interface HorizontalBarPlotEntry<X, Y> {
 /**
  * Convenience function for creating a HorizontalBarPosition.
  */
-public fun <X> horizontalBarPosition(xMin: X, xMax: X): BarPosition<X> = DefaultBarPosition(xMin, xMax)
+public fun <X> horizontalBarPosition(
+    xMin: X,
+    xMax: X,
+): BarPosition<X> = DefaultBarPosition(xMin, xMax)
 
 /**
  * Convenience function for creating a HorizontalBarPlotEntry.
  */
-public fun <X, Y> horizontalBarPlotEntry(y: Y, xMin: X, xMax: X): HorizontalBarPlotEntry<X, Y> =
-    DefaultHorizontalBarPlotEntry(y, horizontalBarPosition(xMin, xMax))
+public fun <X, Y> horizontalBarPlotEntry(
+    y: Y,
+    xMin: X,
+    xMax: X,
+): HorizontalBarPlotEntry<X, Y> = DefaultHorizontalBarPlotEntry(y, horizontalBarPosition(xMin, xMax))
 
 /**
  * Defines a Composable function used to emit a horizontal bar.
@@ -78,14 +85,14 @@ public fun <Y> XYGraphScope<Float, Y>.HorizontalBarPlot(
     xData: List<Float>,
     yData: List<Y>,
     modifier: Modifier = Modifier,
-    bar: DefaultHorizontalBarComposable<Float, Y>,
+    bar: DefaultHorizontalBarComposable<Float, Y> = horizontalSolidBar(MaterialTheme.colorScheme.primary),
     barWidth: Float = 0.9f,
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */
+            // chart animation
             KoalaPlotTheme.animationSpec,
-        )
+        ),
 ) {
     require(xData.size == yData.size) { "xData and yData must be the same size." }
     HorizontalBarPlot(
@@ -95,7 +102,7 @@ public fun <Y> XYGraphScope<Float, Y>.HorizontalBarPlot(
         modifier,
         bar,
         barWidth,
-        startAnimationUseCase
+        startAnimationUseCase,
     )
 }
 
@@ -114,14 +121,14 @@ public fun <Y> XYGraphScope<Float, Y>.HorizontalBarPlot(
 public fun <X, Y, E : HorizontalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.HorizontalBarPlot(
     data: List<E>,
     modifier: Modifier = Modifier,
-    bar: DefaultHorizontalBarComposable<X, Y>,
+    bar: DefaultHorizontalBarComposable<X, Y> = horizontalSolidBar(MaterialTheme.colorScheme.primary),
     barWidth: Float = 0.9f,
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */
+            // chart animation
             KoalaPlotTheme.animationSpec,
-        )
+        ),
 ) {
     val dataAdapter = remember(data) {
         HorizontalEntryToGroupedEntryListAdapter(data)
@@ -134,33 +141,33 @@ public fun <X, Y, E : HorizontalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.Horizonta
             bar(series, index, GroupedEntryToHorizontalEntryAdapter(value))
         },
         maxBarGroupWidth = barWidth,
-        startAnimationUseCase = startAnimationUseCase
+        startAnimationUseCase = startAnimationUseCase,
     )
 }
 
 private class HorizontalEntryToGroupedEntryListAdapter<X, Y>(
-    val data: List<HorizontalBarPlotEntry<X, Y>>
+    val data: List<HorizontalBarPlotEntry<X, Y>>,
 ) : AbstractList<BarPlotGroupedPointEntry<Y, X>>() {
     override val size: Int
         get() = data.size
 
-    override fun get(index: Int): BarPlotGroupedPointEntry<Y, X> {
-        return HorizontalEntryToGroupedEntryAdapter(data[index])
-    }
+    override fun get(index: Int): BarPlotGroupedPointEntry<Y, X> = HorizontalEntryToGroupedEntryAdapter(data[index])
 }
 
-private class HorizontalEntryToGroupedEntryAdapter<X, Y>(val entry: HorizontalBarPlotEntry<X, Y>) :
-    BarPlotGroupedPointEntry<Y, X> {
+private class HorizontalEntryToGroupedEntryAdapter<X, Y>(
+    val entry: HorizontalBarPlotEntry<X, Y>,
+) : BarPlotGroupedPointEntry<Y, X> {
     override val i: Y = entry.y
     override val d: List<BarPosition<X>>
         get() = object : AbstractList<BarPosition<X>>() {
             override val size: Int = 1
+
             override fun get(index: Int): BarPosition<X> = entry.x
         }
 }
 
 internal class GroupedEntryToHorizontalEntryAdapter<X, Y>(
-    private val entry: BarPlotGroupedPointEntry<Y, X>
+    private val entry: BarPlotGroupedPointEntry<Y, X>,
 ) : HorizontalBarPlotEntry<X, Y> {
     override val y: Y
         get() = entry.i
@@ -177,6 +184,12 @@ internal class GroupedEntryToHorizontalEntryAdapter<X, Y>(
  * @param content A block which describes the content for the plot.
  */
 @Composable
+@Deprecated(
+    "Use HorizontalBarPlot with modifier as first parameter instead.",
+    replaceWith = ReplaceWith(
+        "HorizontalBarPlot(modifier, defaultBar, barWidth, startAnimationUseCase, content)",
+    ),
+)
 public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
     defaultBar: DefaultHorizontalBarComposable<X, Y> = horizontalSolidBar(Color.Blue),
     modifier: Modifier = Modifier,
@@ -184,10 +197,34 @@ public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */
+            // chart animation
             KoalaPlotTheme.animationSpec,
         ),
-    content: HorizontalBarPlotScope<X, Y>.() -> Unit
+    content: HorizontalBarPlotScope<X, Y>.() -> Unit,
+) {
+    HorizontalBarPlot(modifier, defaultBar, barWidth, startAnimationUseCase, content)
+}
+
+/**
+ * Creates a Horizontal Bar Plot.
+ *
+ * @param defaultBar A Composable to provide the bar if not specified on an individually added item.
+ * @param barWidth The fraction of space between adjacent x-axis bars that may be used. Must be between 0 and 1,
+ *  defaults to 0.9.
+ * @param content A block which describes the content for the plot.
+ */
+@Composable
+public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
+    modifier: Modifier = Modifier,
+    defaultBar: DefaultHorizontalBarComposable<X, Y> = horizontalSolidBar(Color.Blue),
+    barWidth: Float = 0.9f,
+    startAnimationUseCase: StartAnimationUseCase =
+        StartAnimationUseCase(
+            executionType = StartAnimationUseCase.ExecutionType.Default,
+            // chart animation
+            KoalaPlotTheme.animationSpec,
+        ),
+    content: HorizontalBarPlotScope<X, Y>.() -> Unit,
 ) {
     val scope = remember(content, defaultBar) { HorizontalBarPlotScopeImpl(defaultBar) }
     val data = remember(scope) {
@@ -202,7 +239,7 @@ public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
             data[index].second.invoke(this, series, index, value)
         },
         barWidth,
-        startAnimationUseCase
+        startAnimationUseCase,
     )
 }
 
@@ -215,15 +252,26 @@ public interface HorizontalBarPlotScope<X, Y> {
      * [xMin] to [xMax]. An optional [bar] can be provided to customize the Composable used to
      * generate the bar for this specific item.
      */
-    public fun item(y: Y, xMin: X, xMax: X, bar: (DefaultHorizontalBarComposable<X, Y>)? = null)
+    public fun item(
+        y: Y,
+        xMin: X,
+        xMax: X,
+        bar: (DefaultHorizontalBarComposable<X, Y>)? = null,
+    )
 }
 
-internal class HorizontalBarPlotScopeImpl<X, Y>(private val defaultBar: DefaultHorizontalBarComposable<X, Y>) :
-    HorizontalBarPlotScope<X, Y> {
+internal class HorizontalBarPlotScopeImpl<X, Y>(
+    private val defaultBar: DefaultHorizontalBarComposable<X, Y>,
+) : HorizontalBarPlotScope<X, Y> {
     val data: MutableMap<Y, Pair<HorizontalBarPlotEntry<X, Y>, DefaultHorizontalBarComposable<X, Y>>> =
         mutableMapOf()
 
-    override fun item(y: Y, xMin: X, xMax: X, bar: DefaultHorizontalBarComposable<X, Y>?) {
+    override fun item(
+        y: Y,
+        xMin: X,
+        xMax: X,
+        bar: DefaultHorizontalBarComposable<X, Y>?,
+    ) {
         data[y] = Pair(horizontalBarPlotEntry(y, xMin, xMax), bar ?: defaultBar)
     }
 }

@@ -14,13 +14,12 @@ import io.github.koalaplot.core.gestures.applyPanLocks
  * based on pointer events and gesture configurations
  */
 internal class PanHandlerImpl : PanHandler {
-
     override fun handle(
         size: IntSize,
         event: PointerEvent,
         gestureConfig: GestureConfig,
         velocityTracker: VelocityTracker,
-        onPanChange: (size: IntSize, pan: Offset) -> Boolean
+        onPanChange: (size: IntSize, pan: Offset) -> Boolean,
     ): Boolean {
         val panChange = event
             .calculatePan()

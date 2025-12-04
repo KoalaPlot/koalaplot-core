@@ -19,7 +19,10 @@ import kotlin.math.abs
  * the original composable, i.e. corresponding to positions relative to the content as if it wasn't rotated. Since
  * rotation occurs about the center, it corresponds to the same point in the content before and after rotation.
  */
-internal open class RotatedComposableAreaDelegate(private val area: IntSize, private val rotation: Float) {
+internal open class RotatedComposableAreaDelegate(
+    private val area: IntSize,
+    private val rotation: Float,
+) {
     // Compute the position of the anchor points relative to the center of the Composable
     protected val anchorPositions = buildMap {
         put(AnchorPoint.TopLeft, Vector(-area.width / 2f, -area.height / 2f).rotate(rotation))
@@ -28,12 +31,12 @@ internal open class RotatedComposableAreaDelegate(private val area: IntSize, pri
         put(AnchorPoint.RightMiddle, Vector(area.width / 2f, 0f).rotate(rotation))
         put(
             AnchorPoint.BottomRight,
-            Vector(area.width / 2f, area.height / 2f).rotate(rotation)
+            Vector(area.width / 2f, area.height / 2f).rotate(rotation),
         )
         put(AnchorPoint.BottomCenter, Vector(0f, area.height / 2f).rotate(rotation))
         put(
             AnchorPoint.BottomLeft,
-            Vector(-area.width / 2f, area.height / 2f).rotate(rotation)
+            Vector(-area.width / 2f, area.height / 2f).rotate(rotation),
         )
         put(AnchorPoint.LeftMiddle, Vector(-area.width / 2f, 0f).rotate(rotation))
         put(AnchorPoint.Center, Vector(0f, 0f))
@@ -45,7 +48,7 @@ internal open class RotatedComposableAreaDelegate(private val area: IntSize, pri
     val height: Int by lazy {
         abs(
             anchorPositions.values.maxOf { it.values[1] } -
-                anchorPositions.values.minOf { it.values[1] }
+                anchorPositions.values.minOf { it.values[1] },
         ).toInt()
     }
 
@@ -55,7 +58,7 @@ internal open class RotatedComposableAreaDelegate(private val area: IntSize, pri
     val width: Int by lazy {
         abs(
             anchorPositions.values.maxOf { it.values[0] } -
-                anchorPositions.values.minOf { it.values[0] }
+                anchorPositions.values.minOf { it.values[0] },
         ).toInt()
     }
 
@@ -103,19 +106,30 @@ internal open class RotatedComposableAreaDelegate(private val area: IntSize, pri
  * the original composable, i.e. corresponding to positions relative to the content as if it wasn't rotated. Since
  * rotation occurs about the center, it corresponds to the same point in the content before and after rotation.
  */
-internal class RotatedPlaceableDelegate(private val placeable: Placeable, rotation: Float) :
-    RotatedComposableAreaDelegate(IntSize(placeable.measuredWidth, placeable.measuredHeight), rotation) {
+internal class RotatedPlaceableDelegate(
+    private val placeable: Placeable,
+    rotation: Float,
+) : RotatedComposableAreaDelegate(IntSize(placeable.measuredWidth, placeable.measuredHeight), rotation) {
     /**
      * Places the rotated Placeable's AnchorPoint [ap] at [x], [y] in its parent's coordinate system.
      */
-    fun Placeable.PlacementScope.place(x: Int, y: Int, ap: AnchorPoint, zIndex: Float = 0f) {
+    fun Placeable.PlacementScope.place(
+        x: Int,
+        y: Int,
+        ap: AnchorPoint,
+        zIndex: Float = 0f,
+    ) {
         place(IntOffset(x, y), ap, zIndex)
     }
 
     /**
      * Places the rotated Placeable's AnchorPoint [ap] at [position] in its parent's coordinate system.
      */
-    fun Placeable.PlacementScope.place(position: IntOffset, ap: AnchorPoint, zIndex: Float = 0f) {
+    fun Placeable.PlacementScope.place(
+        position: IntOffset,
+        ap: AnchorPoint,
+        zIndex: Float = 0f,
+    ) {
         // Placeable.place positions the top left corner of the unrotated placeable
         // Compute the offset from the anchor point to that top left corner
         val offset: Vector = (Vector(placeable.width / 2f, placeable.height / 2f) + anchorPositions[ap]!!)

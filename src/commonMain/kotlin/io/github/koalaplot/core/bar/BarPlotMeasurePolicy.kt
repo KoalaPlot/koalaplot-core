@@ -24,11 +24,11 @@ internal class BarPlotMeasurePolicyVertical<X, Y, E : BarPlotGroupedPointEntry<X
     private val xyGraphScope: XYGraphScope<X, Y>,
     private val data: List<E>,
     private val maxBarGroupWidth: Float = 0.9f,
-    private val beta: Animatable<Float, AnimationVector1D>
+    private val beta: Animatable<Float, AnimationVector1D>,
 ) : MultiContentMeasurePolicy {
     override fun MeasureScope.measure(
         measurables: List<List<Measurable>>,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
         val barGroupInfos: MutableList<BarGroupInfo> = mutableListOf()
 
@@ -39,22 +39,24 @@ internal class BarPlotMeasurePolicyVertical<X, Y, E : BarPlotGroupedPointEntry<X
                 (
                     xyGraphScope.computeNeighborDistanceV(index, data) *
                         constraints.maxWidth * maxBarGroupWidth / element.d.size.coerceAtLeast(1)
-                    ).toInt()
+                ).toInt()
 
             element.d.forEachIndexed { i, verticalBarPosition ->
                 val barMin = (
-                    xyGraphScope.yAxisModel.computeOffset(verticalBarPosition.start)
+                    xyGraphScope.yAxisModel
+                        .computeOffset(verticalBarPosition.start)
                         .coerceIn(0f, 1f) * constraints.maxHeight
-                    ).roundToInt()
+                ).roundToInt()
                 val barMax = (
-                    xyGraphScope.yAxisModel.computeOffset(verticalBarPosition.end)
+                    xyGraphScope.yAxisModel
+                        .computeOffset(verticalBarPosition.end)
                         .coerceIn(0f, 1f) * constraints.maxHeight
-                    ).roundToInt()
+                ).roundToInt()
 
                 val height = abs(barMax - barMin) * beta.value
 
                 val p = measurables[index][i].measure(
-                    Constraints(minWidth = 0, maxWidth = scaledBarWidth).fixedHeight(height.roundToInt())
+                    Constraints(minWidth = 0, maxWidth = scaledBarWidth).fixedHeight(height.roundToInt()),
                 )
                 barInfos.add(BarInfo(p, barMin..barMax))
             }
@@ -76,10 +78,10 @@ internal class BarPlotMeasurePolicyVertical<X, Y, E : BarPlotGroupedPointEntry<X
                             xPos,
                             constraints.maxHeight - (
                                 max(
-                                    barGroupInfo.bars[index].range.start, barGroupInfo.bars[index].range.endInclusive
+                                    barGroupInfo.bars[index].range.start,
+                                    barGroupInfo.bars[index].range.endInclusive,
                                 ) * beta.value
-                                )
-                                .roundToInt()
+                            ).roundToInt(),
                         )
                     }
                     xPos += barGroupInfo.thickness
@@ -96,11 +98,11 @@ internal class BarPlotMeasurePolicyHorizontal<X, Y, E : BarPlotGroupedPointEntry
     private val xyGraphScope: XYGraphScope<X, Y>,
     private val data: List<E>,
     private val maxBarGroupWidth: Float = 0.9f,
-    private val beta: Animatable<Float, AnimationVector1D>
+    private val beta: Animatable<Float, AnimationVector1D>,
 ) : MultiContentMeasurePolicy {
     override fun MeasureScope.measure(
         measurables: List<List<Measurable>>,
-        constraints: Constraints
+        constraints: Constraints,
     ): MeasureResult {
         val barGroupInfos: MutableList<BarGroupInfo> = mutableListOf()
 
@@ -111,22 +113,24 @@ internal class BarPlotMeasurePolicyHorizontal<X, Y, E : BarPlotGroupedPointEntry
                 (
                     xyGraphScope.computeNeighborDistanceH(index, data) *
                         constraints.maxHeight * maxBarGroupWidth / element.d.size.coerceAtLeast(1)
-                    ).toInt()
+                ).toInt()
 
             element.d.forEachIndexed { i, barPosition ->
                 val barMin = (
-                    xyGraphScope.xAxisModel.computeOffset(barPosition.start)
+                    xyGraphScope.xAxisModel
+                        .computeOffset(barPosition.start)
                         .coerceIn(0f, 1f) * constraints.maxWidth
-                    ).roundToInt()
+                ).roundToInt()
                 val barMax = (
-                    xyGraphScope.xAxisModel.computeOffset(barPosition.end)
+                    xyGraphScope.xAxisModel
+                        .computeOffset(barPosition.end)
                         .coerceIn(0f, 1f) * constraints.maxWidth
-                    ).roundToInt()
+                ).roundToInt()
 
                 val length = abs(barMax - barMin) * beta.value
 
                 val p = measurables[index][i].measure(
-                    Constraints(minHeight = 0, maxHeight = scaledBarThickness).fixedWidth(length.roundToInt())
+                    Constraints(minHeight = 0, maxHeight = scaledBarThickness).fixedWidth(length.roundToInt()),
                 )
                 barInfos.add(BarInfo(p, barMin..barMax))
             }
@@ -148,9 +152,10 @@ internal class BarPlotMeasurePolicyHorizontal<X, Y, E : BarPlotGroupedPointEntry
                         barInfo.placeable.place(
                             (
                                 min(
-                                    barGroupInfo.bars[index].range.start, barGroupInfo.bars[index].range.endInclusive
+                                    barGroupInfo.bars[index].range.start,
+                                    barGroupInfo.bars[index].range.endInclusive,
                                 ) * beta.value
-                                ).roundToInt(),
+                            ).roundToInt(),
                             yPos,
                         )
                     }
@@ -180,13 +185,19 @@ private sealed interface BarOrientation {
  * @param placeable The placeable representing a single bar.
  * @param range The range of the bar in pixel coordinates.
  */
-private data class BarInfo(val placeable: Placeable, val range: ClosedRange<Int>)
+private data class BarInfo(
+    val placeable: Placeable,
+    val range: ClosedRange<Int>,
+)
 
 /**
  * Holds the [BarInfo] items for a bar group, e.g. all bars drawn side by side at the same axis coordinate (e.g.,
  * x-axis for vertical bars).
  */
-private data class BarGroupInfo(val thickness: Int, val bars: List<BarInfo>)
+private data class BarGroupInfo(
+    val thickness: Int,
+    val bars: List<BarInfo>,
+)
 
 /**
  * Computes the minimum x-axis distance to the data point neighbors to the data point at [index].
@@ -196,51 +207,45 @@ private data class BarGroupInfo(val thickness: Int, val bars: List<BarInfo>)
  */
 private fun <E : BarPlotGroupedPointEntry<X, Y>, X, Y> XYGraphScope<X, Y>.computeNeighborDistanceV(
     index: Int,
-    data: List<E>
-): Float {
-    return computeNeighborDistance(
-        xAxisModel,
-        xAxisState.majorTickOffsets.size,
-        index,
-        data
-    )
-}
+    data: List<E>,
+): Float = computeNeighborDistance(
+    xAxisModel,
+    xAxisState.majorTickOffsets.size,
+    index,
+    data,
+)
 
 private fun <E : BarPlotGroupedPointEntry<I, D>, I, D> XYGraphScope<D, I>.computeNeighborDistanceH(
     index: Int,
-    data: List<E>
-): Float {
-    return computeNeighborDistance(
-        yAxisModel,
-        yAxisState.majorTickOffsets.size,
-        index,
-        data
-    )
-}
+    data: List<E>,
+): Float = computeNeighborDistance(
+    yAxisModel,
+    yAxisState.majorTickOffsets.size,
+    index,
+    data,
+)
 
 private fun <E : BarPlotGroupedPointEntry<I, D>, I, D> computeNeighborDistance(
     axisModel: AxisModel<I>,
     numTicks: Int,
     index: Int,
-    data: List<E>
-): Float {
-    return if (index == 0) {
-        if (data.size == 1) {
-            1f / numTicks.coerceAtLeast(1)
-        } else {
-            val center = axisModel.computeOffset(data[index].i)
-            val right = axisModel.computeOffset(data[index + 1].i)
-            abs(center - right)
-        }
-    } else if (index == data.lastIndex) {
-        val center = axisModel.computeOffset(data[index].i)
-        val left = axisModel.computeOffset(data[index - 1].i)
-        abs(center - left)
+    data: List<E>,
+): Float = if (index == 0) {
+    if (data.size == 1) {
+        1f / numTicks.coerceAtLeast(1)
     } else {
-        val left = axisModel.computeOffset(data[index - 1].i)
         val center = axisModel.computeOffset(data[index].i)
         val right = axisModel.computeOffset(data[index + 1].i)
-
-        min(abs(center - left), abs(center - right))
+        abs(center - right)
     }
+} else if (index == data.lastIndex) {
+    val center = axisModel.computeOffset(data[index].i)
+    val left = axisModel.computeOffset(data[index - 1].i)
+    abs(center - left)
+} else {
+    val left = axisModel.computeOffset(data[index - 1].i)
+    val center = axisModel.computeOffset(data[index].i)
+    val right = axisModel.computeOffset(data[index + 1].i)
+
+    min(abs(center - left), abs(center - right))
 }

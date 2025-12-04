@@ -32,7 +32,7 @@ public fun BulletGraphs(
     modifier: Modifier = Modifier,
     gap: Dp = KoalaPlotTheme.sizes.gap,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
-    builder: BulletGraphScope.() -> Unit
+    builder: BulletGraphScope.() -> Unit,
 ) {
     val graphScope = remember(builder) { BulletGraphScope().apply(builder) }
 
@@ -49,7 +49,7 @@ public fun BulletGraphs(
             (
                 (constraints.maxHeight - gap.roundToPx() * graphScope.scopes.size - 1) /
                     graphScope.scopes.size.coerceAtLeast(1)
-                ).coerceAtLeast(0)
+            ).coerceAtLeast(0)
 
         builders.forEach { it.bulletHeight = bulletHeight }
 
@@ -88,7 +88,10 @@ public fun BulletGraphs(
 }
 
 @OptIn(ExperimentalKoalaPlotApi::class)
-private fun Density.calculateLabelWidthMaxConstraint(graphScope: BulletGraphScope, constraints: Constraints): Int {
+private fun Density.calculateLabelWidthMaxConstraint(
+    graphScope: BulletGraphScope,
+    constraints: Constraints,
+): Int {
     val labelWidthMaxConstraint = when (val labelWidth = graphScope.labelWidth) {
         is FixedFraction -> {
             (constraints.maxWidth * labelWidth.fraction).roundToInt()
@@ -109,7 +112,7 @@ private fun Density.calculateLabelWidthMaxConstraint(graphScope: BulletGraphScop
 private fun calculateLabelWidth(
     graphScope: BulletGraphScope,
     labelWidthMaxConstraint: Int,
-    labelPlaceable: List<Placeable>
+    labelPlaceable: List<Placeable>,
 ): Int {
     val labelWidth = graphScope.labelWidth
 
@@ -125,24 +128,24 @@ private fun calculateLabelWidth(
  */
 @BulletGraphDslMarker
 public data class BulletGraphScope
-@OptIn(ExperimentalKoalaPlotApi::class)
-constructor(
-    internal val scopes: MutableList<BulletBuilderScope<*>> = mutableListOf(),
-    public var labelWidth: LabelWidth = VariableFraction(@Suppress("MagicNumber") 0.25f),
-) {
-    /**
-     * Configures a bullet graph.
-     *
-     * @param axisModel Specifies the LinearAxisModel to use for the bullet.
-     * @param builder Callback function used to configure the bullet graph.
-     */
     @OptIn(ExperimentalKoalaPlotApi::class)
-    public fun <T> bullet(
-        axisModel: LinearAxisModel<T>,
-        builder: BulletBuilderScope<T>.() -> Unit
-    ) where T : Comparable<T>, T : Number {
-        val scope = BulletBuilderScope(axisModel)
-        scope.builder()
-        scopes.add(scope)
+    constructor(
+        internal val scopes: MutableList<BulletBuilderScope<*>> = mutableListOf(),
+        public var labelWidth: LabelWidth = VariableFraction(@Suppress("MagicNumber") 0.25f),
+    ) {
+        /**
+         * Configures a bullet graph.
+         *
+         * @param axisModel Specifies the LinearAxisModel to use for the bullet.
+         * @param builder Callback function used to configure the bullet graph.
+         */
+        @OptIn(ExperimentalKoalaPlotApi::class)
+        public fun <T> bullet(
+            axisModel: LinearAxisModel<T>,
+            builder: BulletBuilderScope<T>.() -> Unit,
+        ) where T : Comparable<T>, T : Number {
+            val scope = BulletBuilderScope(axisModel)
+            scope.builder()
+            scopes.add(scope)
+        }
     }
-}

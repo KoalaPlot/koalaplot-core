@@ -17,17 +17,20 @@ import io.github.koalaplot.core.xygraph.XYGraphScope
  * Specifies baseline coordinates for drawing filled areas on line charts.
  */
 public sealed interface AreaBaseline<X, Y> {
-
     /**
      * Specifies that the area should be drawn to a constant y-axis value across the x-axis range.
      */
-    public data class ConstantLine<X, Y>(val value: Y) : AreaBaseline<X, Y>
+    public data class ConstantLine<X, Y>(
+        val value: Y,
+    ) : AreaBaseline<X, Y>
 
     /**
      * Specifies an arbitrary line to which the area should be drawn. The number of values and their
      * x-axis coordinates must match the data provided to [LinePlot].
      */
-    public data class ArbitraryLine<X, Y>(val values: List<Point<X, Y>>) : AreaBaseline<X, Y>
+    public data class ArbitraryLine<X, Y>(
+        val values: List<Point<X, Y>>,
+    ) : AreaBaseline<X, Y>
 }
 
 /**
@@ -37,7 +40,10 @@ public sealed interface AreaBaseline<X, Y> {
  * @param areaStyle The style to apply to the area.
  *
  */
-public data class StackedAreaStyle(val lineStyle: LineStyle, val areaStyle: AreaStyle)
+public data class StackedAreaStyle(
+    val lineStyle: LineStyle,
+    val areaStyle: AreaStyle,
+)
 
 /**
  * An area plot that draws data as points and lines with a filled area to a baseline.
@@ -60,7 +66,7 @@ public fun <X, Y> XYGraphScope<X, Y>.AreaPlot2(
     modifier: Modifier = Modifier.Companion,
     lineStyle: LineStyle? = null,
     symbol: (@Composable (Point<X, Y>) -> Unit)? = null,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
     AreaPlot(data, areaBaseline, areaStyle, modifier, lineStyle, { symbol?.invoke(it) }, animationSpec)
 }
@@ -87,7 +93,7 @@ public fun <X, Y> XYGraphScope<X, Y>.AreaPlot(
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
     symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
     if (data.isEmpty()) return
 
@@ -98,7 +104,7 @@ public fun <X, Y> XYGraphScope<X, Y>.AreaPlot(
         symbol,
         areaStyle,
         areaBaseline,
-        animationSpec
+        animationSpec,
     ) { points: List<Point<X, Y>>, size: Size ->
         moveTo(scale(points[0], size))
         for (index in 1..points.lastIndex) {
@@ -127,20 +133,20 @@ public fun <X, Y> XYGraphScope<X, Y>.StackedAreaPlot(
     styles: List<StackedAreaStyle>,
     firstBaseline: AreaBaseline.ConstantLine<X, Y>,
     modifier: Modifier = Modifier.Companion,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
     if (data.isEmpty()) return
 
     /**
      * An adapter between Multipoints and Points for use with GeneralLinePlot.
      */
-    class ListAdapter(val series: Int) : AbstractList<Point<X, Y>>() {
+    class ListAdapter(
+        val series: Int,
+    ) : AbstractList<Point<X, Y>>() {
         override val size: Int
             get() = data.size
 
-        override fun get(index: Int): Point<X, Y> {
-            return Point(data[index].x, data[index].y[series])
-        }
+        override fun get(index: Int): Point<X, Y> = Point(data[index].x, data[index].y[series])
     }
 
     GeneralLinePlot(
@@ -150,7 +156,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StackedAreaPlot(
         null,
         styles[0].areaStyle,
         firstBaseline,
-        animationSpec
+        animationSpec,
     ) { points: List<Point<X, Y>>, size: Size ->
         moveTo(scale(points[0], size))
         for (index in 1..points.lastIndex) {
@@ -166,7 +172,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StackedAreaPlot(
             null,
             styles[series].areaStyle,
             AreaBaseline.ArbitraryLine(ListAdapter(series - 1)),
-            animationSpec
+            animationSpec,
         ) { points: List<Point<X, Y>>, size: Size ->
             moveTo(scale(points[0], size))
             for (index in 1..points.lastIndex) {
@@ -197,11 +203,13 @@ public interface StackedAreaPlotEntry<X, Y> {
 /**
  * Returns an instance of a [StackedAreaPlotEntry] using the provided data.
  */
-public fun <X, Y> stackedAreaPlotEntry(x: X, y: Array<Y>): StackedAreaPlotEntry<X, Y> =
-    object : StackedAreaPlotEntry<X, Y> {
-        override val x = x
-        override val y = y
-    }
+public fun <X, Y> stackedAreaPlotEntry(
+    x: X,
+    y: Array<Y>,
+): StackedAreaPlotEntry<X, Y> = object : StackedAreaPlotEntry<X, Y> {
+    override val x = x
+    override val y = y
+}
 
 /**
  * Adapts data for use in a [StackedAreaPlot] where the input data consists of a List of x-axis coordinates and
@@ -209,9 +217,10 @@ public fun <X, Y> stackedAreaPlotEntry(x: X, y: Array<Y>): StackedAreaPlotEntry<
  * will sum y-axis values to compute each line's height in the [StackedAreaPlot]. The size of [xData] and all
  * series in [yData] must be equal.
  */
-public class StackedAreaPlotDataAdapter<X>(private val xData: List<X>, private val yData: List<List<Float>>) :
-    AbstractList<StackedAreaPlotEntry<X, Float>>() {
-
+public class StackedAreaPlotDataAdapter<X>(
+    private val xData: List<X>,
+    private val yData: List<List<Float>>,
+) : AbstractList<StackedAreaPlotEntry<X, Float>>() {
     init {
         if (xData.isNotEmpty()) {
             require(yData.isNotEmpty()) { "yData must not be empty if xData is not empty" }

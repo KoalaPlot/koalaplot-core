@@ -65,7 +65,7 @@ public fun <X, Y> XYGraph(
     yAxisModel: AxisModel<Y>,
     modifier: Modifier = Modifier,
     xAxisContent: AxisContent<X> = rememberAxisContent(),
-    yAxisContent: AxisContent<Y>,
+    yAxisContent: AxisContent<Y> = rememberAxisContent(),
     gridStyle: GridStyle = rememberGridStyle(),
     gestureConfig: GestureConfig = GestureConfig(),
     onPointerMove: ((X, Y) -> Unit)? = null,
@@ -137,10 +137,11 @@ public fun <X, Y> XYGraph(
                         }
 
                     Box(
-                        modifier = Modifier
-                            .clip(RectangleShape)
-                            .then(panZoomModifier)
-                            .onPointerMove(xAxisModel, yAxisModel, onPointerMove),
+                        modifier =
+                            Modifier
+                                .clip(RectangleShape)
+                                .then(panZoomModifier)
+                                .onPointerMove(xAxisModel, yAxisModel, onPointerMove),
                     ) {
                         val chartScope =
                             XYGraphScopeImpl(
@@ -224,8 +225,9 @@ public fun <X, Y> XYGraph(
 @Suppress("LongMethod") // expected
 @Deprecated(
     "Use the overload that accepts AxisContent and GridStyle objects instead.",
-    replaceWith = ReplaceWith(
-        """XYGraph(
+    replaceWith =
+        ReplaceWith(
+            """XYGraph(
         xAxisModel = xAxisModel,
         yAxisModel = yAxisModel,
         modifier = modifier,
@@ -248,8 +250,8 @@ public fun <X, Y> XYGraph(
         gestureConfig = gestureConfig,
         onPointerMove = onPointerMove,
         content = content,
-    )"""
-    ),
+    )""",
+        ),
     level = DeprecationLevel.WARNING,
 )
 @Composable
@@ -258,10 +260,10 @@ public fun <X, Y> XYGraph(
     yAxisModel: AxisModel<Y>,
     modifier: Modifier = Modifier,
     xAxisStyle: AxisStyle = rememberAxisStyle(),
-    xAxisLabels: @Composable (X) -> Unit,
+    xAxisLabels: @Composable (X) -> Unit = {},
     xAxisTitle: @Composable () -> Unit = {},
     yAxisStyle: AxisStyle = rememberAxisStyle(),
-    yAxisLabels: @Composable (Y) -> Unit,
+    yAxisLabels: @Composable (Y) -> Unit = {},
     yAxisTitle: @Composable () -> Unit = {},
     horizontalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
     horizontalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
@@ -275,22 +277,25 @@ public fun <X, Y> XYGraph(
         xAxisModel = xAxisModel,
         yAxisModel = yAxisModel,
         modifier = modifier,
-        xAxisContent = AxisContent(
-            style = xAxisStyle,
-            labels = @Composable { xAxisLabels(it) },
-            title = xAxisTitle,
-        ),
-        yAxisContent = AxisContent(
-            style = yAxisStyle,
-            labels = @Composable { yAxisLabels(it) },
-            title = yAxisTitle,
-        ),
-        gridStyle = GridStyle(
-            horizontalMajorStyle = horizontalMajorGridLineStyle,
-            horizontalMinorStyle = horizontalMinorGridLineStyle,
-            verticalMajorStyle = verticalMajorGridLineStyle,
-            verticalMinorStyle = verticalMinorGridLineStyle,
-        ),
+        xAxisContent =
+            AxisContent(
+                style = xAxisStyle,
+                labels = @Composable { xAxisLabels(it) },
+                title = xAxisTitle,
+            ),
+        yAxisContent =
+            AxisContent(
+                style = yAxisStyle,
+                labels = @Composable { yAxisLabels(it) },
+                title = yAxisTitle,
+            ),
+        gridStyle =
+            GridStyle(
+                horizontalMajorStyle = horizontalMajorGridLineStyle,
+                horizontalMinorStyle = horizontalMinorGridLineStyle,
+                verticalMajorStyle = verticalMajorGridLineStyle,
+                verticalMinorStyle = verticalMinorGridLineStyle,
+            ),
         gestureConfig = gestureConfig,
         onPointerMove = onPointerMove,
         content = content,
@@ -305,7 +310,7 @@ public fun <X, Y> XYGraph(
 private fun <X, Y> Modifier.onPointerMove(
     xAxisModel: AxisModel<X>,
     yAxisModel: AxisModel<Y>,
-    onPointerMove: ((X, Y) -> Unit)?
+    onPointerMove: ((X, Y) -> Unit)?,
 ) = this.pointerInput(xAxisModel, yAxisModel, onPointerMove) {
     awaitPointerEventScope {
         while (true) {
@@ -314,7 +319,7 @@ private fun <X, Y> Modifier.onPointerMove(
                 val change = event.changes.last()
                 onPointerMove?.invoke(
                     xAxisModel.offsetToValue((change.position.x / size.width).coerceIn(0f, 1f)),
-                    yAxisModel.offsetToValue(1f - (change.position.y / size.height).coerceIn(0f, 1f))
+                    yAxisModel.offsetToValue(1f - (change.position.y / size.height).coerceIn(0f, 1f)),
                 )
             }
         }
@@ -325,7 +330,7 @@ private fun <T> zoomAxis(
     axis: AxisModel<T>,
     length: Int,
     centroid: Float,
-    zoom: Float
+    zoom: Float,
 ) {
     val pivot = centroid / length.toFloat()
     axis.zoom(zoom, pivot.coerceIn(0f, 1f))
@@ -334,10 +339,8 @@ private fun <T> zoomAxis(
 private fun <T> panAxis(
     axis: AxisModel<T>,
     length: Int,
-    pan: Float
-): Boolean {
-    return axis.pan(pan / length.toFloat())
-}
+    pan: Float,
+): Boolean = axis.pan(pan / length.toFloat())
 
 /**
  * Normalization of coordinates to the lower left point
@@ -381,35 +384,37 @@ private fun <T> List<Measurable>.calcXAxisLabelWidthConstraints(
     tickSpacing: Int,
     verticalSpace: Int,
     measure: (m: Measurable, width: Int) -> T,
-    getHeight: (T) -> Int
+    getHeight: (T) -> Int,
 ): List<T> = buildList {
     var lastHeight = 0
     this@calcXAxisLabelWidthConstraints.forEachIndexed { index, label ->
-        val w = if (labelRotation == 0) {
-            tickSpacing
-        } else {
-            if (index == 0) {
-                max((verticalSpace / sin(labelRotation * Deg2Rad)).roundToInt(), 0)
-            } else { // potentially constrain the width so the label does not overlap the previous label
-                val origin = Vector(0f, 0f)
-                val p1 = Vector(0f, lastHeight.toFloat())
-                val p2 = p1.rotate(-labelRotation.toFloat())
-                val (distance, intersection) = lineDistance(
-                    origin,
-                    p2,
-                    Vector(tickSpacing.toFloat(), 0f)
-                )
-
-                // Check if the intersection point interferes with the previous label
-                // The origin, p2, and intersection are on the same line
-                // So check if intersection is closer to p1 than p2
-                if (intersection.norm() < p2.norm()) {
-                    distance.toInt() // limit allowed width to position of previous label
-                } else {
+        val w =
+            if (labelRotation == 0) {
+                tickSpacing
+            } else {
+                if (index == 0) {
                     max((verticalSpace / sin(labelRotation * Deg2Rad)).roundToInt(), 0)
+                } else { // potentially constrain the width so the label does not overlap the previous label
+                    val origin = Vector(0f, 0f)
+                    val p1 = Vector(0f, lastHeight.toFloat())
+                    val p2 = p1.rotate(-labelRotation.toFloat())
+                    val (distance, intersection) =
+                        lineDistance(
+                            origin,
+                            p2,
+                            Vector(tickSpacing.toFloat(), 0f),
+                        )
+
+                    // Check if the intersection point interferes with the previous label
+                    // The origin, p2, and intersection are on the same line
+                    // So check if intersection is closer to p1 than p2
+                    if (intersection.norm() < p2.norm()) {
+                        distance.toInt() // limit allowed width to position of previous label
+                    } else {
+                        max((verticalSpace / sin(labelRotation * Deg2Rad)).roundToInt(), 0)
+                    }
                 }
             }
-        }
 
         val t = measure(label, w)
         add(t)
@@ -435,11 +440,11 @@ private data class ChartAreas(
         IntSize(
             (
                 constraints.maxWidth - (yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset)
-                ).coerceAtLeast(0),
+            ).coerceAtLeast(0),
             (
                 constraints.maxHeight -
                     (xAxisTitleHeight + xAxisLabelAreaHeight + xAxisHeight - xAxisOffset)
-                ).coerceAtLeast(0)
+            ).coerceAtLeast(0),
         )
     }
 
@@ -449,36 +454,39 @@ private data class ChartAreas(
     val graphArea: IntRect by lazy {
         IntRect(
             IntOffset(yAxisTitleWidth + yAxisLabelAreaWidth + yAxisOffset, 0),
-            graphSize
+            graphSize,
         )
     }
 
     /**
      * Calculates the x-axis tick spacing based on the width of the graph size and the provided [number] of ticks.
      */
-    fun xTickSpacing(number: Int): Int {
-        return graphSize.width / number.coerceAtLeast(1)
-    }
+    fun xTickSpacing(number: Int): Int = graphSize.width / number.coerceAtLeast(1)
 
     /**
      * Returns a copy of this ChartAreas after setting the [xAxisLabelAreaHeight],
      * based on the x-axis labels and their rotation angle.
      */
-    fun withComputedXAxisLabelAreas(xAxisLabels: List<Measurable>, rotation: Int): ChartAreas {
-        val xAxisLabelHeights = xAxisLabels.calcXAxisLabelWidthConstraints(
-            rotation,
-            xTickSpacing(xAxisLabels.size),
-            constraints.maxHeight - graphSize.height - xAxisHeight - xAxisTitleHeight + xAxisOffset,
-            { meas, w -> meas.maxIntrinsicHeight(w) },
-            { h -> h }
-        )
-
-        val labelAreas = xAxisLabels.mapIndexed { index, label ->
-            RotatedComposableAreaDelegate(
-                IntSize(label.maxIntrinsicWidth(xAxisLabelHeights[index]), xAxisLabelHeights[index]),
-                rotation.toFloat()
+    fun withComputedXAxisLabelAreas(
+        xAxisLabels: List<Measurable>,
+        rotation: Int,
+    ): ChartAreas {
+        val xAxisLabelHeights =
+            xAxisLabels.calcXAxisLabelWidthConstraints(
+                rotation,
+                xTickSpacing(xAxisLabels.size),
+                constraints.maxHeight - graphSize.height - xAxisHeight - xAxisTitleHeight + xAxisOffset,
+                { meas, w -> meas.maxIntrinsicHeight(w) },
+                { h -> h },
             )
-        }
+
+        val labelAreas =
+            xAxisLabels.mapIndexed { index, label ->
+                RotatedComposableAreaDelegate(
+                    IntSize(label.maxIntrinsicWidth(xAxisLabelHeights[index]), xAxisLabelHeights[index]),
+                    rotation.toFloat(),
+                )
+            }
 
         return copy(xAxisLabelAreaHeight = labelAreas.maxOfOrNull { it.height } ?: 0)
     }
@@ -487,15 +495,19 @@ private data class ChartAreas(
      * Returns a copy of this ChartAreas after setting the [yAxisLabelAreaWidth]
      * based on the y-axis labels and their rotation angle.
      */
-    fun withComputedYAxisLabelAreas(yAxisLabels: List<Measurable>, rotation: Int): ChartAreas {
-        val yAxisLabelAreas = yAxisLabels.map {
-            val width = it.maxIntrinsicWidth(graphSize.height / yAxisLabels.size)
+    fun withComputedYAxisLabelAreas(
+        yAxisLabels: List<Measurable>,
+        rotation: Int,
+    ): ChartAreas {
+        val yAxisLabelAreas =
+            yAxisLabels.map {
+                val width = it.maxIntrinsicWidth(graphSize.height / yAxisLabels.size)
 
-            RotatedComposableAreaDelegate(
-                IntSize(width, it.maxIntrinsicHeight(width)),
-                rotation.toFloat()
-            )
-        }
+                RotatedComposableAreaDelegate(
+                    IntSize(width, it.maxIntrinsicHeight(width)),
+                    rotation.toFloat(),
+                )
+            }
 
         return copy(yAxisLabelAreaWidth = yAxisLabelAreas.maxOfOrNull { it.width } ?: 0)
     }
@@ -505,7 +517,7 @@ private fun <X, Y> Density.optimizeGraphSize(
     constraints: Constraints,
     m: Measurables,
     xAxis: AxisDelegate<X>,
-    yAxis: AxisDelegate<Y>
+    yAxis: AxisDelegate<Y>,
 ): ChartAreas {
     var iterations = 0
     var oldSize: IntSize
@@ -518,10 +530,11 @@ private fun <X, Y> Density.optimizeGraphSize(
     do {
         oldSize = chartAreas.graphSize
 
-        chartAreas = chartAreas.copy(
-            xAxisTitleHeight = m.xAxisTitle.maxIntrinsicHeight(chartAreas.graphSize.width),
-            yAxisTitleWidth = m.yAxisTitle.maxIntrinsicWidth(chartAreas.graphSize.height)
-        )
+        chartAreas =
+            chartAreas.copy(
+                xAxisTitleHeight = m.xAxisTitle.maxIntrinsicHeight(chartAreas.graphSize.width),
+                yAxisTitleWidth = m.yAxisTitle.maxIntrinsicWidth(chartAreas.graphSize.height),
+            )
 
         chartAreas =
             chartAreas.withComputedXAxisLabelAreas(m.xAxisLabels, xAxis.style.labelRotation)
@@ -537,9 +550,12 @@ private fun <X, Y> Density.optimizeGraphSize(
 
 private class XYAxisMeasurePolicy<X, Y>(
     val xAxis: AxisDelegate<X>,
-    val yAxis: AxisDelegate<Y>
+    val yAxis: AxisDelegate<Y>,
 ) {
-    fun MeasureScope.measure(m: Measurables, constraints: Constraints): MeasureResult {
+    fun MeasureScope.measure(
+        m: Measurables,
+        constraints: Constraints,
+    ): MeasureResult {
         val chartAreas = optimizeGraphSize(constraints, m, xAxis, yAxis)
 
         val yAxisLabelPlaceableDelegates = createYAxisRotatedPlaceableDelegates(m, chartAreas)
@@ -555,58 +571,66 @@ private class XYAxisMeasurePolicy<X, Y>(
         return layout(constraints.maxWidth, constraints.maxHeight) {
             m.grid.measure(Constraints.fixed(chartAreas.graphSize.width, chartAreas.graphSize.height)).place(
                 chartAreas.graphArea.left,
-                chartAreas.graphArea.top
+                chartAreas.graphArea.top,
             )
 
             xAxisTitlePlaceable.place(
                 chartAreas.graphArea.left + chartAreas.graphArea.width / 2 - xAxisTitlePlaceable.width / 2,
-                chartAreas.graphArea.bottom + xAxisPlaceable.height - xAxis.axisOffset.roundToPx() +
-                    chartAreas.xAxisLabelAreaHeight
+                chartAreas.graphArea.bottom +
+                    xAxisPlaceable.height -
+                    xAxis.axisOffset.roundToPx() +
+                    chartAreas.xAxisLabelAreaHeight,
             )
 
             xAxisLabelPlaceableDelegates.forEachIndexed { index, placeable ->
-                val anchor = if (xAxis.style.labelRotation == 0) {
-                    AnchorPoint.TopCenter
-                } else {
-                    AnchorPoint.RightMiddle
-                }
+                val anchor =
+                    if (xAxis.style.labelRotation == 0) {
+                        AnchorPoint.TopCenter
+                    } else {
+                        AnchorPoint.RightMiddle
+                    }
                 with(placeable) {
                     place(
                         (chartAreas.graphArea.left + xAxis.majorTickOffsets[index] * chartAreas.graphArea.width)
                             .toInt(),
                         chartAreas.graphArea.bottom + xAxisPlaceable.height - xAxis.axisOffset.roundToPx(),
-                        anchor
+                        anchor,
                     )
                 }
             }
 
             yAxisTitlePlaceable.place(
-                chartAreas.graphArea.left - yAxis.axisOffset.roundToPx() -
-                    chartAreas.yAxisLabelAreaWidth - yAxisTitlePlaceable.width,
-                chartAreas.graphArea.top + chartAreas.graphArea.height / 2 - yAxisTitlePlaceable.height / 2
+                chartAreas.graphArea.left -
+                    yAxis.axisOffset.roundToPx() -
+                    chartAreas.yAxisLabelAreaWidth -
+                    yAxisTitlePlaceable.width,
+                chartAreas.graphArea.top + chartAreas.graphArea.height / 2 - yAxisTitlePlaceable.height / 2,
             )
 
             yAxisLabelPlaceableDelegates.forEachIndexed { index, placeable ->
                 @Suppress("MagicNumber")
-                val anchor = if (yAxis.style.labelRotation == 90) {
-                    AnchorPoint.BottomCenter
-                } else {
-                    AnchorPoint.RightMiddle
-                }
+                val anchor =
+                    if (yAxis.style.labelRotation == 90) {
+                        AnchorPoint.BottomCenter
+                    } else {
+                        AnchorPoint.RightMiddle
+                    }
 
                 with(placeable) {
                     place(
                         chartAreas.graphArea.left - yAxis.axisOffset.roundToPx(),
                         (
-                            chartAreas.graphArea.bottom - yAxis.majorTickOffsets[index] *
+                            chartAreas.graphArea.bottom -
+                                yAxis.majorTickOffsets[index] *
                                 chartAreas.graphArea.height
-                            ).toInt(),
-                        anchor
+                        ).toInt(),
+                        anchor,
                     )
                 }
             }
 
-            m.chart.measure(Constraints.fixed(chartAreas.graphArea.width, chartAreas.graphArea.height))
+            m.chart
+                .measure(Constraints.fixed(chartAreas.graphArea.width, chartAreas.graphArea.height))
                 .place(chartAreas.graphArea.left, chartAreas.graphArea.top)
 
             yAxisPlaceable.place(chartAreas.graphArea.left - yAxis.axisOffset.roundToPx(), chartAreas.graphArea.top)
@@ -614,28 +638,33 @@ private class XYAxisMeasurePolicy<X, Y>(
         }
     }
 
-    private fun createYAxisRotatedPlaceableDelegates(m: Measurables, chartAreas: ChartAreas) =
-        m.yAxisLabels.map {
-            RotatedPlaceableDelegate(
-                it.measure(Constraints(maxHeight = chartAreas.graphSize.height / m.yAxisLabels.size)),
-                -yAxis.style.labelRotation.toFloat()
-            )
-        }
+    private fun createYAxisRotatedPlaceableDelegates(
+        m: Measurables,
+        chartAreas: ChartAreas,
+    ) = m.yAxisLabels.map {
+        RotatedPlaceableDelegate(
+            it.measure(Constraints(maxHeight = chartAreas.graphSize.height / m.yAxisLabels.size)),
+            -yAxis.style.labelRotation.toFloat(),
+        )
+    }
 
-    private fun createXAxisRotatedPlaceableDelegates(m: Measurables, chartAreas: ChartAreas) =
-        if (m.xAxisLabels.isNotEmpty()) {
-            m.xAxisLabels.calcXAxisLabelWidthConstraints(
+    private fun createXAxisRotatedPlaceableDelegates(
+        m: Measurables,
+        chartAreas: ChartAreas,
+    ) = if (m.xAxisLabels.isNotEmpty()) {
+        m.xAxisLabels
+            .calcXAxisLabelWidthConstraints(
                 xAxis.style.labelRotation,
                 chartAreas.graphSize.width / m.xAxisLabels.size,
                 chartAreas.xAxisLabelAreaHeight,
                 { meas, w -> meas.measure(Constraints(maxWidth = w)) },
-                { placeable -> placeable.height }
+                { placeable -> placeable.height },
             ).map {
                 RotatedPlaceableDelegate(it, -xAxis.style.labelRotation.toFloat())
             }
-        } else {
-            listOf()
-        }
+    } else {
+        listOf()
+    }
 }
 
 /**
@@ -652,13 +681,11 @@ public interface XYGraphScope<X, Y> : HoverableElementAreaScope {
      */
     public fun scale(
         point: Point<X, Y>,
-        size: Size
-    ): Offset {
-        return Offset(
-            xAxisModel.computeOffset(point.x) * size.width,
-            size.height - yAxisModel.computeOffset(point.y) * size.height
-        )
-    }
+        size: Size,
+    ): Offset = Offset(
+        xAxisModel.computeOffset(point.x) * size.width,
+        size.height - yAxisModel.computeOffset(point.y) * size.height,
+    )
 }
 
 private class XYGraphScopeImpl<X, Y>(
@@ -666,8 +693,9 @@ private class XYGraphScopeImpl<X, Y>(
     override val yAxisModel: AxisModel<Y>,
     override val xAxisState: AxisState,
     override val yAxisState: AxisState,
-    val hoverableElementAreaScope: HoverableElementAreaScope
-) : XYGraphScope<X, Y>, HoverableElementAreaScope by hoverableElementAreaScope
+    val hoverableElementAreaScope: HoverableElementAreaScope,
+) : XYGraphScope<X, Y>,
+    HoverableElementAreaScope by hoverableElementAreaScope
 
 @Composable
 private fun Grid(
@@ -682,25 +710,25 @@ private fun Grid(
         drawVerticalGridLines(
             xAxisState.majorTickOffsets,
             size.width,
-            verticalMajorGridLineStyle
+            verticalMajorGridLineStyle,
         )
 
         drawVerticalGridLines(
             xAxisState.minorTickOffsets,
             size.width,
-            verticalMinorGridLineStyle
+            verticalMinorGridLineStyle,
         )
 
         drawHorizontalGridLines(
             yAxisState.majorTickOffsets,
             size.height,
-            horizontalMajorGridLineStyle
+            horizontalMajorGridLineStyle,
         )
 
         drawHorizontalGridLines(
             yAxisState.minorTickOffsets,
             size.height,
-            horizontalMinorGridLineStyle
+            horizontalMinorGridLineStyle,
         )
     }
 }
@@ -708,14 +736,14 @@ private fun Grid(
 private fun DrawScope.drawVerticalGridLines(
     values: List<Float>,
     scale: Float,
-    style: LineStyle?
+    style: LineStyle?,
 ) {
     if (style != null) {
         values.forEach {
             drawGridLine(
                 style,
                 start = Offset(it * scale, 0f),
-                end = Offset(it * scale, size.height)
+                end = Offset(it * scale, size.height),
             )
         }
     }
@@ -724,20 +752,24 @@ private fun DrawScope.drawVerticalGridLines(
 private fun DrawScope.drawHorizontalGridLines(
     values: List<Float>,
     scale: Float,
-    style: LineStyle?
+    style: LineStyle?,
 ) {
     if (style != null) {
         values.forEach {
             drawGridLine(
                 style,
                 start = Offset(0f, scale - it * scale),
-                end = Offset(size.width, scale - it * scale)
+                end = Offset(size.width, scale - it * scale),
             )
         }
     }
 }
 
-private fun DrawScope.drawGridLine(gridLineStyle: LineStyle?, start: Offset, end: Offset) {
+private fun DrawScope.drawGridLine(
+    gridLineStyle: LineStyle?,
+    start: Offset,
+    end: Offset,
+) {
     if (gridLineStyle != null) {
         with(gridLineStyle) {
             drawLine(
@@ -748,7 +780,7 @@ private fun DrawScope.drawGridLine(gridLineStyle: LineStyle?, start: Offset, end
                 pathEffect = pathEffect,
                 alpha = alpha,
                 colorFilter = colorFilter,
-                blendMode = blendMode
+                blendMode = blendMode,
             )
         }
     }
@@ -779,8 +811,9 @@ private fun DrawScope.drawGridLine(gridLineStyle: LineStyle?, start: Offset, end
 @Deprecated(
     "This overload is deprecated. Call the primary XYGraph function and use the" +
         " rememberXAxisContent() and rememberYAxisContent() helpers.",
-    replaceWith = ReplaceWith(
-        """XYGraph(
+    replaceWith =
+        ReplaceWith(
+            """XYGraph(
         xAxisModel = xAxisModel,
         yAxisModel = yAxisModel,
         modifier = modifier,
@@ -795,9 +828,9 @@ private fun DrawScope.drawGridLine(gridLineStyle: LineStyle?, start: Offset, end
         gestureConfig = gestureConfig,
         onPointerMove = onPointerMove,
         content = content
-    )"""
-    ),
-    level = DeprecationLevel.WARNING
+    )""",
+        ),
+    level = DeprecationLevel.WARNING,
 )
 @Composable
 public fun <X, Y> XYGraph(
@@ -816,7 +849,7 @@ public fun <X, Y> XYGraph(
     verticalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
     gestureConfig: GestureConfig = GestureConfig(),
     onPointerMove: ((X, Y) -> Unit)? = null,
-    content: @Composable XYGraphScope<X, Y>.() -> Unit
+    content: @Composable XYGraphScope<X, Y>.() -> Unit,
 ) {
     XYGraph(
         xAxisModel = xAxisModel,
@@ -824,14 +857,15 @@ public fun <X, Y> XYGraph(
         modifier = modifier,
         xAxisContent = rememberStringAxisContent(style = xAxisStyle, label = xAxisLabels, title = xAxisTitle),
         yAxisContent = rememberStringAxisContent(style = yAxisStyle, label = yAxisLabels, title = yAxisTitle),
-        gridStyle = GridStyle(
-            horizontalMajorStyle = horizontalMajorGridLineStyle,
-            horizontalMinorStyle = horizontalMinorGridLineStyle,
-            verticalMajorStyle = verticalMajorGridLineStyle,
-            verticalMinorStyle = verticalMinorGridLineStyle
-        ),
+        gridStyle =
+            GridStyle(
+                horizontalMajorStyle = horizontalMajorGridLineStyle,
+                horizontalMinorStyle = horizontalMinorGridLineStyle,
+                verticalMajorStyle = verticalMajorGridLineStyle,
+                verticalMinorStyle = verticalMinorGridLineStyle,
+            ),
         gestureConfig = gestureConfig,
         onPointerMove = onPointerMove,
-        content = content
+        content = content,
     )
 }

@@ -17,9 +17,7 @@ import kotlin.math.round
  * Converts the float receiver as a string with [precision] number of digits after the decimal
  * (rounded) (e.g. 35.72 with precision = 1 will be 35.7, 35.78 with precision = 2 will be 35.80)
  */
-public fun Float.toString(precision: Int): String {
-    return this.toDouble().toString(precision)
-}
+public fun Float.toString(precision: Int): String = this.toDouble().toString(precision)
 
 /**
  * Converts the number to a string with [precision] number of digits after the decimal (rounded)
@@ -56,7 +54,7 @@ internal fun maximize(
     min: Double,
     max: Double,
     tolerance: Double = 0.01,
-    eval: (Double) -> Boolean
+    eval: (Double) -> Boolean,
 ): Double {
     require(min <= max)
     require(tolerance > 0)
@@ -74,7 +72,7 @@ private fun maximizeUnguarded(
     min: Double,
     max: Double,
     tolerance: Double = 0.01,
-    eval: (Double) -> Boolean
+    eval: (Double) -> Boolean,
 ): Double {
     if (abs((max - min) / ((max + min) / 2)) < tolerance || (max == 0.0 && min == 0.0)) {
         return min
@@ -99,7 +97,7 @@ private fun maximizeUnguarded(
 
 @RequiresOptIn(
     "This KoalaPlot API is experimental and is likely to change or to be removed in" +
-        " the future."
+        " the future.",
 )
 public annotation class ExperimentalKoalaPlotApi
 
@@ -114,50 +112,45 @@ public fun Modifier.rotateVertically(rotation: VerticalRotation): Modifier = the
     object : LayoutModifier {
         override fun MeasureScope.measure(
             measurable: Measurable,
-            constraints: Constraints
+            constraints: Constraints,
         ): MeasureResult {
             val placeable = measurable.measure(constraints)
             return layout(placeable.height, placeable.width) {
                 placeable.place(
                     x = -(placeable.width / 2 - placeable.height / 2),
-                    y = -(placeable.height / 2 - placeable.width / 2)
+                    y = -(placeable.height / 2 - placeable.width / 2),
                 )
             }
         }
 
         override fun IntrinsicMeasureScope.minIntrinsicHeight(
             measurable: IntrinsicMeasurable,
-            width: Int
-        ): Int {
-            return measurable.maxIntrinsicWidth(width)
-        }
+            width: Int,
+        ): Int = measurable.maxIntrinsicWidth(width)
 
         override fun IntrinsicMeasureScope.maxIntrinsicHeight(
             measurable: IntrinsicMeasurable,
-            width: Int
-        ): Int {
-            return measurable.maxIntrinsicWidth(width)
-        }
+            width: Int,
+        ): Int = measurable.maxIntrinsicWidth(width)
 
         override fun IntrinsicMeasureScope.minIntrinsicWidth(
             measurable: IntrinsicMeasurable,
-            height: Int
-        ): Int {
-            return measurable.minIntrinsicHeight(height)
-        }
+            height: Int,
+        ): Int = measurable.minIntrinsicHeight(height)
 
         override fun IntrinsicMeasureScope.maxIntrinsicWidth(
             measurable: IntrinsicMeasurable,
-            height: Int
-        ): Int {
-            return measurable.maxIntrinsicHeight(height)
-        }
-    }
+            height: Int,
+        ): Int = measurable.maxIntrinsicHeight(height)
+    },
 ).then(rotate(rotation.value))
 
 @Suppress("MagicNumber")
-public enum class VerticalRotation(internal val value: Float) {
-    CLOCKWISE(90f), COUNTER_CLOCKWISE(270f)
+public enum class VerticalRotation(
+    internal val value: Float,
+) {
+    CLOCKWISE(90f),
+    COUNTER_CLOCKWISE(270f),
 }
 
 internal fun min(vararg values: Float): Float {
@@ -180,7 +173,11 @@ internal fun max(vararg values: Float): Float {
  * Finds the distance between a point [p0] and a line defined by points [p1] and [p2], and
  * the point on the line that is closest to the point [p0].
  */
-internal fun lineDistance(p1: Vector, p2: Vector, p0: Vector): Pair<Float, Vector> {
+internal fun lineDistance(
+    p1: Vector,
+    p2: Vector,
+    p0: Vector,
+): Pair<Float, Vector> {
     // Line unit vector
     val line: Vector = line(p1, p2)
 
@@ -205,14 +202,12 @@ internal fun lineDistance(p1: Vector, p2: Vector, p0: Vector): Pair<Float, Vecto
  * Special case:
  *   - `sign(NaN)` is `NaN`
  */
-internal fun sign(x: Long): Long {
-    return if (x < 0L) {
-        -1L
-    } else if (x > 0L) {
-        1L
-    } else {
-        0L
-    }
+internal fun sign(x: Long): Long = if (x < 0L) {
+    -1L
+} else if (x > 0L) {
+    1L
+} else {
+    0L
 }
 
 /**
@@ -224,12 +219,10 @@ internal fun sign(x: Long): Long {
  * Special case:
  *   - `sign(NaN)` is `NaN`
  */
-internal fun sign(x: Int): Int {
-    return if (x < 0) {
-        -1
-    } else if (x > 0) {
-        1
-    } else {
-        0
-    }
+internal fun sign(x: Int): Int = if (x < 0) {
+    -1
+} else if (x > 0) {
+    1
+} else {
+    0
 }

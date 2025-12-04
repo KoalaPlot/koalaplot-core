@@ -16,7 +16,6 @@ public class CategoryAxisModel<T>(
     private val categories: List<T>,
     private val categoryAxisOffset: CategoryAxisOffset = CategoryAxisOffset.Full,
 ) : AxisModel<T> {
-
     public companion object {
         /**
          * Creates a [CategoryAxisModel].
@@ -30,13 +29,11 @@ public class CategoryAxisModel<T>(
         @Deprecated(message = "Use CategoryAxisOffset instead of firstCategoryIsZero", replaceWith = ReplaceWith(""))
         public operator fun <T> invoke(
             categories: List<T>,
-            firstCategoryIsZero: Boolean = false
-        ): CategoryAxisModel<T> {
-            return CategoryAxisModel(
-                categories,
-                if (firstCategoryIsZero) CategoryAxisOffset.None else CategoryAxisOffset.Full
-            )
-        }
+            firstCategoryIsZero: Boolean = false,
+        ): CategoryAxisModel<T> = CategoryAxisModel(
+            categories,
+            if (firstCategoryIsZero) CategoryAxisOffset.None else CategoryAxisOffset.Full,
+        )
 
         /**
          * Creates a [CategoryAxisModel].
@@ -49,9 +46,7 @@ public class CategoryAxisModel<T>(
         public operator fun <T> invoke(
             vararg categories: T,
             categoryAxisOffset: CategoryAxisOffset = CategoryAxisOffset.Full,
-        ): CategoryAxisModel<T> {
-            return CategoryAxisModel(categories.toList(), categoryAxisOffset)
-        }
+        ): CategoryAxisModel<T> = CategoryAxisModel(categories.toList(), categoryAxisOffset)
     }
 
     /**
@@ -91,16 +86,14 @@ public class CategoryAxisModel<T>(
         return categoryPosition / totalDivisions
     }
 
-    override fun offsetToValue(offset: Float): T {
-        return categories[(offset * categories.size).roundToInt().coerceIn(categories.indices)]
-    }
+    override fun offsetToValue(offset: Float): T = categories[(offset * categories.size).roundToInt().coerceIn(categories.indices)]
 
-    override fun computeTickValues(axisLength: Dp): io.github.koalaplot.core.xygraph.TickValues<T> {
-        return TickValues(categories, listOf())
-    }
+    override fun computeTickValues(axisLength: Dp): io.github.koalaplot.core.xygraph.TickValues<T> = TickValues(categories, listOf())
 
-    private data class TickValues<T>(override val majorTickValues: List<T>, override val minorTickValues: List<T>) :
-        io.github.koalaplot.core.xygraph.TickValues<T>
+    private data class TickValues<T>(
+        override val majorTickValues: List<T>,
+        override val minorTickValues: List<T>,
+    ) : io.github.koalaplot.core.xygraph.TickValues<T>
 }
 
 /**
@@ -133,7 +126,9 @@ public sealed interface CategoryAxisOffset {
      *
      * @param offset The fractional value for the reserved space, must be between 0.0 and 1.0 (inclusive).
      */
-    public data class Custom(val offset: Float) : CategoryAxisOffset {
+    public data class Custom(
+        val offset: Float,
+    ) : CategoryAxisOffset {
         init {
             require(offset in 0f..1f)
         }

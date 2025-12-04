@@ -58,7 +58,10 @@ class UtilTest {
         assertEquals(Vector(5f, 5f), r.second)
     }
 
-    internal fun assertEquals(v1: Vector, v2: Vector) {
+    internal fun assertEquals(
+        v1: Vector,
+        v2: Vector,
+    ) {
         assertEquals(v1.values.size, v2.values.size, "Vectors are not same length")
         v1.values.forEachIndexed { index, v ->
             assertEquals(v, v2.values[index], 1e-6f, "Vector values at index $index not equal")

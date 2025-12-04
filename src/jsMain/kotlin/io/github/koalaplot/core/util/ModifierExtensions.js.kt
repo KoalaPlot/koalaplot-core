@@ -38,8 +38,7 @@ internal actual fun Modifier.onGestureInput(
 
         if (pan == Offset.Zero) return@onPointerEvent
         if (onPanChange(size, pan)) change.consume()
-    }
-    .onPointerEvent(PointerEventType.Scroll) { event ->
+    }.onPointerEvent(PointerEventType.Scroll) { event ->
         if (!gestureConfig.zoomEnabled) return@onPointerEvent
         val change = event.changes.lastOrNull() ?: return@onPointerEvent
 
@@ -76,6 +75,5 @@ internal actual fun Modifier.onGestureInput(
  * divide the value by `100`, because the values obtained are initially an integer type and are always equal to `N.0f`
  * @param value Scroll Value
  */
-internal fun normalizeScrollDeltaToZoom(value: Float): Float {
-    return (ZoomFactor.NeutralPoint - value / JsScrollFactor).coerceIn(ScrollDeltaMin..ScrollDeltaMax)
-}
+internal fun normalizeScrollDeltaToZoom(value: Float): Float =
+    (ZoomFactor.NeutralPoint - value / JsScrollFactor).coerceIn(ScrollDeltaMin..ScrollDeltaMax)

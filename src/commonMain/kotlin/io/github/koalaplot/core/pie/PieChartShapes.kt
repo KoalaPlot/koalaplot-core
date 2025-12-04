@@ -58,18 +58,25 @@ public fun PieSliceScope.BiConvexSlice(
     clickable: Boolean = false,
     antiAlias: Boolean = false,
     gap: Float = 0.0f,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     require(gap >= 0F) { "gap cannot be negative" }
     val shape = BiConvexSlice(
-        pieSliceData.startAngle.toDegrees().value.toFloat() + gap,
-        pieSliceData.angle.toDegrees().value.toFloat() - 2 * gap,
+        pieSliceData.startAngle
+            .toDegrees()
+            .value
+            .toFloat() + gap,
+        pieSliceData.angle
+            .toDegrees()
+            .value
+            .toFloat() - 2 * gap,
         innerRadius,
-        outerRadius
+        outerRadius,
     )
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
             .drawWithContent {
                 drawIntoCanvas {
                     val path = (shape.createOutline(size, layoutDirection, this) as Outline.Generic).path
@@ -80,7 +87,7 @@ public fun PieSliceScope.BiConvexSlice(
                         Paint().apply {
                             isAntiAlias = antiAlias
                             this.color = color
-                        }
+                        },
                     )
                 }
                 drawContent()
@@ -90,13 +97,12 @@ public fun PieSliceScope.BiConvexSlice(
                     Modifier.clickable(
                         enabled = true,
                         role = Role.Button,
-                        onClick = onClick
+                        onClick = onClick,
                     )
                 } else {
                     Modifier
-                }
-            )
-            .hoverableElement(hoverElement)
+                },
+            ).hoverableElement(hoverElement),
     ) {}
 }
 
@@ -123,18 +129,25 @@ public fun PieSliceScope.ConcaveConvexSlice(
     clickable: Boolean = false,
     antiAlias: Boolean = false,
     gap: Float = 0.0f,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     require(gap >= 0F) { "gap cannot be negative" }
     val shape = ConcaveConvexSlice(
-        pieSliceData.startAngle.toDegrees().value.toFloat() + gap,
-        pieSliceData.angle.toDegrees().value.toFloat() - 2 * gap,
+        pieSliceData.startAngle
+            .toDegrees()
+            .value
+            .toFloat() + gap,
+        pieSliceData.angle
+            .toDegrees()
+            .value
+            .toFloat() - 2 * gap,
         innerRadius,
-        outerRadius
+        outerRadius,
     )
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
             .drawWithContent {
                 drawIntoCanvas {
                     val path = (shape.createOutline(size, layoutDirection, this) as Outline.Generic).path
@@ -145,7 +158,7 @@ public fun PieSliceScope.ConcaveConvexSlice(
                         Paint().apply {
                             isAntiAlias = antiAlias
                             this.color = color
-                        }
+                        },
                     )
                 }
                 drawContent()
@@ -155,13 +168,12 @@ public fun PieSliceScope.ConcaveConvexSlice(
                     Modifier.clickable(
                         enabled = true,
                         role = Role.Button,
-                        onClick = onClick
+                        onClick = onClick,
                     )
                 } else {
                     Modifier
-                }
-            )
-            .hoverableElement(hoverElement)
+                },
+            ).hoverableElement(hoverElement),
     ) {}
 }
 
@@ -179,12 +191,12 @@ private class BiConvexSlice(
     private val startAngle: Float,
     private val angle: Float,
     private val innerRadius: Float = 0.5F,
-    private val outerRadius: Float = 1.0F
+    private val outerRadius: Float = 1.0F,
 ) : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val radius = size.width / 2F * outerRadius
         val holeRadius = size.width / 2F * innerRadius
@@ -199,7 +211,11 @@ private class BiConvexSlice(
         val innerCircleCenterRadius = (radius + holeRadius) / 2F
 
         val innerCircleDegrees =
-            asin(innerCircleRadius / innerCircleCenterRadius).rad.toDegrees().value.toFloat()
+            asin(innerCircleRadius / innerCircleCenterRadius)
+                .rad
+                .toDegrees()
+                .value
+                .toFloat()
 
         val outerPieSweepAngle = max(sweepAngle - 2 * innerCircleDegrees, 0F)
         val outerPie = Path().apply {
@@ -208,7 +224,7 @@ private class BiConvexSlice(
                 rect = outerRect,
                 startAngleDegrees = startAngle + innerCircleDegrees,
                 sweepAngleDegrees = outerPieSweepAngle,
-                forceMoveTo = false
+                forceMoveTo = false,
             )
         }
 
@@ -219,7 +235,7 @@ private class BiConvexSlice(
                 rect = innerRect,
                 startAngleDegrees = startAngle + innerCircleDegrees,
                 sweepAngleDegrees = innerPieSweepAngle,
-                forceMoveTo = false
+                forceMoveTo = false,
             )
         }
 
@@ -241,30 +257,31 @@ private class BiConvexSlice(
                 oval = Rect(
                     center = center + polarToCartesian(
                         radius = innerCircleCenterRadius,
-                        angle = (startAngle + resultingInnerCircleDegrees).deg
+                        angle = (startAngle + resultingInnerCircleDegrees).deg,
                     ),
-                    radius = resultingInnerCircleRadius
+                    radius = resultingInnerCircleRadius,
                 ),
                 startAngleDegrees = startAngle + resultingInnerCircleDegrees,
-                sweepAngleDegrees = -InnerCircleSweepAngleDegrees
+                sweepAngleDegrees = -InnerCircleSweepAngleDegrees,
             )
             addArc(
                 oval = Rect(
                     center = center + polarToCartesian(
                         radius = innerCircleCenterRadius,
-                        angle = (startAngle + sweepAngle - resultingInnerCircleDegrees).deg
+                        angle = (startAngle + sweepAngle - resultingInnerCircleDegrees).deg,
                     ),
-                    radius = resultingInnerCircleRadius
+                    radius = resultingInnerCircleRadius,
                 ),
                 startAngleDegrees = startAngle + sweepAngle - resultingInnerCircleDegrees,
-                sweepAngleDegrees = InnerCircleSweepAngleDegrees
+                sweepAngleDegrees = InnerCircleSweepAngleDegrees,
             )
         }
 
-        return Path().apply {
-            addPath(outerPie - innerPie)
-            addPath(convexPaths)
-        }.let(Outline::Generic)
+        return Path()
+            .apply {
+                addPath(outerPie - innerPie)
+                addPath(convexPaths)
+            }.let(Outline::Generic)
     }
 }
 
@@ -280,12 +297,12 @@ private class ConcaveConvexSlice(
     private val startAngle: Float,
     private val angle: Float,
     private val innerRadius: Float = 0.5F,
-    private val outerRadius: Float = 1.0F
+    private val outerRadius: Float = 1.0F,
 ) : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val radius = size.width / 2F * outerRadius
         val holeRadius = size.width / 2F * innerRadius
@@ -296,7 +313,7 @@ private class ConcaveConvexSlice(
         val layout = Layout(
             center = center,
             innerRect = innerRect,
-            outerRect = outerRect
+            outerRect = outerRect,
         )
 
         // Gap can lead to negative sweep angle which causes rendering issues
@@ -305,39 +322,44 @@ private class ConcaveConvexSlice(
         val innerCircleCenterRadius = (radius + holeRadius) / 2F
 
         val innerCircleDegrees =
-            asin(innerCircleRadius / innerCircleCenterRadius).rad.toDegrees().value.toFloat()
+            asin(innerCircleRadius / innerCircleCenterRadius)
+                .rad
+                .toDegrees()
+                .value
+                .toFloat()
         val innerCircle = InnerCircle(
             innerCircleCenterRadius = innerCircleCenterRadius,
             innerCircleDegrees = innerCircleDegrees,
-            innerCircleRadius = innerCircleRadius
+            innerCircleRadius = innerCircleRadius,
         )
 
         val concaveRingSlice = concaveRingSlice(
             layout = layout,
             startAngle = startAngle,
             sweepAngle = sweepAngle,
-            innerCircle = innerCircle
+            innerCircle = innerCircle,
         )
 
         val ringSlice = ringSlice(
             layout = layout,
             startAngle = startAngle,
             sweepAngle = sweepAngle,
-            innerCircle = innerCircle
+            innerCircle = innerCircle,
         )
 
         val convexRingSlice = convexRingSlice(
             layout = layout,
             startAngle = startAngle,
             sweepAngle = sweepAngle,
-            innerCircle = innerCircle
+            innerCircle = innerCircle,
         )
 
-        return Path().apply {
-            addPath(convexRingSlice)
-            addPath(ringSlice)
-            addPath(concaveRingSlice)
-        }.let(Outline::Generic)
+        return Path()
+            .apply {
+                addPath(convexRingSlice)
+                addPath(ringSlice)
+                addPath(concaveRingSlice)
+            }.let(Outline::Generic)
     }
 }
 
@@ -355,7 +377,7 @@ private fun concaveRingSlice(
     layout: Layout,
     startAngle: Float,
     sweepAngle: Float,
-    innerCircle: InnerCircle
+    innerCircle: InnerCircle,
 ): Path {
     val (center, innerRect, outerRect) = layout
     val (innerCircleCenterRadius, innerCircleDegrees, innerCircleRadius) = innerCircle
@@ -371,13 +393,13 @@ private fun concaveRingSlice(
             rect = outerRect,
             startAngleDegrees = toOuterStartAngleDegrees,
             sweepAngleDegrees = outerSweepAngleDegrees,
-            false
+            false,
         )
         arcTo(
             rect = innerRect,
             startAngleDegrees = toInnerStartAngleDegrees,
             sweepAngleDegrees = -outerSweepAngleDegrees,
-            false
+            false,
         )
     }
 
@@ -388,12 +410,12 @@ private fun concaveRingSlice(
             oval = Rect(
                 center = center + polarToCartesian(
                     radius = innerCircleCenterRadius,
-                    angle = toInnerCircleDegrees.deg
+                    angle = toInnerCircleDegrees.deg,
                 ),
-                radius = innerCircleRadius
+                radius = innerCircleRadius,
             ),
             startAngleDegrees = toInnerCircleDegrees,
-            sweepAngleDegrees = InnerCircleSweepAngleDegrees
+            sweepAngleDegrees = InnerCircleSweepAngleDegrees,
         )
     }
     return slice - convexSemicircle
@@ -412,7 +434,7 @@ private fun ringSlice(
     layout: Layout,
     startAngle: Float,
     sweepAngle: Float,
-    innerCircle: InnerCircle
+    innerCircle: InnerCircle,
 ): Path {
     val (_, innerRect, outerRect) = layout
     val (_, innerCircleDegrees, _) = innerCircle
@@ -426,13 +448,13 @@ private fun ringSlice(
         addArc(
             oval = outerRect,
             startAngleDegrees = toOuterStartAngleDegrees,
-            sweepAngleDegrees = outerSweepAngleDegrees
+            sweepAngleDegrees = outerSweepAngleDegrees,
         )
         arcTo(
             rect = innerRect,
             startAngleDegrees = toInnerStartAngleDegrees,
             sweepAngleDegrees = -outerSweepAngleDegrees,
-            forceMoveTo = false
+            forceMoveTo = false,
         )
     }
 }
@@ -449,7 +471,7 @@ private fun convexRingSlice(
     layout: Layout,
     startAngle: Float,
     sweepAngle: Float,
-    innerCircle: InnerCircle
+    innerCircle: InnerCircle,
 ): Path {
     val (center, _, _) = layout
     val (innerCircleCenterRadius, innerCircleDegrees, innerCircleRadius) = innerCircle
@@ -460,12 +482,12 @@ private fun convexRingSlice(
             oval = Rect(
                 center = center + polarToCartesian(
                     radius = innerCircleCenterRadius,
-                    angle = toInnerCircleDegrees.deg
+                    angle = toInnerCircleDegrees.deg,
                 ),
-                radius = innerCircleRadius
+                radius = innerCircleRadius,
             ),
             startAngleDegrees = toInnerCircleDegrees,
-            sweepAngleDegrees = InnerCircleSweepAngleDegrees
+            sweepAngleDegrees = InnerCircleSweepAngleDegrees,
         )
     }
 
@@ -476,12 +498,12 @@ private fun convexRingSlice(
                 oval = Rect(
                     center = center + polarToCartesian(
                         radius = innerCircleCenterRadius,
-                        angle = toConcaveInnerCircleDegrees.deg
+                        angle = toConcaveInnerCircleDegrees.deg,
                     ),
-                    radius = innerCircleRadius
+                    radius = innerCircleRadius,
                 ),
                 startAngleDegrees = toConcaveInnerCircleDegrees,
-                sweepAngleDegrees = InnerCircleSweepAngleDegrees
+                sweepAngleDegrees = InnerCircleSweepAngleDegrees,
             )
         }
 
@@ -500,7 +522,7 @@ private fun convexRingSlice(
 private data class Layout(
     val center: Offset,
     val innerRect: Rect,
-    val outerRect: Rect
+    val outerRect: Rect,
 )
 
 /**

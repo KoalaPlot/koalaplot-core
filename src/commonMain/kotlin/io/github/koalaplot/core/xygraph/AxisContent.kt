@@ -32,7 +32,7 @@ public fun <T> rememberAxisContent(
             it.toString(),
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.padding(2.dp)
+            modifier = Modifier.padding(2.dp),
         )
     },
     title: @Composable () -> Unit = {},
@@ -67,7 +67,7 @@ public fun <T> rememberStringAxisContent(
                 label(it),
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(2.dp)
+                modifier = Modifier.padding(2.dp),
             )
         },
         title = {
@@ -76,10 +76,10 @@ public fun <T> rememberStringAxisContent(
                     Text(
                         title,
                         color = MaterialTheme.colorScheme.onBackground,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
                     )
                 }
             }
-        }
+        },
     )
 }

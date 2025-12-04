@@ -22,11 +22,14 @@ import io.github.koalaplot.core.style.KoalaPlotTheme
  * Specifies the position of axis ticks.
  */
 public enum class TickPosition {
-    Outside, Inside, None
+    Outside,
+    Inside,
+    None,
 }
 
 internal enum class AxisOrientation {
-    Horizontal, Vertical
+    Horizontal,
+    Vertical,
 }
 
 /**
@@ -41,7 +44,7 @@ public data class AxisStyle(
     val minorTickSize: Dp = 0.dp,
     val tickPosition: TickPosition = TickPosition.None,
     val lineWidth: Dp = 1.dp,
-    val labelRotation: Int = 0
+    val labelRotation: Int = 0,
 ) {
     init {
         @Suppress("MagicNumber")
@@ -59,7 +62,7 @@ public fun rememberAxisStyle(
     minorTickSize: Dp = KoalaPlotTheme.axis.minorTickSize,
     tickPosition: TickPosition = KoalaPlotTheme.axis.xyGraphTickPosition,
     lineWidth: Dp = KoalaPlotTheme.axis.lineThickness,
-    labelRotation: Int = 0
+    labelRotation: Int = 0,
 ): AxisStyle = remember(color, majorTickSize, minorTickSize, tickPosition, lineWidth, labelRotation) {
     AxisStyle(
         color,
@@ -67,7 +70,7 @@ public fun rememberAxisStyle(
         minorTickSize,
         tickPosition,
         lineWidth,
-        labelRotation
+        labelRotation,
     )
 }
 
@@ -76,21 +79,26 @@ internal class AxisDelegate<T> private constructor(
     val tickValues: TickValues<T>,
     val orientation: AxisOrientation,
     val style: AxisStyle,
-) : AxisState by axisState, TickValues<T> by tickValues {
+) : AxisState by axisState,
+    TickValues<T> by tickValues {
     companion object {
-        fun <T> createVerticalAxis(axisModel: AxisModel<T>, style: AxisStyle, length: Dp): AxisDelegate<T> {
-            return createAxis(AxisOrientation.Vertical, axisModel, style, length)
-        }
+        fun <T> createVerticalAxis(
+            axisModel: AxisModel<T>,
+            style: AxisStyle,
+            length: Dp,
+        ): AxisDelegate<T> = createAxis(AxisOrientation.Vertical, axisModel, style, length)
 
-        fun <T> createHorizontalAxis(axisModel: AxisModel<T>, style: AxisStyle, length: Dp): AxisDelegate<T> {
-            return createAxis(AxisOrientation.Horizontal, axisModel, style, length)
-        }
+        fun <T> createHorizontalAxis(
+            axisModel: AxisModel<T>,
+            style: AxisStyle,
+            length: Dp,
+        ): AxisDelegate<T> = createAxis(AxisOrientation.Horizontal, axisModel, style, length)
 
         private fun <T> createAxis(
             orientation: AxisOrientation,
             axisModel: AxisModel<T>,
             style: AxisStyle,
-            length: Dp
+            length: Dp,
         ): AxisDelegate<T> {
             val tickValues = axisModel.computeTickValues(length)
 
@@ -159,7 +167,7 @@ internal class AxisDelegate<T> private constructor(
                 Offset(0f, 0f),
                 Offset(0f, sizeInline),
                 strokeWidth = style.lineWidth.toPx(),
-                cap = StrokeCap.Butt
+                cap = StrokeCap.Butt,
             )
 
             if (style.tickPosition != TickPosition.None) {
@@ -171,7 +179,7 @@ internal class AxisDelegate<T> private constructor(
                             Offset(0f, y),
                             Offset(style.majorTickSize.toPx(), y),
                             strokeWidth = style.lineWidth.toPx(),
-                            cap = StrokeCap.Butt
+                            cap = StrokeCap.Butt,
                         )
                     }
                 }
@@ -184,7 +192,7 @@ internal class AxisDelegate<T> private constructor(
                             Offset(0f, y),
                             Offset(style.minorTickSize.toPx(), y),
                             strokeWidth = style.lineWidth.toPx(),
-                            cap = StrokeCap.Butt
+                            cap = StrokeCap.Butt,
                         )
                     }
                 }
@@ -200,7 +208,7 @@ internal fun <T> Axis(delegate: AxisDelegate<T>) {
             Modifier.fillMaxHeight().width(delegate.thicknessDp)
         } else {
             Modifier.fillMaxWidth().height(delegate.thicknessDp)
-        }
+        },
     ) {
         with(delegate) {
             drawAxis()

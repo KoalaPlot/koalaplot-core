@@ -14,7 +14,6 @@ public class StartAnimationUseCase(
     private val executionType: ExecutionType = ExecutionType.Default,
     private vararg val chartAnimationSpecs: AnimationSpec<Float>,
 ) {
-
     public val animatables: List<Animatable<Float, AnimationVector1D>> by lazy {
         chartAnimationSpecs.map {
             Animatable(getAnimationStartValue())
@@ -27,7 +26,7 @@ public class StartAnimationUseCase(
             ExecutionType.Default -> {
                 LaunchedEffect(key1 = key) {
                     chartAnimationSpecs.forEachIndexed { index, animationSpec ->
-                        animatables[index].animateTo(TARGET_ANIMATION_VALUE, animationSpec)
+                        animatables[index].animateTo(TargetAnimationValue, animationSpec)
                     }
                 }
             }
@@ -38,11 +37,9 @@ public class StartAnimationUseCase(
         }
     }
 
-    private fun getAnimationStartValue(): Float {
-        return when (executionType) {
-            ExecutionType.Default -> START_ANIMATION_VALUE
-            ExecutionType.None -> TARGET_ANIMATION_VALUE
-        }
+    private fun getAnimationStartValue(): Float = when (executionType) {
+        ExecutionType.Default -> StartAnimationValue
+        ExecutionType.None -> TargetAnimationValue
     }
 
     public enum class ExecutionType {
@@ -51,7 +48,7 @@ public class StartAnimationUseCase(
     }
 
     private companion object {
-        private const val START_ANIMATION_VALUE = 0f
-        private const val TARGET_ANIMATION_VALUE = 1f
+        private const val StartAnimationValue = 0f
+        private const val TargetAnimationValue = 1f
     }
 }

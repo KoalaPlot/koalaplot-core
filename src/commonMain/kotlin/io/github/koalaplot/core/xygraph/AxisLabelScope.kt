@@ -4,4 +4,6 @@ public interface AxisLabelScope<T> {
     public val tickValues: TickValues<T>
 }
 
-internal data class DefaultAxisLabelScope<T>(override val tickValues: TickValues<T>) : AxisLabelScope<T>
+internal data class DefaultAxisLabelScope<T>(
+    override val tickValues: TickValues<T>,
+) : AxisLabelScope<T>

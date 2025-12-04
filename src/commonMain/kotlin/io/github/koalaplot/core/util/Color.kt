@@ -15,7 +15,7 @@ public typealias ColorPaletteGenerator = (count: Int) -> List<Color>
 public fun generateHueColorPalette(
     count: Int,
     saturation: Float = 0.5f,
-    lightness: Float = 0.5f
+    lightness: Float = 0.5f,
 ): List<Color> {
     val delta = (DegreesFullCircle / count)
 

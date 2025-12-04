@@ -13,7 +13,6 @@ import kotlin.math.abs
 import kotlin.test.assertEquals
 
 class GesturesTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -80,7 +79,7 @@ class GesturesTest {
             ZoomFactor(1.0f, 1.0f),
             ZoomFactor(-2.0f, 4.0f),
             ZoomFactor(2.5f, -0.5f),
-            ZoomFactor(-1.5f, -3.5f)
+            ZoomFactor(-1.5f, -3.5f),
         )
 
         for (testCase in testCases) {
@@ -105,7 +104,7 @@ class GesturesTest {
             panYConsumptionEnabled = true,
             zoomXEnabled = true,
             zoomYEnabled = true,
-            independentZoomEnabled = true
+            independentZoomEnabled = true,
         )
 
         val gestureConfig2 = GestureConfig(
@@ -115,7 +114,7 @@ class GesturesTest {
             panYConsumptionEnabled = false,
             zoomXEnabled = false,
             zoomYEnabled = false,
-            independentZoomEnabled = false
+            independentZoomEnabled = false,
         )
 
         val gestureConfig3 = GestureConfig(
@@ -125,7 +124,7 @@ class GesturesTest {
             panYConsumptionEnabled = false,
             zoomXEnabled = true,
             zoomYEnabled = false,
-            independentZoomEnabled = true
+            independentZoomEnabled = true,
         )
 
         val gestureConfig4 = GestureConfig(
@@ -135,28 +134,28 @@ class GesturesTest {
             panYConsumptionEnabled = true,
             zoomXEnabled = false,
             zoomYEnabled = true,
-            independentZoomEnabled = false
+            independentZoomEnabled = false,
         )
 
         composeTestRule.setContent {
             @Composable
-            fun testXYGraphWithGestureConfig(gestureConfig: GestureConfig) {
+            fun TestXYGraphWithGestureConfig(gestureConfig: GestureConfig) {
                 XYGraph(
                     xAxisModel = FloatLinearAxisModel(
                         -100f..100f,
                     ),
                     yAxisModel = FloatLinearAxisModel(
-                        range = -100f..100f
+                        range = -100f..100f,
                     ),
-                    gestureConfig = gestureConfig
+                    gestureConfig = gestureConfig,
                 ) {
                 }
             }
 
-            testXYGraphWithGestureConfig(gestureConfig = gestureConfig1)
-            testXYGraphWithGestureConfig(gestureConfig = gestureConfig2)
-            testXYGraphWithGestureConfig(gestureConfig = gestureConfig3)
-            testXYGraphWithGestureConfig(gestureConfig = gestureConfig4)
+            TestXYGraphWithGestureConfig(gestureConfig = gestureConfig1)
+            TestXYGraphWithGestureConfig(gestureConfig = gestureConfig2)
+            TestXYGraphWithGestureConfig(gestureConfig = gestureConfig3)
+            TestXYGraphWithGestureConfig(gestureConfig = gestureConfig4)
         }
     }
 }

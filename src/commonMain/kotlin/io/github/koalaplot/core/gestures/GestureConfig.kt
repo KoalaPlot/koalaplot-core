@@ -19,7 +19,6 @@ import androidx.compose.runtime.Stable
  */
 @Immutable
 public data class GestureConfig(
-
     /**
      * Whether the pan gesture is enabled for the X-axis
      *
@@ -28,7 +27,6 @@ public data class GestureConfig(
      * If `false`, no pan gestures will be handled for the X-axis
      */
     val panXEnabled: Boolean = false,
-
     /**
      * Whether the pan gesture is enabled for the Y-axis
      *
@@ -37,7 +35,6 @@ public data class GestureConfig(
      * If `false`, no pan gestures will be handled for the Y-axis
      */
     val panYEnabled: Boolean = false,
-
     /**
      * Whether the pan gesture on the X-axis should be consumed. Has no effect for `js` and `wasmJs`
      *
@@ -48,7 +45,6 @@ public data class GestureConfig(
      * the gesture if needed
      */
     val panXConsumptionEnabled: Boolean = true,
-
     /**
      * Whether the pan gesture on the Y-axis should be consumed. Has no effect for `js` and `wasmJs`
      *
@@ -59,7 +55,6 @@ public data class GestureConfig(
      * the gesture if needed
      */
     val panYConsumptionEnabled: Boolean = true,
-
     /**
      * Whether the zoom gesture is enabled for the X-axis
      *
@@ -68,7 +63,6 @@ public data class GestureConfig(
      * If `false`, no zoom gestures will be handled for the X-axis
      */
     val zoomXEnabled: Boolean = false,
-
     /**
      * Whether the zoom gesture is enabled for the Y-axis
      *
@@ -77,7 +71,6 @@ public data class GestureConfig(
      * If `false`, no zoom gestures will be handled for the Y-axis
      */
     val zoomYEnabled: Boolean = false,
-
     /**
      * Whether independent zoom (zooming on X and Y axes separately) is allowed
      *
@@ -112,7 +105,6 @@ public data class GestureConfig(
      * scroll while pressing Ctrl/Cmd is not supported (a problem with browser scaling)
      */
     val independentZoomEnabled: Boolean = false,
-
     /**
      * Whether the inertial pan fling animation is enabled
      *

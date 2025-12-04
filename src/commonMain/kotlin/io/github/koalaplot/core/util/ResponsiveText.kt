@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,7 +34,7 @@ public fun ResponsiveText(
     overflow: TextOverflow = TextOverflow.Clip,
 ) {
     var lastSize by remember { mutableStateOf(Size(0f, 0f)) }
-    var lastTextSize by remember { mutableStateOf(0.0f) }
+    var lastTextSize by remember { mutableFloatStateOf(0.0f) }
 
     val fontResolver = LocalFontFamilyResolver.current
     val density = LocalDensity.current
@@ -41,7 +42,7 @@ public fun ResponsiveText(
     fun findTextSize(
         constraints: Constraints,
         minTextSize: Float,
-        maxTextSize: Float
+        maxTextSize: Float,
     ): Float {
         if (maxTextSize - minTextSize < 1) {
             return minTextSize

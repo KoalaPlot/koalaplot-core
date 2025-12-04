@@ -1,18 +1,20 @@
 # Configuration for Compose, see https://detekt.dev/docs/introduction/compose/
 naming:
-    FunctionNaming:
-        ignoreAnnotated: ['Composable']
-    TopLevelPropertyNaming:
-        constantPattern: '[A-Z][A-Za-z0-9]*'
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9]*'
 
 complexity:
-    LongParameterList:
-        ignoreDefaultParameters: true
-    LongMethod:
-        threshold: 80
+  LongParameterList:
+    ignoreDefaultParameters: true
+  LongMethod:
+    threshold: 80
 
 style:
-    MagicNumber:
-        ignorePropertyDeclaration: true
-    UnusedPrivateMember:
-        ignoreAnnotated: ['Preview']
+  MaxLineLength:
+    active: false  # checked by ktlint
+  MagicNumber:
+    ignorePropertyDeclaration: true
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']

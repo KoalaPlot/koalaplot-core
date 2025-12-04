@@ -91,15 +91,17 @@ private fun makePieSliceData(
     pieStartAngle: AngularValue,
     pieExtendAngle: AngularValue,
 ): List<PieSliceData> {
-    val total = data.sumOf {
-        it.toDouble()
-    }.toFloat().let {
-        if (it == 0F) {
-            1F
-        } else {
-            it
+    val total = data
+        .sumOf {
+            it.toDouble()
+        }.toFloat()
+        .let {
+            if (it == 0F) {
+                1F
+            } else {
+                it
+            }
         }
-    }
 
     return buildList {
         var startAngle = pieStartAngle.toDegrees().value
@@ -130,8 +132,9 @@ private data class PieSliceScopeImpl(
     override val pieSliceData: PieSliceData,
     override val innerRadius: Float,
     override val outerRadius: Float,
-    val hoverableElementAreaScope: HoverableElementAreaScope
-) : PieSliceScope, HoverableElementAreaScope by hoverableElementAreaScope
+    val hoverableElementAreaScope: HoverableElementAreaScope,
+) : PieSliceScope,
+    HoverableElementAreaScope by hoverableElementAreaScope
 
 /**
  * The LabelConnectorScope provides geometry information to LabelConnector implementations so they
@@ -165,7 +168,7 @@ internal data class LabelConnectorScopeImpl(
     override val startPosition: MutableState<Offset> = mutableStateOf(Offset.Zero),
     override val endPosition: MutableState<Offset> = mutableStateOf(Offset.Zero),
     override val startAngle: MutableState<AngularValue> = mutableStateOf(0.deg),
-    override val endAngle: MutableState<AngularValue> = mutableStateOf(0.deg)
+    override val endAngle: MutableState<AngularValue> = mutableStateOf(0.deg),
 ) : LabelConnectorScope
 
 // Initial outer radius as a fraction of size before hover expansion
@@ -242,7 +245,7 @@ public fun PieChart(
             executionType = StartAnimationUseCase.ExecutionType.Default,
             pieAnimationSpec,
             labelAnimationSpec,
-        )
+        ),
     )
 }
 
@@ -293,10 +296,10 @@ public fun PieChart(
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */
+            // chart animation
             KoalaPlotTheme.animationSpec,
-            /* label animation */
-            tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
+            // label animation
+            tween(LabelFadeInDuration, 0, LinearOutSlowInEasing),
         ),
     pieStartAngle: AngularValue = AngleCCWTop.deg,
     pieExtendAngle: AngularValue = DegreesFullCircle.deg,
@@ -344,7 +347,7 @@ public fun PieChart(
                 labelMeasurables,
                 constraints,
                 minPieDiameter.toPx(),
-                maxPieDiameter.toPx()
+                maxPieDiameter.toPx(),
             )
 
             val labelPositions =
@@ -352,14 +355,14 @@ public fun PieChart(
                     pieDiameter * InitOuterRadius,
                     holeSize,
                     labelPlaceables,
-                    finalPieSliceData
+                    finalPieSliceData,
                 )
 
             val size = pieMeasurePolicy.computeSize(labelPlaceables, labelPositions, pieDiameter).run {
                 // add one due to later float to int conversion dropping the fraction part
                 copy(
                     (width + 1).coerceAtMost(constraints.maxWidth.toFloat()),
-                    (height + 1).coerceAtMost(constraints.maxHeight.toFloat())
+                    (height + 1).coerceAtMost(constraints.maxHeight.toFloat()),
                 )
             }
 
@@ -373,15 +376,16 @@ public fun PieChart(
                 }
             }[0].measure(Constraints.fixed(holeDiameter.toInt(), holeDiameter.toInt()))
 
-            val connectorPlaceables = pieSliceData.mapIndexed { index, _ ->
-                subcompose("connector $index") {
-                    Box(modifier = Modifier.fillMaxSize().alpha(labelAlpha.value)) {
-                        labelConnectorTranslations[index]?.let {
-                            with(it.second) { labelConnector(index) }
+            val connectorPlaceables = pieSliceData
+                .mapIndexed { index, _ ->
+                    subcompose("connector $index") {
+                        Box(modifier = Modifier.fillMaxSize().alpha(labelAlpha.value)) {
+                            labelConnectorTranslations[index]?.let {
+                                with(it.second) { labelConnector(index) }
+                            }
                         }
-                    }
-                }.map { it.measure(constraints) }
-            }.flatten()
+                    }.map { it.measure(constraints) }
+                }.flatten()
 
             with(pieMeasurePolicy) {
                 layoutPie(
@@ -389,7 +393,7 @@ public fun PieChart(
                     labelPositions,
                     labelConnectorTranslations.map { it?.first },
                     pieDiameter,
-                    PieMeasurePolicy.PiePlaceables(piePlaceable, holePlaceable, labelPlaceables, connectorPlaceables)
+                    PieMeasurePolicy.PiePlaceables(piePlaceable, holePlaceable, labelPlaceables, connectorPlaceables),
                 )
             }
         }
@@ -508,10 +512,10 @@ public fun PieChart(
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */
+            // chart animation
             KoalaPlotTheme.animationSpec,
-            /* label animation */
-            tween(LabelFadeInDuration, 0, LinearOutSlowInEasing)
+            // label animation
+            tween(LabelFadeInDuration, 0, LinearOutSlowInEasing),
         ),
 ) {
     require(labelSpacing >= 1f) { "labelSpacing must be greater than 1" }
@@ -545,8 +549,8 @@ private fun HoverableElementAreaScope.Pie(
                         sliceData,
                         holeSize,
                         InitOuterRadius,
-                        this@Pie
-                    )
+                        this@Pie,
+                    ),
                 )
             }
         }
@@ -604,21 +608,28 @@ public fun PieSliceScope.DefaultSlice(
     clickable: Boolean = false,
     antiAlias: Boolean = false,
     gap: Float = 0.0f,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val targetOuterRadius by animateFloatAsState(outerRadius * if (isHovered) hoverExpandFactor else 1f)
 
     val shape = Slice(
-        pieSliceData.startAngle.toDegrees().value.toFloat() + gap,
-        pieSliceData.angle.toDegrees().value.toFloat() - 2 * gap,
+        pieSliceData.startAngle
+            .toDegrees()
+            .value
+            .toFloat() + gap,
+        pieSliceData.angle
+            .toDegrees()
+            .value
+            .toFloat() - 2 * gap,
         innerRadius,
-        targetOuterRadius
+        targetOuterRadius,
     )
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
             .drawWithContent {
                 drawIntoCanvas {
                     val path = (shape.createOutline(size, layoutDirection, this) as Outline.Generic).path
@@ -629,7 +640,7 @@ public fun PieSliceScope.DefaultSlice(
                         Paint().apply {
                             isAntiAlias = antiAlias
                             this.color = color
-                        }
+                        },
                     )
 
                     if (border != null) {
@@ -646,7 +657,7 @@ public fun PieSliceScope.DefaultSlice(
                                     strokeWidth = border.width.toPx()
                                     style = PaintingStyle.Stroke
                                     border.brush.applyTo(size, this, 1f)
-                                }
+                                },
                             )
 
                             // Remove part of border drawn outside of the slice bounds
@@ -655,7 +666,7 @@ public fun PieSliceScope.DefaultSlice(
                                 Paint().apply {
                                     isAntiAlias = antiAlias
                                     blendMode = BlendMode.Clear
-                                }
+                                },
                             )
                         }
                     }
@@ -667,14 +678,13 @@ public fun PieSliceScope.DefaultSlice(
                     Modifier.clickable(
                         enabled = true,
                         role = Role.Button,
-                        onClick = onClick
+                        onClick = onClick,
                     )
                 } else {
                     Modifier
-                }
-            )
-            .hoverableElement(hoverElement)
-            .hoverable(interactionSource)
+                },
+            ).hoverableElement(hoverElement)
+            .hoverable(interactionSource),
     ) {}
 }
 
@@ -688,12 +698,12 @@ private class Slice(
     private val startAngle: Float,
     private val angle: Float,
     private val innerRadius: Float = 0.5f,
-    private val outerRadius: Float = 1.0f
+    private val outerRadius: Float = 1.0f,
 ) : Shape {
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
-        density: Density
+        density: Density,
     ): Outline {
         val radius = size.width / 2f * outerRadius
         val holeRadius = size.width / 2f * innerRadius
@@ -708,10 +718,10 @@ private class Slice(
                             size.width / 2f - radius,
                             size.width / 2f - radius,
                             size.width / 2f + radius,
-                            size.width / 2f + radius
+                            size.width / 2f + radius,
                         ),
                         startAngle,
-                        angle
+                        angle,
                     )
                     // Inner circle
                     addArc(
@@ -719,10 +729,10 @@ private class Slice(
                             size.width / 2f - holeRadius,
                             size.width / 2f - holeRadius,
                             size.width / 2f + holeRadius,
-                            size.width / 2f + holeRadius
+                            size.width / 2f + holeRadius,
                         ),
                         startAngle,
-                        -angle
+                        -angle,
                     )
                 } else {
                     // First line segment from start point to first outer corner
@@ -735,10 +745,10 @@ private class Slice(
                             size.width / 2f - radius,
                             size.width / 2f - radius,
                             size.width / 2f + radius,
-                            size.width / 2f + radius
+                            size.width / 2f + radius,
                         ),
                         startAngle,
-                        angle
+                        angle,
                     )
 
                     // Line from second outer corner to inner corner or center
@@ -751,7 +761,7 @@ private class Slice(
                                 size.width / 2f - holeRadius,
                                 size.height / 2f - holeRadius,
                                 size.width / 2f + holeRadius,
-                                size.height / 2f + holeRadius
+                                size.height / 2f + holeRadius,
                             ),
                             startAngle + angle,
                             -angle,
@@ -759,7 +769,7 @@ private class Slice(
                         )
                     }
                 }
-            }
+            },
         )
     }
 }
@@ -774,7 +784,7 @@ private class Slice(
 public fun LabelConnectorScope.BezierLabelConnector(
     modifier: Modifier = Modifier,
     connectorColor: Color = MaterialTheme.colorScheme.onBackground,
-    connectorStroke: Stroke = Stroke(width = 1f)
+    connectorStroke: Stroke = Stroke(width = 1f),
 ) {
     val length by remember(startPosition.value, endPosition.value) {
         val delta = startPosition.value - endPosition.value
@@ -798,9 +808,9 @@ public fun LabelConnectorScope.BezierLabelConnector(
             drawPath(
                 path = path,
                 color = connectorColor,
-                style = connectorStroke
+                style = connectorStroke,
             )
-        }
+        },
     ) {}
 }
 
@@ -814,7 +824,7 @@ public fun LabelConnectorScope.BezierLabelConnector(
 public fun LabelConnectorScope.StraightLineConnector(
     modifier: Modifier = Modifier,
     connectorColor: Color = MaterialTheme.colorScheme.onBackground,
-    connectorStroke: Stroke = Stroke(width = 1f)
+    connectorStroke: Stroke = Stroke(width = 1f),
 ) {
     val path = Path().apply {
         moveTo(startPosition.value)
@@ -823,6 +833,6 @@ public fun LabelConnectorScope.StraightLineConnector(
     Box(
         modifier = modifier.fillMaxSize().drawBehind {
             drawPath(path = path, color = connectorColor, style = connectorStroke)
-        }
+        },
     ) {}
 }

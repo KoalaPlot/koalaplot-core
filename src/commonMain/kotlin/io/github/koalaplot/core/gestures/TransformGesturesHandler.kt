@@ -13,7 +13,6 @@ import io.github.koalaplot.core.util.ZoomFactor
  * callbacks when zoom or pan changes occur
  */
 internal interface TransformGesturesHandler {
-
     /**
      * Detects and processes transform gestures, such as zoom and pan
      *

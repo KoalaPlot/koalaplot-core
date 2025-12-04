@@ -22,6 +22,10 @@ import kotlin.math.max
  * up to the maximum width of the component. Multiple legend entries will be placed in the same
  * row until all horizontal space is consumed.
  */
+@Deprecated(
+    "Use FlowLegend2",
+    replaceWith = ReplaceWith("FlowLegend2(itemCount, modifier, symbol, label, symbolGap, columnGap, rowGap)"),
+)
 @Composable
 public fun FlowLegend(
     itemCount: Int,
@@ -30,12 +34,30 @@ public fun FlowLegend(
     symbolGap: Dp = KoalaPlotTheme.sizes.gap,
     columnGap: Dp = KoalaPlotTheme.sizes.gap,
     rowGap: Dp = KoalaPlotTheme.sizes.gap,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+) {
+    FlowLegend2(itemCount, modifier, symbol, label, symbolGap, columnGap, rowGap)
+}
+
+/**
+ * A flow layout type of legend where each entry will take as much horizontal space as it requires,
+ * up to the maximum width of the component. Multiple legend entries will be placed in the same
+ * row until all horizontal space is consumed.
+ */
+@Composable
+public fun FlowLegend2(
+    itemCount: Int,
+    modifier: Modifier = Modifier,
+    symbol: @Composable LegendScope.(item: Int) -> Unit = {},
+    label: @Composable LegendScope.(item: Int) -> Unit = {},
+    symbolGap: Dp = KoalaPlotTheme.sizes.gap,
+    columnGap: Dp = KoalaPlotTheme.sizes.gap,
+    rowGap: Dp = KoalaPlotTheme.sizes.gap,
 ) {
     fun Density.sizeOrPlace(
         placeables: List<Placeable>,
         constraints: Constraints,
-        place: Placeable.(Int, Int) -> Unit
+        place: Placeable.(Int, Int) -> Unit,
     ): IntSize {
         var x = 0
         var y = 0

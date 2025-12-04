@@ -26,13 +26,12 @@ import io.github.koalaplot.core.util.ZoomFactor
 internal class StickyAxisZoomHandler(
     private val minTouchesDistance: Float,
 ) : ZoomHandler {
-
     override fun handle(
         size: IntSize,
         event: PointerEvent,
         isHorizontalZoom: Boolean,
         gestureConfig: GestureConfig,
-        onZoomChange: (size: IntSize, centroid: Offset, zoom: ZoomFactor) -> Unit
+        onZoomChange: (size: IntSize, centroid: Offset, zoom: ZoomFactor) -> Unit,
     ): Boolean {
         var zoomChange = event
             .calculateZoomXY()
@@ -94,7 +93,10 @@ internal class StickyAxisZoomHandler(
      * @param minTouchesDistance Minimum allowed distance between touches
      * @param isHorizontalZoom For which axis the zooming is change
      */
-    private fun PointerEvent.zoomGestureIsCorrect(minTouchesDistance: Float, isHorizontalZoom: Boolean): Boolean {
+    private fun PointerEvent.zoomGestureIsCorrect(
+        minTouchesDistance: Float,
+        isHorizontalZoom: Boolean,
+    ): Boolean {
         var firstTouch: Offset? = null
         var secondTouch: Offset? = null
         for (change in changes) {

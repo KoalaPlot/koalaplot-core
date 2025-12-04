@@ -23,11 +23,17 @@ public interface Point<X, Y> {
  * @param Y The type of the y-axis value
  */
 @Suppress("FunctionNaming")
-public fun <X, Y> Point(x: X, y: Y): Point<X, Y> = DefaultPoint(x, y)
+public fun <X, Y> Point(
+    x: X,
+    y: Y,
+): Point<X, Y> = DefaultPoint(x, y)
 
 /**
  * Default implementation of the Point interface.
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values
  */
-public data class DefaultPoint<X, Y>(override val x: X, override val y: Y) : Point<X, Y>
+public data class DefaultPoint<X, Y>(
+    override val x: X,
+    override val y: Y,
+) : Point<X, Y>

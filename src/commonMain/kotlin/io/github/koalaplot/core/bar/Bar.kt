@@ -32,11 +32,12 @@ public fun BarScope.DefaultBar(
     hoverElement: @Composable () -> Unit = {},
 ) {
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
             .background(brush = brush, shape = shape)
             .clip(shape)
-            .hoverableElement(hoverElement)
+            .hoverableElement(hoverElement),
     )
 }
 
@@ -57,7 +58,7 @@ public fun BarScope.DefaultBar(
  */
 @Deprecated(
     message = "Delegates to vertical solid bar. Use explicitly dedicated factory function.",
-    replaceWith = ReplaceWith("verticalSolidBar(color, shape, border)")
+    replaceWith = ReplaceWith("verticalSolidBar(color, shape, border)"),
 )
 public fun <X, Y> solidBar(
     color: Color,
@@ -98,7 +99,7 @@ public fun <X> XYGraphScope<X, Float>.verticalPlanoConvexBar(
     DefaultBar(
         brush = SolidColor(color),
         shape = VerticalPlanoConvexShape(this@verticalPlanoConvexBar, index, value),
-        border = border
+        border = border,
     )
 }
 
@@ -114,7 +115,7 @@ public fun <X> XYGraphScope<X, Float>.verticalBiConvexBar(
     DefaultBar(
         brush = SolidColor(color),
         shape = VerticalBiConvexShape(this@verticalBiConvexBar, index, value),
-        border = border
+        border = border,
     )
 }
 
@@ -129,7 +130,7 @@ public fun <X> XYGraphScope<Float, X>.horizontalPlanoConvexBar(
     DefaultBar(
         brush = SolidColor(color),
         shape = HorizontalPlanoConvexShape(this@horizontalPlanoConvexBar, index, value),
-        border = border
+        border = border,
     )
 }
 
@@ -145,6 +146,6 @@ public fun <X> XYGraphScope<Float, X>.horizontalBiConvexBar(
     DefaultBar(
         brush = SolidColor(color),
         shape = HorizontalBiConvexShape(this@horizontalBiConvexBar, index, value),
-        border = border
+        border = border,
     )
 }

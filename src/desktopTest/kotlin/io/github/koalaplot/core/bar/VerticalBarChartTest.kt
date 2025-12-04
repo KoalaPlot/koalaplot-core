@@ -26,10 +26,10 @@ class VerticalBarChartTest {
                     listOf(
                         DefaultVerticalBarPlotEntry(
                             5f,
-                            DefaultBarPosition(0f, 10f)
-                        )
+                            DefaultBarPosition(0f, 10f),
+                        ),
                     ),
-                    bar = { _, _, _ -> }
+                    bar = { _, _, _ -> },
                 )
             }
         }

@@ -16,20 +16,20 @@ class IntLinearAxisModelTest {
             500.dp,
             listOf(
                 0,
-                10
-            )
+                10,
+            ),
         )
         testLinearAxisMajorTicks(
             0..10,
             50.dp,
             500.dp,
-            List(11) { it }
+            List(11) { it },
         )
         testLinearAxisMajorTicks(
             0..10,
             100.dp,
             500.dp,
-            List(6) { it * 2 }
+            List(6) { it * 2 },
         )
     }
 
@@ -39,19 +39,19 @@ class IntLinearAxisModelTest {
             -10..0,
             500.dp,
             500.dp,
-            listOf(-10, 0)
+            listOf(-10, 0),
         )
         testLinearAxisMajorTicks(
             -10..0,
             50.dp,
             500.dp,
-            List(11) { it * -1 }.reversed()
+            List(11) { it * -1 }.reversed(),
         )
         testLinearAxisMajorTicks(
             -10..0,
             100.dp,
             500.dp,
-            List(6) { it * -2 }.reversed()
+            List(6) { it * -2 }.reversed(),
         )
     }
 
@@ -61,19 +61,19 @@ class IntLinearAxisModelTest {
             0..100,
             500.dp,
             500.dp,
-            listOf(0, 100)
+            listOf(0, 100),
         )
         testLinearAxisMajorTicks(
             0..100,
             50.dp,
             500.dp,
-            List(11) { it * 10 }
+            List(11) { it * 10 },
         )
         testLinearAxisMajorTicks(
             0..100,
             100.dp,
             500.dp,
-            List(6) { it * 20 }
+            List(6) { it * 20 },
         )
     }
 
@@ -83,13 +83,13 @@ class IntLinearAxisModelTest {
             10..90,
             50.dp,
             500.dp,
-            List(9) { it * 10 + 10 }
+            List(9) { it * 10 + 10 },
         )
         testLinearAxisMajorTicks(
             10..90,
             100.dp,
             500.dp,
-            List(4) { it * 20 + 20 }
+            List(4) { it * 20 + 20 },
         )
     }
 
@@ -122,7 +122,7 @@ class IntLinearAxisModelTest {
         val testPoints = listOf(
             30 to 0.3f,
             0 to 0.0f,
-            100 to 1.0f
+            100 to 1.0f,
         )
 
         IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 100).let { axisModel ->
@@ -143,10 +143,10 @@ class IntLinearAxisModelTest {
         val testPoints = listOf(
             0.3f to 30,
             0.0f to 0,
-            1.0f to 100
+            1.0f to 100,
         )
 
-        IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 100).let{ axisModel ->
+        IntLinearAxisModel(0..100, minViewExtent = 10, maxViewExtent = 100).let { axisModel ->
             testPoints.forEach { (p, e) ->
                 assertEquals(e, axisModel.offsetToValue(p))
             }
@@ -164,7 +164,7 @@ private fun testLinearAxisMajorTicks(
     range: IntRange,
     minTickSpacing: Dp,
     axisLength: Dp,
-    expected: List<Int>
+    expected: List<Int>,
 ) {
     val axis = IntLinearAxisModel(range, minimumMajorTickSpacing = minTickSpacing)
     val ticks = axis.computeTickValues(axisLength).majorTickValues

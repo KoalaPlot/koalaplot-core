@@ -26,8 +26,13 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-private class Sender(private val onMessageReceived: (@Composable () -> Unit, Boolean) -> Unit) {
-    fun sendMessage(composable: @Composable () -> Unit, display: Boolean) {
+private class Sender(
+    private val onMessageReceived: (@Composable () -> Unit, Boolean) -> Unit,
+) {
+    fun sendMessage(
+        composable: @Composable () -> Unit,
+        display: Boolean,
+    ) {
         onMessageReceived(composable, display)
     }
 }
@@ -47,20 +52,21 @@ private class Sender(private val onMessageReceived: (@Composable () -> Unit, Boo
 @Composable
 public fun HoverableElementArea(
     modifier: Modifier = Modifier,
-    content: @Composable HoverableElementAreaScope.() -> Unit
+    content: @Composable HoverableElementAreaScope.() -> Unit,
 ) {
     var isHovered by remember { mutableStateOf(false) }
     var position by remember { mutableStateOf(Offset.Zero) }
     var hoverElement: (@Composable () -> Unit)? by remember { mutableStateOf(null) }
 
-    val scope = remember {
-        HoverableElementAreaScopeImpl(
-            Sender { composable, display ->
-                isHovered = display
-                hoverElement = composable
-            }
-        )
-    }
+    val scope =
+        remember {
+            HoverableElementAreaScopeImpl(
+                Sender { composable, display ->
+                    isHovered = display
+                    hoverElement = composable
+                },
+            )
+        }
 
     Layout(
         modifier = modifier.pointerPosition(Unit) { position = it },
@@ -80,34 +86,41 @@ public fun HoverableElementArea(
                     it?.invoke()
                 }
             }
-        }
+        },
     ) { measurables, constraints ->
         val contentConstraints = constraints.copy(minWidth = 0, minHeight = 0)
         val placeable = measurables[0].measure(contentConstraints)
-        val hoverItem = if (measurables.size == 2) {
-            measurables[1].measure(contentConstraints)
-        } else {
-            null
-        }
+        val hoverItem =
+            if (measurables.size == 2) {
+                measurables[1].measure(contentConstraints)
+            } else {
+                null
+            }
 
         layout(placeable.width, placeable.height) {
             placeable.place(0, 0)
 
             hoverItem?.apply {
-                val left = (position.x.toInt() - width / 2)
-                    .coerceAtMost(constraints.maxWidth - width).coerceAtLeast(0)
+                val left =
+                    (position.x.toInt() - width / 2)
+                        .coerceAtMost(constraints.maxWidth - width)
+                        .coerceAtLeast(0)
 
                 place(
                     left,
                     (position.y.toInt() - height).coerceAtLeast(0),
-                    1f
+                    1f,
                 )
             }
         }
     }
 }
 
-private fun Modifier.pointerPosition(key1: Any?, update: (Offset) -> Unit): Modifier = composed {
+@Suppress("ktlint:compose:modifier-composed-check")
+private fun Modifier.pointerPosition(
+    key1: Any?,
+    update: (Offset) -> Unit,
+): Modifier = composed {
     Modifier.pointerInput(key1) {
         val currentContext = currentCoroutineContext()
         awaitPointerEventScope {
@@ -129,8 +142,10 @@ public interface HoverableElementAreaScope {
     public fun Modifier.hoverableElement(element: @Composable () -> Unit): Modifier
 }
 
-private class HoverableElementAreaScopeImpl(private val sender: Sender) :
-    HoverableElementAreaScope {
+private class HoverableElementAreaScopeImpl(
+    private val sender: Sender,
+) : HoverableElementAreaScope {
+    @Suppress("ktlint:compose:modifier-composed-check")
     override fun Modifier.hoverableElement(element: @Composable () -> Unit): Modifier = composed {
         val interactionSource = remember { MutableInteractionSource() }
         var hoverInteraction by remember { mutableStateOf<HoverInteraction.Enter?>(null) }
@@ -161,7 +176,7 @@ private class HoverableElementAreaScopeImpl(private val sender: Sender) :
         // package location of this code
         Modifier // .modifierLocalConsumer { sender = ModifierLocalSender.current }
             .pointerInput(
-                interactionSource
+                interactionSource,
             ) {
                 coroutineScope {
                     val currentContext = currentCoroutineContext()
@@ -170,16 +185,20 @@ private class HoverableElementAreaScopeImpl(private val sender: Sender) :
                         while (currentContext.isActive) {
                             val event = awaitPointerEvent()
                             when (event.type) {
-                                PointerEventType.Enter -> outerScope.launch(
-                                    start = CoroutineStart.UNDISPATCHED
-                                ) {
-                                    emitEnter()
+                                PointerEventType.Enter -> {
+                                    outerScope.launch(
+                                        start = CoroutineStart.UNDISPATCHED,
+                                    ) {
+                                        emitEnter()
+                                    }
                                 }
 
-                                PointerEventType.Exit -> outerScope.launch(
-                                    start = CoroutineStart.UNDISPATCHED
-                                ) {
-                                    emitExit()
+                                PointerEventType.Exit -> {
+                                    outerScope.launch(
+                                        start = CoroutineStart.UNDISPATCHED,
+                                    ) {
+                                        emitExit()
+                                    }
                                 }
                             }
                         }

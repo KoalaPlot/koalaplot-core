@@ -39,7 +39,7 @@ public class IntLinearAxisModel(
     private val maxViewExtent: Int = ((range.last - range.first)),
     private val minimumMajorTickIncrement: Int = (
         (range.last - range.first) * MinimumMajorTickIncrementDefault
-        ).toInt(),
+    ).toInt(),
     override val minimumMajorTickSpacing: Dp = 50.dp,
     private val minorTickCount: Int = 4,
     private val inverted: Boolean = false,
@@ -67,7 +67,7 @@ public class IntLinearAxisModel(
         (
             (point - currentRange.value.start) /
                 (currentRange.value.endInclusive - currentRange.value.start)
-            ).toFloat()
+        ).toFloat()
     }
 
     // Function used to compute the inverse of offsetComputer. Set as a variable to avoid an
@@ -83,7 +83,7 @@ public class IntLinearAxisModel(
                 (
                     (currentRange.value.endInclusive - point) /
                         (currentRange.value.endInclusive - currentRange.value.start)
-                    ).toFloat()
+                ).toFloat()
             }
 
             offsetToValueFunction = { offset ->
@@ -91,14 +91,14 @@ public class IntLinearAxisModel(
                 (
                     currentRange.value.endInclusive -
                         offset * (currentRange.value.endInclusive - currentRange.value.start)
-                    ).roundToInt()
+                ).roundToInt()
             }
         }
     }
 
     // Internal for testing
     internal var currentRange = mutableStateOf(
-        range.first.toDouble()..(range.first + maxViewExtent).toDouble()
+        range.first.toDouble()..(range.first + maxViewExtent).toDouble(),
     )
     public override val viewRange: State<ClosedRange<Double>> = currentRange
 
@@ -111,7 +111,10 @@ public class IntLinearAxisModel(
 
     override fun computeTickValues(axisLength: Dp): TickValues<Int> = tickCalculator.computeTickValues(axisLength)
 
-    override fun zoom(zoomFactor: Float, pivot: Float) {
+    override fun zoom(
+        zoomFactor: Float,
+        pivot: Float,
+    ) {
         if (zoomFactor == 1f) return
 
         require(zoomFactor > 0) { "Zoom amount must be greater than 0" }
@@ -237,7 +240,7 @@ private class IntTickCalculator(
         val majorTickValues = computeMajorTickValues(minTickSpacing)
         val minorTickValues = computeMinorTickValues(
             majorTickValues,
-            computeMajorTickSpacing(minTickSpacing)
+            computeMajorTickSpacing(minTickSpacing),
         )
         return object : TickValues<Int> {
             override val majorTickValues = if (inverted) majorTickValues.reversed() else majorTickValues
@@ -262,7 +265,10 @@ private class IntTickCalculator(
         return tickSpacing
     }
 
-    private fun computeMinorTickValues(majorTickValues: List<Int>, majorTickSpacing: Int): List<Int> = buildList {
+    private fun computeMinorTickValues(
+        majorTickValues: List<Int>,
+        majorTickSpacing: Int,
+    ): List<Int> = buildList {
         if (minorTickCount > 0 && majorTickValues.isNotEmpty()) {
             val minorIncrement = majorTickSpacing / (minorTickCount + 1)
 

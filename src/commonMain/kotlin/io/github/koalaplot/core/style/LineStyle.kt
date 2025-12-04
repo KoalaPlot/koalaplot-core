@@ -25,5 +25,5 @@ public data class LineStyle(
     val pathEffect: PathEffect? = null,
     val alpha: Float = 1.0f,
     val colorFilter: ColorFilter? = null,
-    val blendMode: BlendMode = DrawScope.DefaultBlendMode
+    val blendMode: BlendMode = DrawScope.DefaultBlendMode,
 )

@@ -21,7 +21,7 @@ public interface BarPosition<P> {
  */
 public data class DefaultBarPosition<P>(
     public override val start: P,
-    public override val end: P
+    public override val end: P,
 ) : BarPosition<P>
 
 /**
@@ -44,5 +44,5 @@ public interface BarPlotGroupedPointEntry<I, D> {
 
 public data class DefaultBarPlotGroupedPointEntry<I, D>(
     override val i: I,
-    override val d: List<BarPosition<D>>
+    override val d: List<BarPosition<D>>,
 ) : BarPlotGroupedPointEntry<I, D>

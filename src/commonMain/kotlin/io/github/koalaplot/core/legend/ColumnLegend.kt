@@ -23,6 +23,10 @@ private const val ColumnLegendColumns = 3
  * Creates a legend with [itemCount] legend items laid out vertically in a column.
  * Each row of the legend consists of a symbol, label, and value.
  */
+@Deprecated(
+    "Use ColumnLegend2 with modifier as first default parameter instead.",
+    replaceWith = ReplaceWith("ColumnLegend2(itemCount, modifier, symbol, label, value, rowGap, columnGap)"),
+)
 @Composable
 public fun ColumnLegend(
     itemCount: Int,
@@ -31,7 +35,24 @@ public fun ColumnLegend(
     value: @Composable LegendScope.(item: Int) -> Unit = {},
     rowGap: Dp = KoalaPlotTheme.sizes.gap,
     columnGap: Dp = KoalaPlotTheme.sizes.gap,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+) {
+    ColumnLegend2(itemCount, modifier, symbol, label, value, rowGap, columnGap)
+}
+
+/**
+ * Creates a legend with [itemCount] legend items laid out vertically in a column.
+ * Each row of the legend consists of a symbol, label, and value.
+ */
+@Composable
+public fun ColumnLegend2(
+    itemCount: Int,
+    modifier: Modifier = Modifier,
+    symbol: @Composable LegendScope.(item: Int) -> Unit = {},
+    label: @Composable LegendScope.(item: Int) -> Unit = {},
+    value: @Composable LegendScope.(item: Int) -> Unit = {},
+    rowGap: Dp = KoalaPlotTheme.sizes.gap,
+    columnGap: Dp = KoalaPlotTheme.sizes.gap,
 ) {
     Layout(modifier = modifier.clipToBounds(), content = {
         for (i in 0 until itemCount) {
@@ -49,7 +70,7 @@ private fun MeasureScope.measureColumnLegend(
     measureables: List<Measurable>,
     constraints: Constraints,
     columnGap: Dp,
-    rowGap: Dp
+    rowGap: Dp,
 ): MeasureResult {
     val rowMeasurables = (0 until itemCount).map {
         val rowIndex = it * ColumnLegendColumns
@@ -60,16 +81,17 @@ private fun MeasureScope.measureColumnLegend(
 
     val valueColConstraint = constraints.copy(
         maxWidth =
-        (constraints.maxWidth - (columnGap.toPx() * (ColumnLegendColumns - 1)) - symbolWidth)
-            .toInt().coerceAtLeast(constraints.minWidth)
+            (constraints.maxWidth - (columnGap.toPx() * (ColumnLegendColumns - 1)) - symbolWidth)
+                .toInt()
+                .coerceAtLeast(constraints.minWidth),
     )
     val valuePlaceables = rowMeasurables.map { it.third.measure(valueColConstraint) }
     val valueWidth = valuePlaceables.maxOf { it.width }
 
     val labelColConstraint = valueColConstraint.copy(
         maxWidth = (valueColConstraint.maxWidth - valueWidth).coerceAtLeast(
-            valueColConstraint.minWidth
-        )
+            valueColConstraint.minWidth,
+        ),
     )
     val labelPlaceables = rowMeasurables.map { it.second.measure(labelColConstraint) }
     val labelWidth = labelPlaceables.maxOf { it.width }
@@ -82,7 +104,7 @@ private fun MeasureScope.measureColumnLegend(
         (symbolWidth + valueWidth + labelWidth + (columnGap.toPx() * (ColumnLegendColumns - 1)).toInt())
             .coerceAtMost(constraints.maxWidth),
         (rowHeights.sum() + (rowGap.toPx() * (itemCount - 1)).toInt())
-            .coerceAtMost(constraints.maxHeight)
+            .coerceAtMost(constraints.maxHeight),
     ) {
         var offset = Offset(0f, 0f)
         for (row in 0 until itemCount) {
@@ -92,7 +114,7 @@ private fun MeasureScope.measureColumnLegend(
                 symbolPlaceables[row],
                 rowHeights[row],
                 symbolWidth,
-                offset
+                offset,
             )
             offset += Offset(symbolWidth + columnGap.toPx(), 0f)
             placeCell(
@@ -100,7 +122,7 @@ private fun MeasureScope.measureColumnLegend(
                 labelPlaceables[row],
                 rowHeights[row],
                 labelWidth,
-                offset
+                offset,
             )
             offset += Offset(labelWidth + columnGap.toPx(), 0f)
             placeCell(rowMeasurables[row].third, valuePlaceables[row], rowHeights[row], valueWidth, offset)

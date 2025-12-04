@@ -1,5 +1,6 @@
 package io.github.koalaplot.core.bar
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -47,14 +48,14 @@ public data class DefaultHorizontalBarPlotStackedPointEntry<X, Y>(
 public fun <X, Y, E : HorizontalBarPlotStackedPointEntry<X, Y>> XYGraphScope<X, Y>.StackedHorizontalBarPlot(
     data: List<E>,
     modifier: Modifier = Modifier,
-    bar: DefaultHorizontalBarComposable<X, Y>,
+    bar: DefaultHorizontalBarComposable<X, Y> = horizontalSolidBar(MaterialTheme.colorScheme.primary),
     barWidth: Float = 0.9f,
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */
+            // chart animation
             KoalaPlotTheme.animationSpec,
-        )
+        ),
 ) {
     val maxBarCount = data.maxOf { it.x.size }
 
@@ -67,28 +68,27 @@ public fun <X, Y, E : HorizontalBarPlotStackedPointEntry<X, Y>> XYGraphScope<X, 
                 bar(index, barIndex, value)
             },
             barWidth,
-            startAnimationUseCase
+            startAnimationUseCase,
         )
     }
 }
 
 private class HorizontalStackToBarEntryAdapter<X, Y>(
     val data: List<HorizontalBarPlotStackedPointEntry<X, Y>>,
-    val barIndex: Int
-) :
-    AbstractList<HorizontalBarPlotEntry<X, Y>>() {
+    val barIndex: Int,
+) : AbstractList<HorizontalBarPlotEntry<X, Y>>() {
     override val size: Int = data.size
 
-    override fun get(index: Int): HorizontalBarPlotEntry<X, Y> {
-        return object : HorizontalBarPlotEntry<X, Y> {
-            override val y: Y = data[index].y
-            override val x: BarPosition<X>
-                get() = HorizontalBarPositionAdapter(data[index], barIndex)
-        }
+    override fun get(index: Int): HorizontalBarPlotEntry<X, Y> = object : HorizontalBarPlotEntry<X, Y> {
+        override val y: Y = data[index].y
+        override val x: BarPosition<X>
+            get() = HorizontalBarPositionAdapter(data[index], barIndex)
     }
 
-    class HorizontalBarPositionAdapter<X, Y>(entry: HorizontalBarPlotStackedPointEntry<X, Y>, barIndex: Int) :
-        BarPosition<X> {
+    class HorizontalBarPositionAdapter<X, Y>(
+        entry: HorizontalBarPlotStackedPointEntry<X, Y>,
+        barIndex: Int,
+    ) : BarPosition<X> {
         override val start: X = if (barIndex == 0) {
             entry.xOrigin
         } else {
@@ -116,10 +116,10 @@ public fun <Y> XYGraphScope<Float, Y>.StackedHorizontalBarPlot(
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
             executionType = StartAnimationUseCase.ExecutionType.Default,
-            /* chart animation */
+            // chart animation
             KoalaPlotTheme.animationSpec,
         ),
-    content: StackedHorizontalBarPlotScope<Float, Y>.() -> Unit
+    content: StackedHorizontalBarPlotScope<Float, Y>.() -> Unit,
 ) {
     val scope = remember(content) {
         val scope = StackedHorizontalBarPlotScopeImpl<Float, Y>()
@@ -129,12 +129,13 @@ public fun <Y> XYGraphScope<Float, Y>.StackedHorizontalBarPlot(
 
     data class EntryWithBars<Y>(
         override val y: Y,
-        val xb: List<Pair<Float, DefaultHorizontalBarComposable<Float, Y>>>
+        val xb: List<Pair<Float, DefaultHorizontalBarComposable<Float, Y>>>,
     ) : HorizontalBarPlotStackedPointEntry<Float, Y> {
         override val xOrigin = 0f
 
         override val x: List<Float> = object : AbstractList<Float>() {
             override val size: Int = xb.size
+
             override fun get(index: Int): Float = xb.subList(0, index + 1).fold(0F) { acc, (y, _) ->
                 acc + y
             }
@@ -157,9 +158,8 @@ public fun <Y> XYGraphScope<Float, Y>.StackedHorizontalBarPlot(
         }
 
         override val size: Int = data.size
-        override fun get(index: Int): HorizontalBarPlotStackedPointEntry<Float, Y> {
-            return data[index]
-        }
+
+        override fun get(index: Int): HorizontalBarPlotStackedPointEntry<Float, Y> = data[index]
     }
 
     val data = remember(scope) { DataHolder() }
@@ -168,10 +168,13 @@ public fun <Y> XYGraphScope<Float, Y>.StackedHorizontalBarPlot(
         data,
         modifier,
         { yIndex, seriesIndex, value ->
-            data.data[yIndex].xb[seriesIndex].second.invoke(this, yIndex, seriesIndex, value)
+            data.data[yIndex]
+                .xb[seriesIndex]
+                .second
+                .invoke(this, yIndex, seriesIndex, value)
         },
         barWidth,
-        startAnimationUseCase
+        startAnimationUseCase,
     )
 }
 
@@ -185,15 +188,16 @@ public interface StackedHorizontalBarPlotScope<X, Y> {
      */
     public fun series(
         defaultBar: DefaultHorizontalBarComposable<X, Y> = horizontalSolidBar(Color.Blue),
-        content: StackedHorizontalBarPlotSeriesScope<X, Y>.() -> Unit
+        content: StackedHorizontalBarPlotSeriesScope<X, Y>.() -> Unit,
     )
 }
 
 private class StackedHorizontalBarPlotScopeImpl<X, Y> : StackedHorizontalBarPlotScope<X, Y> {
     val series: MutableList<StackedHorizontalBarPlotSeriesScopeImpl<X, Y>> = mutableListOf()
+
     override fun series(
         defaultBar: DefaultHorizontalBarComposable<X, Y>,
-        content: StackedHorizontalBarPlotSeriesScope<X, Y>.() -> Unit
+        content: StackedHorizontalBarPlotSeriesScope<X, Y>.() -> Unit,
     ) {
         val scope = StackedHorizontalBarPlotSeriesScopeImpl(defaultBar)
         series.add(scope)
@@ -211,14 +215,23 @@ public interface StackedHorizontalBarPlotSeriesScope<X, Y> {
      * An optional [bar] can be provided to customize the Composable used to
      * generate the bar for this specific item.
      */
-    public fun item(x: Float, y: Y, bar: (DefaultHorizontalBarComposable<X, Y>)? = null)
+    public fun item(
+        x: Float,
+        y: Y,
+        bar: (DefaultHorizontalBarComposable<X, Y>)? = null,
+    )
 }
 
-private class StackedHorizontalBarPlotSeriesScopeImpl<X, Y>(val defaultBar: DefaultHorizontalBarComposable<X, Y>) :
-    StackedHorizontalBarPlotSeriesScope<X, Y> {
+private class StackedHorizontalBarPlotSeriesScopeImpl<X, Y>(
+    val defaultBar: DefaultHorizontalBarComposable<X, Y>,
+) : StackedHorizontalBarPlotSeriesScope<X, Y> {
     val data: MutableMap<Y, Pair<Float, DefaultHorizontalBarComposable<X, Y>>> = mutableMapOf()
 
-    override fun item(x: Float, y: Y, bar: (DefaultHorizontalBarComposable<X, Y>)?) {
+    override fun item(
+        x: Float,
+        y: Y,
+        bar: (DefaultHorizontalBarComposable<X, Y>)?,
+    ) {
         data[y] = Pair(x, bar ?: defaultBar)
     }
 }

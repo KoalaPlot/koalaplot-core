@@ -22,7 +22,6 @@ private const val MinFlingMovementThreshold = 0.5f
 internal class PanFlingBehavior(
     val animationSpec: FloatDecayAnimationSpec,
 ) {
-
     /**
      * Performs a fling operation based on the initial velocity and updates the pan offset over time
      *
@@ -36,7 +35,10 @@ internal class PanFlingBehavior(
      * animation
      * The callback receives the calculated pan offset as a parameter
      */
-    suspend fun performFling(initialVelocity: Velocity, block: (pan: Offset) -> Unit) {
+    suspend fun performFling(
+        initialVelocity: Velocity,
+        block: (pan: Offset) -> Unit,
+    ) {
         var lastValue = 0f
         val initialSpeed = initialVelocity.getSpeed()
         val direction = initialVelocity / initialSpeed

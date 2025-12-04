@@ -21,9 +21,7 @@ import kotlin.math.min
  * restrict its size to the required diameter.
  */
 @Composable
-internal fun <T> PolarGraphScope<T>.Grid(
-    polarGraphProperties: PolarGraphProperties,
-) {
+internal fun <T> PolarGraphScope<T>.Grid(polarGraphProperties: PolarGraphProperties) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         if (polarGraphProperties.background != null) {
             val backgroundPath = generateGridBoundaryPath(size, polarGraphProperties.radialGridType)
@@ -34,7 +32,7 @@ internal fun <T> PolarGraphScope<T>.Grid(
                 polarGraphProperties.background.alpha,
                 Fill,
                 polarGraphProperties.background.colorFilter,
-                polarGraphProperties.background.blendMode
+                polarGraphProperties.background.blendMode,
             )
         }
 
@@ -46,7 +44,7 @@ internal fun <T> PolarGraphScope<T>.Grid(
 
         drawAngularGridLines(
             this@Grid,
-            polarGraphProperties.angularAxisGridLineStyle
+            polarGraphProperties.angularAxisGridLineStyle,
         )
     }
 }
@@ -57,7 +55,7 @@ internal fun <T> PolarGraphScope<T>.Grid(
 private fun <T> DrawScope.drawRadialGridLines(
     polarGraphScope: PolarGraphScope<T>,
     style: LineStyle?,
-    radialGridType: RadialGridType
+    radialGridType: RadialGridType,
 ) {
     val radii = polarGraphScope.radialAxisModel.tickValues.map { polarGraphScope.radialAxisModel.computeOffset(it) }
     if (radii.isEmpty()) return
@@ -73,7 +71,7 @@ private fun <T> DrawScope.drawRadialGridLines(
 
 private fun <T> DrawScope.drawStraightRadialGridLines(
     polarGraphScope: PolarGraphScope<T>,
-    style: LineStyle
+    style: LineStyle,
 ) {
     val angles = polarGraphScope.angularAxisModel.getTickValues()
     val radii = polarGraphScope.radialAxisModel.tickValues
@@ -89,7 +87,7 @@ private fun <T> DrawScope.drawStraightRadialGridLines(
                 pathEffect = style.pathEffect,
                 alpha = style.alpha,
                 colorFilter = style.colorFilter,
-                blendMode = style.blendMode
+                blendMode = style.blendMode,
             )
             startAngle = angles[angleIndex]
         }
@@ -110,14 +108,14 @@ private fun DrawScope.drawCircularRadialGridLines(
             alpha = style.alpha,
             style = Stroke(width = style.strokeWidth.toPx(), pathEffect = style.pathEffect),
             colorFilter = style.colorFilter,
-            blendMode = style.blendMode
+            blendMode = style.blendMode,
         )
     }
 }
 
 private fun <T> DrawScope.drawAngularGridLines(
     polarGraphScope: PolarGraphScope<T>,
-    style: LineStyle?
+    style: LineStyle?,
 ) {
     if (style == null) return
 
@@ -133,7 +131,7 @@ private fun <T> DrawScope.drawAngularGridLines(
             pathEffect = style.pathEffect,
             alpha = style.alpha,
             colorFilter = style.colorFilter,
-            blendMode = style.blendMode
+            blendMode = style.blendMode,
         )
     }
 }
@@ -144,26 +142,24 @@ private fun <T> DrawScope.drawAngularGridLines(
  */
 internal fun <T> PolarGraphScope<T>.generateGridBoundaryPath(
     size: Size,
-    type: RadialGridType
-): Path {
-    return if (type == RadialGridType.CIRCLES) {
-        Path().apply {
-            val scale = min(size.width, size.height)
-            @Suppress("MagicNumber")
-            this.addArc(Rect(-scale / 2f, -scale / 2f, scale / 2f, scale / 2f), 0f, 360f)
+    type: RadialGridType,
+): Path = if (type == RadialGridType.CIRCLES) {
+    Path().apply {
+        val scale = min(size.width, size.height)
+        @Suppress("MagicNumber")
+        this.addArc(Rect(-scale / 2f, -scale / 2f, scale / 2f, scale / 2f), 0f, 360f)
+    }
+} else {
+    val angles = angularAxisModel.getTickValues()
+    val radius = radialAxisModel.tickValues.last()
+
+    Path().apply {
+        moveTo(polarToCartesian(PolarPoint(radius, angles.first()), size))
+
+        for (angleIndex in 1..angles.lastIndex) {
+            lineTo(polarToCartesian(PolarPoint(radius, angles[angleIndex]), size))
         }
-    } else {
-        val angles = angularAxisModel.getTickValues()
-        val radius = radialAxisModel.tickValues.last()
 
-        Path().apply {
-            moveTo(polarToCartesian(PolarPoint(radius, angles.first()), size))
-
-            for (angleIndex in 1..angles.lastIndex) {
-                lineTo(polarToCartesian(PolarPoint(radius, angles[angleIndex]), size))
-            }
-
-            lineTo(polarToCartesian(PolarPoint(radius, angles.first()), size))
-        }
+        lineTo(polarToCartesian(PolarPoint(radius, angles.first()), size))
     }
 }

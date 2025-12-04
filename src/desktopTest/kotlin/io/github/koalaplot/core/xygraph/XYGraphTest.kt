@@ -21,12 +21,12 @@ class XYGraphTest {
                 xAxisModel = LongLinearAxisModel(
                     0L..2000L,
                     minorTickCount = 0,
-                    minimumMajorTickIncrement = 1000
+                    minimumMajorTickIncrement = 1000,
                 ),
                 yAxisModel = DoubleLinearAxisModel(
                     points.autoScaleYRange(),
-                    minorTickCount = 2
-                )
+                    minorTickCount = 2,
+                ),
             ) {
             }
 
@@ -34,12 +34,12 @@ class XYGraphTest {
                 xAxisModel = IntLinearAxisModel(
                     0..2000,
                     minorTickCount = 0,
-                    minimumMajorTickIncrement = 1000
+                    minimumMajorTickIncrement = 1000,
                 ),
                 yAxisModel = DoubleLinearAxisModel(
                     points.autoScaleYRange(),
-                    minorTickCount = 2
-                )
+                    minorTickCount = 2,
+                ),
             ) {
             }
 
@@ -47,12 +47,12 @@ class XYGraphTest {
                 xAxisModel = FloatLinearAxisModel(
                     0f..2000f,
                     minorTickCount = 0,
-                    minimumMajorTickIncrement = 1000f
+                    minimumMajorTickIncrement = 1000f,
                 ),
                 yAxisModel = DoubleLinearAxisModel(
                     points.autoScaleYRange(),
-                    minorTickCount = 2
-                )
+                    minorTickCount = 2,
+                ),
             ) {
             }
 
@@ -60,12 +60,12 @@ class XYGraphTest {
                 xAxisModel = DoubleLinearAxisModel(
                     0.0..2000.0,
                     minorTickCount = 0,
-                    minimumMajorTickIncrement = 1000.0
+                    minimumMajorTickIncrement = 1000.0,
                 ),
                 yAxisModel = DoubleLinearAxisModel(
                     points.autoScaleYRange(),
-                    minorTickCount = 2
-                )
+                    minorTickCount = 2,
+                ),
             ) {
             }
         }
@@ -83,12 +83,12 @@ class XYGraphTest {
                     xAxisModel = LongLinearAxisModel(
                         0L..2000L,
                         minorTickCount = 0,
-                        minimumMajorTickIncrement = 5000
+                        minimumMajorTickIncrement = 5000,
                     ),
                     yAxisModel = DoubleLinearAxisModel(
                         points.autoScaleYRange(),
-                        minorTickCount = 2
-                    )
+                        minorTickCount = 2,
+                    ),
                 ) {
                 }
             }
@@ -98,12 +98,12 @@ class XYGraphTest {
                     xAxisModel = IntLinearAxisModel(
                         0..2000,
                         minorTickCount = 0,
-                        minimumMajorTickIncrement = 5000
+                        minimumMajorTickIncrement = 5000,
                     ),
                     yAxisModel = DoubleLinearAxisModel(
                         points.autoScaleYRange(),
-                        minorTickCount = 2
-                    )
+                        minorTickCount = 2,
+                    ),
                 ) {
                 }
             }
@@ -113,12 +113,12 @@ class XYGraphTest {
                     xAxisModel = FloatLinearAxisModel(
                         0f..2000f,
                         minorTickCount = 0,
-                        minimumMajorTickIncrement = 5000f
+                        minimumMajorTickIncrement = 5000f,
                     ),
                     yAxisModel = DoubleLinearAxisModel(
                         points.autoScaleYRange(),
-                        minorTickCount = 2
-                    )
+                        minorTickCount = 2,
+                    ),
                 ) {
                 }
             }
@@ -128,12 +128,12 @@ class XYGraphTest {
                     xAxisModel = DoubleLinearAxisModel(
                         0.0..2000.0,
                         minorTickCount = 0,
-                        minimumMajorTickIncrement = 5000.0
+                        minimumMajorTickIncrement = 5000.0,
                     ),
                     yAxisModel = DoubleLinearAxisModel(
                         points.autoScaleYRange(),
-                        minorTickCount = 2
-                    )
+                        minorTickCount = 2,
+                    ),
                 ) {
                 }
             }
@@ -148,12 +148,12 @@ class XYGraphTest {
                 xAxisModel = LongLinearAxisModel(
                     0L..10L,
                     minorTickCount = 0,
-                    minimumMajorTickIncrement = 2L
+                    minimumMajorTickIncrement = 2L,
                 ),
                 // yAxis doesn't have room for 4 minor ticks (default value)
                 yAxisModel = LongLinearAxisModel(
                     0L..10L,
-                )
+                ),
             ) {
             }
         }
@@ -167,11 +167,11 @@ class XYGraphTest {
                 xAxisModel = LongLinearAxisModel(
                     0L..1L,
                     minorTickCount = 0,
-                    minimumMajorTickIncrement = 1L
+                    minimumMajorTickIncrement = 1L,
                 ),
                 yAxisModel = LongLinearAxisModel(
                     0L..10L,
-                )
+                ),
             ) {
             }
         }

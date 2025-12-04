@@ -10,7 +10,6 @@ import io.github.koalaplot.core.util.ZoomFactor
  * Interface for handling zoom gestures
  */
 internal interface ZoomHandler {
-
     /**
      * Handles a zoom gesture event
      *

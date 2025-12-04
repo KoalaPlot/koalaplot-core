@@ -188,10 +188,12 @@ kotlin = "2.2.21"
 ##  ⬆ = "2.3.0-Beta2"
 ##  ⬆ = "2.3.0-RC"
 
+ktlint-compose = "0.4.28"
 ktlint-gradle = "14.0.1"
 
 [libraries]
 
 # dokka-base = { group = "org.jetbrains.dokka", name = "dokka-base", version.ref = "dokka" }
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.10.2" }
-detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
+
+ktlint-compose = { module = "io.nlopez.compose.rules:ktlint", version.ref = "ktlint-compose" }

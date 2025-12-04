@@ -22,7 +22,7 @@ class AutoScaleRangeTest {
         (-0.67f to -0.05f) to (-0.7f to 0f),
         (0.05f to 0.57f) to (0f to 0.6f),
         (1f to 1f) to (0.5f to 2f),
-        (0f to 0f) to (0.0f to 1f)
+        (0f to 0f) to (0.0f to 1f),
     )
 
     private val intTestConditions: List<Pair<Pair<Int, Int>, Pair<Int, Int>>> = listOf(
@@ -37,7 +37,7 @@ class AutoScaleRangeTest {
         (-1024 to 1024) to (-2000 to 2000),
         (-1200000 to -150000) to (-2000000 to 0),
         (1 to 1) to (0 to 2),
-        (0 to 0) to (0 to 1)
+        (0 to 0) to (0 to 1),
     )
 
     @Test

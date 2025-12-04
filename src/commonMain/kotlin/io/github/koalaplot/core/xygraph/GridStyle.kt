@@ -33,7 +33,7 @@ public fun rememberGridStyle(
     horizontalMajorStyle,
     horizontalMinorStyle,
     verticalMajorStyle,
-    verticalMinorStyle
+    verticalMinorStyle,
 ) {
     GridStyle(
         horizontalMajorStyle = horizontalMajorStyle,

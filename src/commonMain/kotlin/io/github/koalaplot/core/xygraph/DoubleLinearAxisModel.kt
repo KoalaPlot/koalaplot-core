@@ -67,7 +67,7 @@ public class DoubleLinearAxisModel(
     private var offsetComputer = { point: Double ->
         (
             (point - currentRange.value.start) / (currentRange.value.endInclusive - currentRange.value.start)
-            ).toFloat()
+        ).toFloat()
     }
 
     // Function used to compute the inverse of offsetComputer. Set as a variable to avoid an
@@ -83,7 +83,7 @@ public class DoubleLinearAxisModel(
                 (
                     (currentRange.value.endInclusive - point) /
                         (currentRange.value.endInclusive - currentRange.value.start)
-                    ).toFloat()
+                ).toFloat()
             }
 
             offsetToValueFunction = { offset ->
@@ -106,7 +106,10 @@ public class DoubleLinearAxisModel(
 
     override fun computeTickValues(axisLength: Dp): TickValues<Double> = tickCalculator.computeTickValues(axisLength)
 
-    override fun zoom(zoomFactor: Float, pivot: Float) {
+    override fun zoom(
+        zoomFactor: Float,
+        pivot: Float,
+    ) {
         if (zoomFactor == 1f) return
 
         require(zoomFactor > 0) { "Zoom amount must be greater than 0" }
@@ -198,7 +201,7 @@ private class DoubleTickCalculator(
     private val currentRange: MutableState<ClosedFloatingPointRange<Double>>,
     private val minimumMajorTickIncrement: Double,
     private val minorTickCount: Int,
-    private val inverted: Boolean
+    private val inverted: Boolean,
 ) {
     fun computeTickValues(axisLength: Dp): TickValues<Double> {
         val minTickSpacing = if (axisLength == 0.dp) {
@@ -209,7 +212,7 @@ private class DoubleTickCalculator(
         val majorTickValues = computeMajorTickValues(minTickSpacing)
         val minorTickValues = computeMinorTickValues(
             majorTickValues,
-            computeMajorTickSpacing(minTickSpacing)
+            computeMajorTickSpacing(minTickSpacing),
         )
         return object : TickValues<Double> {
             override val majorTickValues = if (inverted) majorTickValues.reversed() else majorTickValues

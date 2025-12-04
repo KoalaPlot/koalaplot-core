@@ -20,10 +20,9 @@ class BulletGraphTest {
         composeTestRule.setContent {
             BulletGraphs {
                 bullet(
-                    IntLinearAxisModel(0..100)
+                    IntLinearAxisModel(0..100),
                 ) {
                     ranges(0, 10, 20, 30, 40, 50)
-
                 }
             }
         }
@@ -41,7 +40,7 @@ class BulletGraphTest {
 
             BulletGraphs {
                 bullet(
-                    IntLinearAxisModel(0..100)
+                    IntLinearAxisModel(0..100),
                 ) {
                     try {
                         ranges(0, 10, 20, 30, 40, 50, 60)
@@ -65,9 +64,8 @@ class BulletGraphTest {
         composeTestRule.setContent {
             BulletGraphs {
                 bullet(
-                    IntLinearAxisModel(0..100)
+                    IntLinearAxisModel(0..100),
                 ) {
-
                     ranges(0) {
                         range(10)
                         range(20)

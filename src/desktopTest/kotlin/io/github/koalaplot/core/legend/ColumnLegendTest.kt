@@ -12,9 +12,9 @@ class ColumnLegendTest {
      * Test creating a ColumnLegend.
      */
     @Test
-    fun BasicColumnLegendTest() {
+    fun basicColumnLegendTest() {
         composeTestRule.setContent {
-            ColumnLegend(5)
+            ColumnLegend2(5)
         }
     }
 }

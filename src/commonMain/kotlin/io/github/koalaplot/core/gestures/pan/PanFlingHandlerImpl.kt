@@ -14,11 +14,10 @@ import io.github.koalaplot.core.animation.PanFlingBehavior
 internal class PanFlingHandlerImpl(
     private val panFlingBehavior: PanFlingBehavior,
 ) : PanFlingHandler {
-
     override suspend fun perform(
         size: IntSize,
         velocityTracker: VelocityTracker,
-        onPanChange: (size: IntSize, pan: Offset) -> Boolean
+        onPanChange: (size: IntSize, pan: Offset) -> Boolean,
     ) {
         val velocity = velocityTracker.calculateVelocity()
         panFlingBehavior.performFling(velocity) { pan ->

@@ -23,11 +23,17 @@ public interface PolarPoint<R, T> {
  * @param T The type of the angular axis value
  */
 @Suppress("FunctionNaming")
-public fun <R, T> PolarPoint(r: R, theta: T): PolarPoint<R, T> = DefaultPolarPoint(r, theta)
+public fun <R, T> PolarPoint(
+    r: R,
+    theta: T,
+): PolarPoint<R, T> = DefaultPolarPoint(r, theta)
 
 /**
  * Default implementation of the [PolarPoint] interface.
  * @param R The type of the radius axis value
  * @param T The type of the angular axis value
  */
-public data class DefaultPolarPoint<R, T>(override val r: R, override val theta: T) : PolarPoint<R, T>
+public data class DefaultPolarPoint<R, T>(
+    override val r: R,
+    override val theta: T,
+) : PolarPoint<R, T>

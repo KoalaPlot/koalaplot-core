@@ -25,7 +25,7 @@ public interface LabelPositionProvider {
         pieDiameter: Float,
         holeSize: Float,
         placeables: List<Placeable>,
-        pieSliceData: List<PieSliceData>
+        pieSliceData: List<PieSliceData>,
     ): List<LabelPosition>
 }
 
@@ -50,7 +50,7 @@ public sealed interface LabelPosition
 public data class ExternalLabelPosition(
     val position: Offset,
     val anchorPoint: Offset,
-    val anchorAngle: AngularValue
+    val anchorAngle: AngularValue,
 ) : LabelPosition
 
 /**
@@ -59,7 +59,9 @@ public data class ExternalLabelPosition(
  *  [position] specifies the offset of the label's top-left corner relative to the center of the Pie Chart, which
  *  is at the coordinate (0, 0), with positive values down and to the right.
  */
-public data class InternalLabelPosition(val position: Offset) : LabelPosition
+public data class InternalLabelPosition(
+    val position: Offset,
+) : LabelPosition
 
 /**
  * Specifies a label that is not positioned, and should not be displayed. This is used, for example, when
@@ -67,10 +69,8 @@ public data class InternalLabelPosition(val position: Offset) : LabelPosition
  */
 public data object None : LabelPosition
 
-internal fun LabelPosition.getPositionOrNull(): Offset? {
-    return when (this) {
-        is ExternalLabelPosition -> position
-        is InternalLabelPosition -> position
-        is None -> null
-    }
+internal fun LabelPosition.getPositionOrNull(): Offset? = when (this) {
+    is ExternalLabelPosition -> position
+    is InternalLabelPosition -> position
+    is None -> null
 }
