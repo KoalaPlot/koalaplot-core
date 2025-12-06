@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -21,11 +25,13 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.layout.SubcomposeMeasureScope
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.gestures.GestureConfig
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
@@ -63,9 +69,9 @@ import kotlin.math.sin
 public fun <X, Y> XYGraph(
     xAxisModel: AxisModel<X>,
     yAxisModel: AxisModel<Y>,
+    xAxisContent: AxisContent<X>,
+    yAxisContent: AxisContent<Y>,
     modifier: Modifier = Modifier,
-    xAxisContent: AxisContent<X> = rememberAxisContent(),
-    yAxisContent: AxisContent<Y> = rememberAxisContent(),
     gridStyle: GridStyle = rememberGridStyle(),
     gestureConfig: GestureConfig = GestureConfig(),
     onPointerMove: ((X, Y) -> Unit)? = null,
@@ -155,45 +161,29 @@ public fun <X, Y> XYGraph(
                     }
                 }[0]
 
-            val measurables =
-                subcompose(Unit) {
-                    Grid(
-                        xAxis,
-                        yAxis,
-                        gridStyle.horizontalMajorStyle,
-                        gridStyle.horizontalMinorStyle,
-                        gridStyle.verticalMajorStyle,
-                        gridStyle.verticalMinorStyle,
-                    )
+            val gridMeasurable = subcompose("grid") {
+                Grid(
+                    xAxis,
+                    yAxis,
+                    gridStyle.horizontalMajorStyle,
+                    gridStyle.horizontalMinorStyle,
+                    gridStyle.verticalMajorStyle,
+                    gridStyle.verticalMinorStyle,
+                )
+            }
 
-                    with(DefaultAxisLabelScope(xAxis.tickValues)) {
-                        xAxis.majorTickValues.forEach {
-                            Box(modifier = Modifier.rotate(-xAxisContent.style.labelRotation.toFloat())) {
-                                xAxisContent.labels(this@with, it)
-                            }
-                        }
-                    }
-                    with(DefaultAxisLabelScope(yAxis.tickValues)) {
-                        yAxis.majorTickValues.forEach {
-                            Box(modifier = Modifier.rotate(-yAxisContent.style.labelRotation.toFloat())) {
-                                yAxisContent.labels(this@with, it)
-                            }
-                        }
-                    }
-                }
+            val xAxisLabelMeasurables = axisLabels("xAxisLabels", xAxis, xAxisContent)
+            val yAxisLabelMeasurables = axisLabels("yAxisLabels", yAxis, yAxisContent)
 
             val measurablesMap =
                 Measurables(
-                    measurables[0],
+                    gridMeasurable[0],
                     chartMeasurable,
                     xAxisMeasurable,
-                    measurables.subList(1, xAxis.majorTickValues.size + 1),
+                    xAxisLabelMeasurables,
                     xAxisTitleMeasurable,
                     yAxisMeasurable,
-                    measurables.subList(
-                        xAxis.majorTickValues.size + 1,
-                        xAxis.majorTickValues.size + 1 + yAxis.majorTickValues.size,
-                    ),
+                    yAxisLabelMeasurables,
                     yAxisTitleMeasurable,
                 )
 
@@ -202,6 +192,21 @@ public fun <X, Y> XYGraph(
             }
         }
     }
+}
+
+private fun <T> SubcomposeMeasureScope.axisLabels(
+    id: String,
+    axis: AxisDelegate<T>,
+    content: AxisContent<T>,
+): List<Measurable> = with(DefaultAxisLabelScope(axis.tickValues)) {
+    axis.majorTickValues
+        .mapIndexed { index, value ->
+            subcompose("$id $index") {
+                Box(modifier = Modifier.rotate(-content.style.labelRotation.toFloat())) {
+                    content.labels(this@with, value)
+                }
+            }
+        }.flatten()
 }
 
 /**
@@ -855,8 +860,50 @@ public fun <X, Y> XYGraph(
         xAxisModel = xAxisModel,
         yAxisModel = yAxisModel,
         modifier = modifier,
-        xAxisContent = rememberStringAxisContent(style = xAxisStyle, label = xAxisLabels, title = xAxisTitle),
-        yAxisContent = rememberStringAxisContent(style = yAxisStyle, label = yAxisLabels, title = yAxisTitle),
+        xAxisContent = AxisContent(
+            style = xAxisStyle,
+            labels = {
+                Text(
+                    xAxisLabels(it),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(2.dp),
+                )
+            },
+            title = {
+                if (xAxisTitle != null) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(
+                            xAxisTitle,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                }
+            },
+        ),
+        yAxisContent = AxisContent(
+            style = yAxisStyle,
+            labels = {
+                Text(
+                    yAxisLabels(it),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(2.dp),
+                )
+            },
+            title = {
+                if (yAxisTitle != null) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(
+                            yAxisTitle,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                }
+            },
+        ),
         gridStyle =
             GridStyle(
                 horizontalMajorStyle = horizontalMajorGridLineStyle,
