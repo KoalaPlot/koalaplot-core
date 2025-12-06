@@ -27,6 +27,8 @@ class XYGraphTest {
                     points.autoScaleYRange(),
                     minorTickCount = 2,
                 ),
+                xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
             ) {
             }
 
@@ -40,6 +42,8 @@ class XYGraphTest {
                     points.autoScaleYRange(),
                     minorTickCount = 2,
                 ),
+                xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
             ) {
             }
 
@@ -53,6 +57,8 @@ class XYGraphTest {
                     points.autoScaleYRange(),
                     minorTickCount = 2,
                 ),
+                xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
             ) {
             }
 
@@ -66,6 +72,8 @@ class XYGraphTest {
                     points.autoScaleYRange(),
                     minorTickCount = 2,
                 ),
+                xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
             ) {
             }
         }
@@ -89,6 +97,8 @@ class XYGraphTest {
                         points.autoScaleYRange(),
                         minorTickCount = 2,
                     ),
+                    xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                    yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
                 ) {
                 }
             }
@@ -104,6 +114,8 @@ class XYGraphTest {
                         points.autoScaleYRange(),
                         minorTickCount = 2,
                     ),
+                    xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                    yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
                 ) {
                 }
             }
@@ -119,6 +131,8 @@ class XYGraphTest {
                         points.autoScaleYRange(),
                         minorTickCount = 2,
                     ),
+                    xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                    yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
                 ) {
                 }
             }
@@ -134,6 +148,8 @@ class XYGraphTest {
                         points.autoScaleYRange(),
                         minorTickCount = 2,
                     ),
+                    xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                    yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
                 ) {
                 }
             }
@@ -154,6 +170,8 @@ class XYGraphTest {
                 yAxisModel = LongLinearAxisModel(
                     0L..10L,
                 ),
+                xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
             ) {
             }
         }
@@ -172,6 +190,8 @@ class XYGraphTest {
                 yAxisModel = LongLinearAxisModel(
                     0L..10L,
                 ),
+                xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
             ) {
             }
         }

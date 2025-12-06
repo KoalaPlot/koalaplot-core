@@ -5,8 +5,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.junit4.createComposeRule
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.util.ZoomFactor
+import io.github.koalaplot.core.xygraph.AxisContent
 import io.github.koalaplot.core.xygraph.FloatLinearAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
+import io.github.koalaplot.core.xygraph.rememberAxisStyle
 import org.junit.Rule
 import org.junit.Test
 import kotlin.math.abs
@@ -147,6 +149,8 @@ class GesturesTest {
                     yAxisModel = FloatLinearAxisModel(
                         range = -100f..100f,
                     ),
+                    xAxisContent = AxisContent({}, {}, rememberAxisStyle()),
+                    yAxisContent = AxisContent({}, {}, rememberAxisStyle()),
                     gestureConfig = gestureConfig,
                 ) {
                 }
