@@ -1,5 +1,7 @@
 package io.github.koalaplot.core.heatmap
 
+import kotlin.math.floor
+
 /**
  * Generates a 2D histogram from a list of samples.
  *
@@ -33,19 +35,17 @@ public fun <T, X, Y> generateHistogram2D(
     val yRange = yDomain.endInclusive.toFloat() - yDomain.start.toFloat()
 
     val bins = Array(nBinsX) { Array<Int>(nBinsY) { 0 } }
-
     for (sample in samples) {
         val x = xGetter(sample).toFloat()
         val y = yGetter(sample).toFloat()
 
-        val bx = (((x - xDomain.start.toFloat()) / xRange) * nBinsX).toInt()
-        val by = (((y - yDomain.start.toFloat()) / yRange) * nBinsY).toInt()
+        val ix = floor(nBinsX * (x - xDomain.start.toFloat()) / xRange).toInt()
+        val iy = floor(nBinsY * (y - yDomain.start.toFloat()) / yRange).toInt()
 
-        if (bx !in 0 until nBinsX) continue
-        if (by !in 0 until nBinsY) continue
+        if (ix !in 0 until nBinsX) continue
+        if (iy !in 0 until nBinsY) continue
 
-        bins[bx][by]++
+        bins[ix][iy]++
     }
-
     return bins
 }
