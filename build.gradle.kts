@@ -67,7 +67,9 @@ kotlin {
 
         val desktopMain by getting {
             dependsOn(commonMain.get())
-            dependencies {}
+            dependencies {
+                implementation(compose.desktop.currentOs)
+            }
         }
 
         val desktopTest by getting {
@@ -143,4 +145,27 @@ ktlint {
 
 dependencies {
     ktlintRuleset(libs.ktlint.compose)
+}
+
+tasks.register<Jar>("heatMapFatJar") {
+    group = "application"
+    description = "Create executable JAR for HeatMap example"
+    archiveClassifier.set("heatmap")
+    manifest {
+        attributes["Main-Class"] = "io.github.koalaplot.core.heatmap.HeatMapExampleKt"
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(configurations.getByName("desktopRuntimeClasspath").map { if (it.isDirectory) it else zipTree(it) })
+    with(tasks.named<Jar>("desktopJar").get())
+}
+
+tasks.register<JavaExec>("runHeatMapExample") {
+    group = "application"
+    description = "Run HeatMap example"
+    classpath = files(
+        "build/libs/koalaplot-core-desktop-0.11.0-dev.1.jar",
+        configurations.getByName("desktopRuntimeClasspath"),
+    )
+    mainClass.set("io.github.koalaplot.core.heatmap.HeatMapExampleKt")
+    dependsOn("desktopJar")
 }
