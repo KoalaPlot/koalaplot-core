@@ -18,6 +18,7 @@ import io.github.koalaplot.core.animation.StartAnimationUseCase
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraphScope
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -61,10 +62,10 @@ public fun <X : Comparable<X>, Y : Comparable<Y>, Z> XYGraphScope<X, Y>.HeatMapP
 
         // Pre-calculate cell size
         val cellWidth = (right - left) / xBins
-        val cellHeight = (bottom - top) / yBins
+        val cellHeight = (top - bottom) / yBins
         val cellSize = Size(
-            beta.value * cellWidth,
-            beta.value * cellHeight,
+            beta.value * abs(cellWidth),
+            beta.value * abs(cellHeight),
         )
         val animationOffset = (1f - beta.value) / 2f
 
@@ -77,7 +78,7 @@ public fun <X : Comparable<X>, Y : Comparable<Y>, Z> XYGraphScope<X, Y>.HeatMapP
 
                 val cellColor = colorScale(value)
                 val cellLeft = left + (xi + animationOffset) * cellWidth
-                val cellTop = top + (yi + animationOffset) * cellHeight
+                val cellTop = bottom + (yi + 1 + animationOffset) * cellHeight
 
                 drawRect(
                     color = cellColor,
