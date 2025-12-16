@@ -2,6 +2,8 @@ package io.github.koalaplot.core.heatmap
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import io.github.koalaplot.core.util.normalize
+import io.github.koalaplot.core.util.lerp
 
 public typealias ColorScale<Z> = (Z) -> Color
 
@@ -14,10 +16,7 @@ public fun <Z> linearColorScale(
     domain: ClosedRange<Z>,
     colors: List<Color>,
 ): ColorScale<Z> where Z : Comparable<Z>, Z : Number = { value ->
-    val normalized = (
-        (value.toFloat() - domain.start.toFloat()) /
-            (domain.endInclusive.toFloat() - domain.start.toFloat())
-    ).coerceIn(0f, 1f)
+    val normalized = domain.normalize(value).toFloat().coerceIn(0f, 1f)
 
     if (colors.size == 1) {
         colors[0]
@@ -43,10 +42,7 @@ public fun <Z> divergingColorScale(
     midColor: Color = Color.White,
     highColor: Color = Color.Red,
 ): ColorScale<Z> where Z : Comparable<Z>, Z : Number = { value ->
-    val normalized = (
-        (value.toFloat() - domain.start.toFloat()) /
-            (domain.endInclusive.toFloat() - domain.start.toFloat())
-    ).coerceIn(0f, 1f)
+    val normalized = domain.normalize(value).toFloat().coerceIn(0f, 1f)
 
     if (normalized < 0.5f) {
         val progress = normalized * 2f
@@ -93,19 +89,9 @@ public fun <Z> discreteColorScale(
     require(colors.size >= 1) { "Scale needs at least one color" }
     val binCount = colors.size
 
-    val startFloat = domain.start.toFloat()
-    val endFloat = domain.endInclusive.toFloat()
-    val binSize = (endFloat - startFloat) / binCount
     val thresholds = (1 until binCount).map { i ->
-        when (domain.start) {
-            is Int -> (startFloat + i * binSize).toInt() as Z
-            is Float -> (startFloat + i * binSize) as Z
-            is Double -> (startFloat + i * binSize) as Z
-            is Long -> (startFloat + i * binSize).toLong() as Z
-            is Short -> (startFloat + i * binSize).toInt().toShort() as Z
-            is Byte -> (startFloat + i * binSize).toInt().toByte() as Z
-            else -> throw UnsupportedOperationException("Unsupported numeric type: ${domain.start::class}")
-        }
+        val normalized = (0..binCount).normalize(i)
+        domain.lerp(normalized)
     }
 
     return discreteColorScale(

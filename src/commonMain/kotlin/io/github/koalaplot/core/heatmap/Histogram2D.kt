@@ -1,5 +1,7 @@
 package io.github.koalaplot.core.heatmap
 
+import io.github.koalaplot.core.util.normalize
+import io.github.koalaplot.core.util.lerp
 import kotlin.math.floor
 
 /**
@@ -31,16 +33,11 @@ public fun <T, X, Y> generateHistogram2D(
 ): HeatMapGrid<Int> where X : Comparable<X>, X : Number, Y : Comparable<Y>, Y : Number {
     require(nBinsX > 0 && nBinsY > 0) { "Number of bins must be positive." }
 
-    val xRange = xDomain.endInclusive.toFloat() - xDomain.start.toFloat()
-    val yRange = yDomain.endInclusive.toFloat() - yDomain.start.toFloat()
-
     val bins = Array(nBinsX) { Array<Int>(nBinsY) { 0 } }
     for (sample in samples) {
-        val x = xGetter(sample).toFloat()
-        val y = yGetter(sample).toFloat()
 
-        val ix = floor(nBinsX * (x - xDomain.start.toFloat()) / xRange).toInt()
-        val iy = floor(nBinsY * (y - yDomain.start.toFloat()) / yRange).toInt()
+        val ix = (0..nBinsX).lerp(xDomain.normalize(xGetter(sample)))
+        val iy = (0..nBinsY).lerp(yDomain.normalize(yGetter(sample)))
 
         if (ix !in 0 until nBinsX) continue
         if (iy !in 0 until nBinsY) continue
