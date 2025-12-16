@@ -90,6 +90,52 @@ public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
 }
 
 /**
+ * A line plot that draws data as points and lines on an XYGraph.
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ * @param data Data series to plot.
+ * @param control Function to compute the cubic Bezier control points, given a current point and a next point.
+ * See https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Path#cubicTo(kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float),
+ * where the first returned point corresponds to (x1, y1) and the 2nd point to (x2, y2). The default implementation
+ * is suitable for most horizontal x-y line plots where the x-axis is the independent axis and the data points are monotonically increasing on the
+ * x-axis.
+ * @param lineStyle Style to use for the line that connects the data points. If null, no line is drawn.
+ * @param symbol Composable for the symbol to be shown at each data point.
+ * @param modifier Modifier for the plot.
+ */
+@Composable
+public fun <X, Y> XYGraphScope<X, Y>.CubicBezierLinePlot(
+    data: List<Point<X, Y>>,
+    modifier: Modifier = Modifier,
+    control: (current: Offset, next: Offset) -> Pair<Offset, Offset> = { current, next ->
+        val dx = (current.x + next.x) / 2
+        Offset(dx, current.y) to Offset(dx, next.y)
+    },
+    lineStyle: LineStyle? = null,
+    symbol: (@Composable (Point<X, Y>) -> Unit)? = null,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+) {
+    if (data.isEmpty()) return
+
+    GeneralLinePlot(
+        data,
+        modifier,
+        lineStyle,
+        { symbol?.invoke(it) },
+        null,
+        null,
+        animationSpec,
+    ) { points: List<Point<X, Y>>, size: Size ->
+        moveTo(scale(points[0], size))
+        for (index in 1..points.lastIndex) {
+            val (cp1, cp2) = control(scale(points[index - 1], size), scale(points[index], size))
+            val p3 = scale(points[index], size)
+            cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p3.x, p3.y)
+        }
+    }
+}
+
+/**
  * An XY Chart that draws series as points and stairsteps between points.
  * @param X The type of the x-axis values
  * @param Y The type of the y-axis values

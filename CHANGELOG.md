@@ -13,6 +13,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - CategoryAxisOffset to have more control over CategoryAxisModel's positioning of categories
   relative to the origin.
 - AxisContent and GridStyle to shorten the function signature of XYGraph.
+- CubicBezierLinePlot
 
 ### Changed
 
