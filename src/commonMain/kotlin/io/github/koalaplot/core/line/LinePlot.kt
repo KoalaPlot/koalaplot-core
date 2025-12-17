@@ -33,6 +33,8 @@ import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraphScope
 import kotlin.math.min
 
+private const val DefaultTau = 0.5f
+
 /**
  * A line plot that draws data as points and lines on an XYGraph.
  * @param X The type of the x-axis values
@@ -90,27 +92,60 @@ public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
 }
 
 /**
- * A line plot that draws data as points and lines on an XYGraph.
- * @param X The type of the x-axis values
- * @param Y The type of the y-axis values
- * @param data Data series to plot.
- * @param control Function to compute the cubic Bezier control points, given a current point and a next point.
- * See https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Path#cubicTo(kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float),
- * where the first returned point corresponds to (x1, y1) and the 2nd point to (x2, y2). The default implementation
- * is suitable for most horizontal x-y line plots where the x-axis is the independent axis and the data points are monotonically increasing on the
- * x-axis.
- * @param lineStyle Style to use for the line that connects the data points. If null, no line is drawn.
- * @param symbol Composable for the symbol to be shown at each data point.
+ * Defines a function to compute the two control points required for a cubic Bezier curve that goes from the point
+ * "current" to "next". "previous" is the data point that occurs before "current" and "subsequent" is the data point that occurs after "next".
+ * The first returned point corresponds to (x1, y1) and the 2nd point to (x2, y2), as defined in
+ * https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Path#cubicTo(kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float)
+ */
+public typealias CubicBezierControlPointCalculator = (
+    previous: Offset,
+    current: Offset,
+    next: Offset,
+    subsequent: Offset,
+) -> Pair<Offset, Offset>
+
+/**
+ * Creates a [CubicBezierControlPointCalculator] that generates control points for a Catmull-Rom spline,
+ * resulting in a smooth curve that passes through all data points.
+ *
+ * This implementation uses the position of neighboring points to calculate tangents, ensuring a
+ * continuous curve.
+ *
+ * @param tau A value, typically between 0.0f and 1.0f, that controls the "curviness" of the spline.
+ * A value of 0.0f will produce straight lines. A common default is 0.5f. The 'tau' parameter from
+ * Catmull-Rom theory is divided by 3 internally to adapt it for cubic Bézier usage.
+ * @return A [CubicBezierControlPointCalculator] for use in [CubicBezierLinePlot].
+ * @see <a href="https://en.wikipedia.org/wiki/Catmull%E2%80%93Rom_spline">Catmull-Rom spline (Wikipedia)</a>
+ */
+@Suppress("MagicNumber")
+public fun catmullRomControlPoints(tau: Float): CubicBezierControlPointCalculator = { previous, current, next, subsequent ->
+    val cp1 = current + Offset(next.x - previous.x, next.y - previous.y) * tau / 3f
+    val cp2 = next - Offset(subsequent.x - current.x, subsequent.y - current.y) * tau / 3f
+    cp1 to cp2
+}
+
+/**
+ * A line plot that draws a smooth, curved line that passes through each data point.
+ *
+ * This plot is ideal for representing continuous data sets where a visually smooth path is desired,
+ * such as in signal processing or natural phenomena graphs. It differs from a standard [LinePlot2] by using
+ * cubic Bézier curves between points instead of straight lines.
+ *
+ * @param X The type of the x-axis values.
+ * @param Y The type of the y-axis values.
+ * @param data The series of `Point`s to be plotted.
+ * @param control A [CubicBezierControlPointCalculator] that defines the curve's shape between points.
+ * Defaults to a Catmull-Rom implementation.
+ * @param lineStyle Style for the line connecting data points. If null, no line is drawn.
+ * @param symbol An optional composable used to render a symbol at each data point.
+ * @param animationSpec The [AnimationSpec] to use for animating the plot.
  * @param modifier Modifier for the plot.
  */
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.CubicBezierLinePlot(
     data: List<Point<X, Y>>,
     modifier: Modifier = Modifier,
-    control: (current: Offset, next: Offset) -> Pair<Offset, Offset> = { current, next ->
-        val dx = (current.x + next.x) / 2
-        Offset(dx, current.y) to Offset(dx, next.y)
-    },
+    control: CubicBezierControlPointCalculator = catmullRomControlPoints(DefaultTau),
     lineStyle: LineStyle? = null,
     symbol: (@Composable (Point<X, Y>) -> Unit)? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
@@ -128,7 +163,12 @@ public fun <X, Y> XYGraphScope<X, Y>.CubicBezierLinePlot(
     ) { points: List<Point<X, Y>>, size: Size ->
         moveTo(scale(points[0], size))
         for (index in 1..points.lastIndex) {
-            val (cp1, cp2) = control(scale(points[index - 1], size), scale(points[index], size))
+            val (cp1, cp2) = control(
+                scale(points[(index - 2).coerceAtLeast(0)], size),
+                scale(points[index - 1], size),
+                scale(points[index], size),
+                scale(points[(index + 1).coerceAtMost(points.lastIndex)], size),
+            )
             val p3 = scale(points[index], size)
             cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p3.x, p3.y)
         }
