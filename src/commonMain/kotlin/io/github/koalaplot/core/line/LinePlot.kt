@@ -31,9 +31,10 @@ import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
 import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraphScope
+import kotlin.apply
 import kotlin.math.min
 
-private const val DefaultTau = 0.5f
+internal const val DefaultTau = 0.5f
 
 /**
  * A line plot that draws data as points and lines on an XYGraph.
@@ -92,53 +93,6 @@ public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
 }
 
 /**
- * Defines a function to compute the two control points required for a cubic Bezier curve that goes from the point
- * "current" to "next". "previous" is the data point that occurs before "current" and "subsequent" is the data point that occurs after "next".
- * The first returned point corresponds to (x1, y1) and the 2nd point to (x2, y2), as defined in
- * https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Path#cubicTo(kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float)
- */
-public typealias CubicBezierControlPointCalculator = (
-    previous: Offset,
-    current: Offset,
-    next: Offset,
-    subsequent: Offset,
-) -> Pair<Offset, Offset>
-
-/**
- * Creates a [CubicBezierControlPointCalculator] that generates control points for a Catmull-Rom spline,
- * resulting in a smooth curve that passes through all data points.
- *
- * This implementation uses the position of neighboring points to calculate tangents, ensuring a
- * continuous curve.
- *
- * @param tau A value, typically between 0.0f and 1.0f, that controls the "curviness" of the spline.
- * A value of 0.0f will produce straight lines. A common default is 0.5f. The 'tau' parameter from
- * Catmull-Rom theory is divided by 3 internally to adapt it for cubic Bézier usage.
- * @return A [CubicBezierControlPointCalculator] for use in [CubicBezierLinePlot].
- * @see <a href="https://en.wikipedia.org/wiki/Catmull%E2%80%93Rom_spline">Catmull-Rom spline (Wikipedia)</a>
- */
-@Suppress("MagicNumber")
-public fun catmullRomControlPoints(tau: Float): CubicBezierControlPointCalculator = { previous, current, next, subsequent ->
-    val cp1 = current + Offset(next.x - previous.x, next.y - previous.y) * tau / 3f
-    val cp2 = next - Offset(subsequent.x - current.x, subsequent.y - current.y) * tau / 3f
-    cp1 to cp2
-}
-
-/**
- * Creates a [CubicBezierControlPointCalculator] that generates control points for a horizontal Bézier curve.
- *
- * This calculator places the control points halfway horizontally between the current and next data points,
- * at the same y-level as the current and next points respectively. The resulting curve leaves the first
- * point horizontally and arrives at the second point horizontally.
- *
- * @return A [CubicBezierControlPointCalculator] for use in [CubicBezierLinePlot].
- */
-public fun horizontalBezierControlPoints(): CubicBezierControlPointCalculator = { _, current, next, _ ->
-    val dx = (current.x + next.x) / 2
-    Offset(dx, current.y) to Offset(dx, next.y)
-}
-
-/**
  * A line plot that draws a smooth, curved line that passes through each data point.
  *
  * This plot is ideal for representing continuous data sets where a visually smooth path is desired,
@@ -166,6 +120,8 @@ public fun <X, Y> XYGraphScope<X, Y>.CubicBezierLinePlot(
 ) {
     if (data.isEmpty()) return
 
+    val cubicBezierGenerator = cubicBezierDrawer(control)
+
     GeneralLinePlot(
         data,
         modifier,
@@ -174,19 +130,8 @@ public fun <X, Y> XYGraphScope<X, Y>.CubicBezierLinePlot(
         null,
         null,
         animationSpec,
-    ) { points: List<Point<X, Y>>, size: Size ->
-        moveTo(scale(points[0], size))
-        for (index in 1..points.lastIndex) {
-            val (cp1, cp2) = control(
-                scale(points[(index - 2).coerceAtLeast(0)], size),
-                scale(points[index - 1], size),
-                scale(points[index], size),
-                scale(points[(index + 1).coerceAtMost(points.lastIndex)], size),
-            )
-            val p3 = scale(points[index], size)
-            cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p3.x, p3.y)
-        }
-    }
+        cubicBezierGenerator,
+    )
 }
 
 /**
@@ -391,7 +336,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot2(
  */
 @Deprecated("Use StairstepPlot2 instead", replaceWith = ReplaceWith("StairstepPlot2"))
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     data: List<Point<X, Y>>,
     lineStyle: LineStyle,
@@ -407,6 +352,9 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
 
     if (areaStyle != null) {
         require(areaBaseline != null) { "areaBaseline must be provided for area charts" }
+        require(areaBaseline !is AreaBaseline.CubicBezierLine) {
+            "Cubic Bezier baselines are not supported for StairstepPlot"
+        }
         if (areaBaseline is AreaBaseline.ArbitraryLine) {
             require(areaBaseline.values.size == data.size) {
                 "baseline values must be the same size as the data"
@@ -467,8 +415,15 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                                     Point(
                                         nextPoint.point.x,
                                         when (areaBaseline) {
+                                            is AreaBaseline.HorizontalLine -> areaBaseline.value
+
                                             is AreaBaseline.ConstantLine -> areaBaseline.value
+
                                             is AreaBaseline.ArbitraryLine -> areaBaseline.values[i].y
+
+                                            is AreaBaseline.CubicBezierLine -> error(
+                                                "Cubic Bezier baselines are not supported for StairstepPlot",
+                                            )
                                         },
                                     ),
                                     size,
@@ -537,7 +492,7 @@ internal fun <X, Y> XYGraphScope<X, Y>.GeneralLinePlot(
     areaStyle: AreaStyle? = null,
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
-    drawConnectorLine: Path.(points: List<Point<X, Y>>, size: Size) -> Unit,
+    drawConnectorLine: LineDrawer<X, Y>,
 ) {
     if (data.isEmpty()) return
 
@@ -552,7 +507,7 @@ internal fun <X, Y> XYGraphScope<X, Y>.GeneralLinePlot(
         content = {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val mainLinePath = Path().apply {
-                    drawConnectorLine(data, size)
+                    with(drawConnectorLine) { draw(data, size) }
                 }
 
                 if (areaBaseline != null && areaStyle != null) {
@@ -594,40 +549,53 @@ private fun <X, Y> XYGraphScope<X, Y>.generateArea(
     data: List<Point<X, Y>>,
     mainLinePath: Path,
     size: Size,
-    drawConnectorLine: Path.(points: List<Point<X, Y>>, size: Size) -> Unit,
+    drawConnectorLine: LineDrawer<X, Y>,
 ): Path = Path().apply {
     fillType = PathFillType.EvenOdd
+    addPath(mainLinePath)
+
     when (areaBaseline) {
         is AreaBaseline.ArbitraryLine -> {
-            addPath(mainLinePath)
-
             // right edge of fill area
             lineTo(scale(areaBaseline.values.last(), size))
 
             // draw baseline
-            drawConnectorLine(areaBaseline.values.reversed(), size)
+            with(drawConnectorLine) {
+                draw(areaBaseline.values.reversed(), size)
+            }
+        }
 
-            // draw left edge of fill area
-            lineTo(scale(data.first(), size))
+        is AreaBaseline.CubicBezierLine -> {
+            // right edge
+            lineTo(scale(areaBaseline.values.last(), size))
 
-            close()
+            // draw baseline
+            with(drawConnectorLine) {
+                draw(areaBaseline.values.reversed(), size)
+            }
         }
 
         is AreaBaseline.ConstantLine -> {
-            addPath(mainLinePath)
-
             // right edge
             lineTo(scale(Point(data.last().x, areaBaseline.value), size))
 
             // baseline
             lineTo(scale(Point(data.first().x, areaBaseline.value), size))
+        }
 
-            // left edge
-            lineTo(scale(data.first(), size))
+        is AreaBaseline.HorizontalLine -> {
+            // right edge
+            lineTo(scale(Point(data.last().x, areaBaseline.value), size))
 
-            close()
+            // baseline
+            lineTo(scale(Point(data.first().x, areaBaseline.value), size))
         }
     }
+
+    // draw left edge of fill area
+    lineTo(scale(data.first(), size))
+
+    close()
 }
 
 private fun DrawScope.fillRectangle(
@@ -671,5 +639,104 @@ private fun <X, Y, P : Point<X, Y>> XYGraphScope<X, Y>.Symbols(
                 }
             }
         }
+    }
+}
+
+/**
+ * An interface for drawing a connector line on a [Path].
+ * This is used by plots to define how a series of points are translated into a drawable path.
+ */
+internal fun interface LineDrawer<X, Y> {
+    /**
+     * Draws the connector line for the given [data] points.
+     * @param data The list of data points to connect.
+     * @param size The available size of the drawing area.
+     */
+    fun Path.draw(
+        data: List<Point<X, Y>>,
+        size: Size,
+    )
+}
+
+/**
+ * An interface for computing the two control points of a cubic Bézier curve segment.
+ * The curve segment connects the current and next data points.
+ */
+public fun interface CubicBezierControlPointCalculator {
+    /**
+     * Computes the two control points for a cubic Bézier curve segment.
+     *
+     * The first returned [Offset] corresponds to control point 1 (x1, y1) and the second to
+     * control point 2 (x2, y2), as defined in [Path.cubicTo].
+     * https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/Path#cubicTo(kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float,kotlin.Float)
+     *
+     * @param previous The data point before the [current] point in the series.
+     * @param current The starting point of the Bézier curve segment.
+     * @param next The ending point of the Bézier curve segment.
+     * @param subsequent The data point after the [next] point in the series.
+     * @return A [Pair] containing the two control points for the curve segment.
+     */
+    public fun compute(
+        previous: Offset,
+        current: Offset,
+        next: Offset,
+        subsequent: Offset,
+    ): Pair<Offset, Offset>
+}
+
+/**
+ * Creates a [CubicBezierControlPointCalculator] that generates control points for a Catmull-Rom spline,
+ * resulting in a smooth curve that passes through all data points.
+ *
+ * This implementation uses the position of neighboring points to calculate tangents, ensuring a
+ * continuous curve.
+ *
+ * @param tau A value, typically between 0.0f and 1.0f, that controls the "curviness" of the spline.
+ * A value of 0.0f will produce straight lines. A common default is 0.5f. The 'tau' parameter from
+ * Catmull-Rom theory is divided by 3 internally to adapt it for cubic Bézier usage.
+ * @return A [CubicBezierControlPointCalculator] for use in [CubicBezierLinePlot].
+ * @see <a href="https://en.wikipedia.org/wiki/Catmull%E2%80%93Rom_spline">Catmull-Rom spline (Wikipedia)</a>
+ */
+@Suppress("MagicNumber")
+public fun catmullRomControlPoints(tau: Float): CubicBezierControlPointCalculator =
+    CubicBezierControlPointCalculator { previous, current, next, subsequent ->
+        val cp1 = current + Offset(next.x - previous.x, next.y - previous.y) * tau / 3f
+        val cp2 = next - Offset(subsequent.x - current.x, subsequent.y - current.y) * tau / 3f
+        cp1 to cp2
+    }
+
+/**
+ * Creates a [CubicBezierControlPointCalculator] that generates control points for a horizontal Bézier curve.
+ *
+ * This calculator places the control points halfway horizontally between the current and next data points,
+ * at the same y-level as the current and next points respectively. The resulting curve leaves the first
+ * point horizontally and arrives at the second point horizontally.
+ *
+ * @return A [CubicBezierControlPointCalculator] for use in [CubicBezierLinePlot].
+ */
+public fun horizontalBezierControlPoints(): CubicBezierControlPointCalculator = CubicBezierControlPointCalculator { _, current, next, _ ->
+    val dx = (current.x + next.x) / 2
+    Offset(dx, current.y) to Offset(dx, next.y)
+}
+
+internal fun <X, Y> XYGraphScope<X, Y>.cubicBezierDrawer(control: CubicBezierControlPointCalculator): LineDrawer<X, Y> =
+    LineDrawer { points, size ->
+        moveTo(scale(points[0], size))
+        for (index in 1..points.lastIndex) {
+            val (cp1, cp2) = control.compute(
+                scale(points[(index - 2).coerceAtLeast(0)], size),
+                scale(points[index - 1], size),
+                scale(points[index], size),
+                scale(points[(index + 1).coerceAtMost(points.lastIndex)], size),
+            )
+            val p3 = scale(points[index], size)
+            cubicTo(cp1.x, cp1.y, cp2.x, cp2.y, p3.x, p3.y)
+        }
+    }
+
+internal fun <X, Y> XYGraphScope<X, Y>.lineDrawer(): LineDrawer<X, Y> = LineDrawer { points, size ->
+    moveTo(scale(points[0], size))
+    for (index in 1..points.lastIndex) {
+        lineTo(scale(points[index], size))
     }
 }

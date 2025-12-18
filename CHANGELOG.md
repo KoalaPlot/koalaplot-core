@@ -13,7 +13,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - CategoryAxisOffset to have more control over CategoryAxisModel's positioning of categories
   relative to the origin.
 - AxisContent and GridStyle to shorten the function signature of XYGraph.
-- CubicBezierLinePlot
+- Support for cubic Bezier curves in line, area, and stacked area plots
 
 ### Changed
 
@@ -21,6 +21,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update dependencies: Compose 1.9.3, AGP 8.13.1
 - Deprecated Composable functions that did not comply with Compose coding standards, and implemented
   compliant replacements.
+- Renamed ConstantLine to HorizontalLine for area plot baselines.
 
 ### Fixed
 
