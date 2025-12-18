@@ -125,6 +125,20 @@ public fun catmullRomControlPoints(tau: Float): CubicBezierControlPointCalculato
 }
 
 /**
+ * Creates a [CubicBezierControlPointCalculator] that generates control points for a horizontal Bézier curve.
+ *
+ * This calculator places the control points halfway horizontally between the current and next data points,
+ * at the same y-level as the current and next points respectively. The resulting curve leaves the first
+ * point horizontally and arrives at the second point horizontally.
+ *
+ * @return A [CubicBezierControlPointCalculator] for use in [CubicBezierLinePlot].
+ */
+public fun horizontalBezierControlPoints(): CubicBezierControlPointCalculator = { _, current, next, _ ->
+    val dx = (current.x + next.x) / 2
+    Offset(dx, current.y) to Offset(dx, next.y)
+}
+
+/**
  * A line plot that draws a smooth, curved line that passes through each data point.
  *
  * This plot is ideal for representing continuous data sets where a visually smooth path is desired,
