@@ -70,6 +70,7 @@ public fun <X : Comparable<X>, Y : Comparable<Y>, Z> XYGraphScope<X, Y>.HeatMapP
         val animationOffset = (1f - beta.value) / 2f
 
         for (xi in 0 until xBins) {
+            @Suppress("LoopWithTooManyJumpStatements")
             for (yi in 0 until yBins) {
                 val value = bins[xi][yi] ?: continue
 

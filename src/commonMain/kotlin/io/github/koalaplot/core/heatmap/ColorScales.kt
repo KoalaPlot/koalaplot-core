@@ -2,8 +2,8 @@ package io.github.koalaplot.core.heatmap
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import io.github.koalaplot.core.util.normalize
 import io.github.koalaplot.core.util.lerp
+import io.github.koalaplot.core.util.normalize
 
 public typealias ColorScale<Z> = (Z) -> Color
 
@@ -36,6 +36,7 @@ public fun <Z> linearColorScale(
  * @param midColor Color for midpoint values
  * @param highColor Color for high values
  */
+@Suppress("MagicNumber")
 public fun <Z> divergingColorScale(
     domain: ClosedRange<Z>,
     lowColor: Color = Color.Blue,

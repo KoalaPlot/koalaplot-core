@@ -4,11 +4,10 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class RangeTest {
-
     internal fun <T> assertLerpEquals(
         range: ClosedRange<T>,
         expected: List<Pair<Double, T>>,
-    ) where T: Comparable<T>, T: Number {
+    ) where T : Comparable<T>, T : Number {
         val result = expected.map { it.first to range.lerp(it.first) }
         assertEquals(expected.toString(), result.toString())
     }
@@ -109,7 +108,7 @@ class RangeTest {
     internal fun <T> assertNormalizeEquals(
         range: ClosedRange<T>,
         expected: List<Pair<T, Double>>,
-    ) where T: Comparable<T>, T: Number {
+    ) where T : Comparable<T>, T : Number {
         val result = expected.map { it.first to range.normalize(it.first) }
         assertEquals(expected.toString(), result.toString())
     }

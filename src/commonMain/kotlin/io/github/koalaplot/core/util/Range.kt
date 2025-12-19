@@ -1,16 +1,44 @@
 package io.github.koalaplot.core.util
 
 @Suppress("UNCHECKED_CAST")
-private fun <Z : Number> doubleToTypeOf(value: Double, example: Z): Z =
-    when (example) {
-        is Double -> value as Z
-        is Float -> value.toFloat() as Z
-        is Int -> kotlin.math.floor(value).toInt() as Z
-        is Long -> kotlin.math.floor(value).toLong() as Z
-        is Short -> kotlin.math.floor(value).toInt().toShort() as Z
-        is Byte -> kotlin.math.floor(value).toInt().toByte() as Z
-        else -> throw UnsupportedOperationException("Unsupported numeric type: ${example::class}")
+private fun <Z : Number> doubleToTypeOf(
+    value: Double,
+    example: Z,
+): Z = when (example) {
+    is Double -> {
+        value as Z
     }
+
+    is Float -> {
+        value.toFloat() as Z
+    }
+
+    is Int -> {
+        kotlin.math.floor(value).toInt() as Z
+    }
+
+    is Long -> {
+        kotlin.math.floor(value).toLong() as Z
+    }
+
+    is Short -> {
+        kotlin.math
+            .floor(value)
+            .toInt()
+            .toShort() as Z
+    }
+
+    is Byte -> {
+        kotlin.math
+            .floor(value)
+            .toInt()
+            .toByte() as Z
+    }
+
+    else -> {
+        throw UnsupportedOperationException("Unsupported numeric type: ${example::class}")
+    }
+}
 
 /**
  * Linearly normalizes the value within the range between 0.0 and 1.0.
@@ -19,8 +47,7 @@ private fun <Z : Number> doubleToTypeOf(value: Double, example: Z): Z =
  * This is the inverse of operation [lerp].
  */
 public fun <T> ClosedRange<T>.normalize(value: T): Double
-    where T : Number, T : Comparable<T>
-{
+    where T : Number, T : Comparable<T> {
     val r0 = start.toDouble()
     val r1 = endInclusive.toDouble()
     val size = r1 - r0
@@ -34,8 +61,7 @@ public fun <T> ClosedRange<T>.normalize(value: T): Double
  * This is the inverse of operation [normalize].
  */
 public fun <T> ClosedRange<T>.lerp(t: Double): T
-    where T : Number, T : Comparable<T>
-{
+    where T : Number, T : Comparable<T> {
     val r0 = start.toDouble()
     val r1 = endInclusive.toDouble()
     val size = r1 - r0

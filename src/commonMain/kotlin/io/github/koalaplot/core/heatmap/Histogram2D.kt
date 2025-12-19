@@ -1,7 +1,7 @@
 package io.github.koalaplot.core.heatmap
 
-import io.github.koalaplot.core.util.normalize
 import io.github.koalaplot.core.util.lerp
+import io.github.koalaplot.core.util.normalize
 import kotlin.math.floor
 
 /**
@@ -22,20 +22,20 @@ import kotlin.math.floor
  * @param yGetter Function to extract y-coordinate from a sample
  * @return HeatMapGrid containing the histogram counts
  */
+@Suppress("LoopWithTooManyJumpStatements")
 public fun <T, X, Y> generateHistogram2D(
     samples: List<T>,
-    nBinsX: Int,
-    nBinsY: Int,
     xDomain: ClosedRange<X>,
     yDomain: ClosedRange<Y>,
     xGetter: (T) -> X,
     yGetter: (T) -> Y,
+    nBinsX: Int = 100,
+    nBinsY: Int = 100,
 ): HeatMapGrid<Int> where X : Comparable<X>, X : Number, Y : Comparable<Y>, Y : Number {
     require(nBinsX > 0 && nBinsY > 0) { "Number of bins must be positive." }
 
     val bins = Array(nBinsX) { Array<Int>(nBinsY) { 0 } }
     for (sample in samples) {
-
         val ix = (0..nBinsX).lerp(xDomain.normalize(xGetter(sample)))
         val iy = (0..nBinsY).lerp(yDomain.normalize(yGetter(sample)))
 
