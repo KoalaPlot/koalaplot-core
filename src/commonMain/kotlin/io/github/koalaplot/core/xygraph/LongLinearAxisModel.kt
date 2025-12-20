@@ -35,7 +35,7 @@ import kotlin.math.roundToLong
  */
 public class LongLinearAxisModel(
     public override val range: LongRange,
-    private val minViewExtent: Long = ((range.last - range.first) * ZoomRangeLimitDefault).coerceAtLeast(1.0).toLong(),
+    internal val minViewExtent: Long = ((range.last - range.first) * ZoomRangeLimitDefault).coerceAtLeast(1.0).toLong(),
     private val maxViewExtent: Long = ((range.last - range.first)),
     private val minimumMajorTickIncrement: Long = (
         (range.last - range.first) * MinimumMajorTickIncrementDefault
@@ -317,7 +317,7 @@ private class LongTickCalculator(
 @Composable
 public fun rememberLongLinearAxisModel(
     range: LongRange,
-    minViewExtent: Long = ((range.last - range.first) * ZoomRangeLimitDefault).toLong(),
+    minViewExtent: Long = ((range.last - range.first) * ZoomRangeLimitDefault).coerceAtLeast(1.0).toLong(),
     maxViewExtent: Long = ((range.last - range.first)),
     minimumMajorTickIncrement: Long = ((range.last - range.first) * MinimumMajorTickIncrementDefault).toLong(),
     minimumMajorTickSpacing: Dp = 50.dp,

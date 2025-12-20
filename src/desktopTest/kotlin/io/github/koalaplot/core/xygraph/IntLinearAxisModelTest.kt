@@ -2,12 +2,17 @@
 
 package io.github.koalaplot.core.xygraph
 
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class IntLinearAxisModelTest {
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
     @Test
     fun testComputeMajorTickValues0to10() {
         testLinearAxisMajorTicks(
@@ -156,6 +161,14 @@ class IntLinearAxisModelTest {
             testPoints.forEach { (p, e) ->
                 assertEquals(e, axisModel.offsetToValue(p))
             }
+        }
+    }
+
+    @Test
+    fun rememberIntLinearAxisModelSetsCorrectDefaultMinViewExtent() {
+        composeTestRule.setContent {
+            val model = rememberIntLinearAxisModel(0..1)
+            assertEquals(1, model.minViewExtent)
         }
     }
 }

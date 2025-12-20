@@ -32,6 +32,19 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   bounds of the
   component.
 
+## [0.10.4]
+
+### Fixed
+
+- rememberLongLinearAxisModel incorrectly computing minViewExtent=0 if range set to 0..1
+
+## [0.10.3]
+
+### Fixed
+
+- XYGraph pointer tracking would throw an exception if the pointer event had a position outside the bounds of the
+  component.
+
 ## [0.10.2]
 
 ### Fixed
