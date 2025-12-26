@@ -24,6 +24,16 @@ import kotlin.math.min
 
 public typealias HeatMapGrid<Z> = Array<Array<Z>>
 
+/**
+ * A HeatMap plot displays 2-dimensional data values as color.
+ *
+ * @param xDomain Domain for the x dimension.
+ * @param yDomain Domain for the y dimension.
+ * @param bins An 2D array of values.
+ * @param colorScale A mapping function from value to color.
+ * @param alphaScale A mapping function from value to alpha.
+ * @param animationSpec The [AnimationSpec] to use for animating the plot.
+ */
 @Composable
 public fun <X : Comparable<X>, Y : Comparable<Y>, Z> XYGraphScope<X, Y>.HeatMapPlot(
     xDomain: ClosedRange<X>,
