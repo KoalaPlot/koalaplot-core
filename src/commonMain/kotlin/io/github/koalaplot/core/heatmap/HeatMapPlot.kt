@@ -79,24 +79,28 @@ public fun <X : Comparable<X>, Y : Comparable<Y>, Z> XYGraphScope<X, Y>.HeatMapP
         )
         val animationOffset = (1f - beta.value) / 2f
 
+        fun drawRect(
+            xi: Int,
+            yi: Int,
+        ) {
+            val value = bins[xi][yi] ?: return
+            val alpha = alphaScale(value) * beta.value
+            if (alpha <= 0f) return
+            val cellColor = colorScale(value)
+            val cellLeft = left + (xi + animationOffset) * cellWidth
+            val cellTop = bottom + (yi + 1 + animationOffset) * cellHeight
+
+            drawRect(
+                color = cellColor,
+                topLeft = Offset(cellLeft, cellTop),
+                size = cellSize,
+                alpha = alpha,
+            )
+        }
+
         for (xi in 0 until xBins) {
-            @Suppress("LoopWithTooManyJumpStatements")
             for (yi in 0 until yBins) {
-                val value = bins[xi][yi] ?: continue
-
-                val alpha = alphaScale(value) * beta.value
-                if (alpha <= 0f) continue
-
-                val cellColor = colorScale(value)
-                val cellLeft = left + (xi + animationOffset) * cellWidth
-                val cellTop = bottom + (yi + 1 + animationOffset) * cellHeight
-
-                drawRect(
-                    color = cellColor,
-                    topLeft = Offset(cellLeft, cellTop),
-                    size = cellSize,
-                    alpha = alpha,
-                )
+                drawRect(xi, yi)
             }
         }
     }
