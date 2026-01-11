@@ -19,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Measurable
@@ -50,19 +51,35 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 
 /**
- * Provides a set of X-Y axes and grid for displaying X-Y plots.
+ * A composable that lays out a chart consisting of two axes, a grid, and plot content.
  *
- * @param X The data type for the x-axis
- * @param Y The data type for the y-axis
- * @param xAxisModel x-axis state controlling the display of the axis and coordinate transformation
- * @param yAxisModel y-axis state controlling the display of the axis and coordinate transformation
- * @param xAxisContent The content and style for the X-axis. See [AxisContent].
- * @param yAxisContent The content and style for the Y-axis. See [AxisContent].
+ * The layout process is performed in several steps:
+ * 1. The sizes of the axis titles are determined.
+ * 2. The axis models are consulted to determine the tick values.
+ * 3. The axis labels are sub-composed and measured to determine their sizes.
+ * 4. The remaining space is allocated to the plot area.
+ * 5. The grid, axes, and plot content are composed and placed in the plot area.
+ *
+ * The `content` of the `XYGraph` is a Composable lambda that receives an [XYGraphScope]. This
+ * scope provides the context of the graph's axes and allows for the conversion between data
+ * coordinates and screen coordinates, which is necessary for plotting data.
+ *
+ * @param X The data type for the x-axis.
+ * @param Y The data type for the y-axis.
+ * @param xAxisModel The [AxisModel] for the x-axis, which controls the range, coordinate transformation, and tick marks.
+ * @param yAxisModel The [AxisModel] for the y-axis, which controls the range, coordinate transformation, and tick marks.
+ * @param xAxisContent The content for the x-axis, including the title and labels.
+ * See [AxisContent].
+ * @param yAxisContent The content for the y-axis, including the title and labels.
+ * See [AxisContent].
+ * @param modifier The modifier to be applied to the graph.
  * @param gridStyle The styling for the major and minor grid lines. See [GridStyle].
- * @param gestureConfig Configuration for gesture handling. See [GestureConfig]
- * @param onPointerMove Callback invoked when the pointer moves with the current pointer position in plot coordinates.
- * @param content The content to be displayed, which should include one plot for each series to be
- * plotted on this XYGraph.
+ * @param gestureConfig Configuration for pan and zoom gestures. See [GestureConfig].
+ * @param onPointerEvent A callback that is invoked when a pointer event occurs within the plot
+ * area. The [XYGraphPointerEventScope] provides a `scale` function to convert from screen to
+ * data coordinates.
+ * @param content The composable content to be displayed within the graph, which typically
+ * includes one or more plot types like [io.github.koalaplot.core.line.LinePlot] or [io.github.koalaplot.core.line.AreaPlot].
  */
 @Suppress("LongMethod") // expected
 @Composable
@@ -74,7 +91,7 @@ public fun <X, Y> XYGraph(
     modifier: Modifier = Modifier,
     gridStyle: GridStyle = rememberGridStyle(),
     gestureConfig: GestureConfig = GestureConfig(),
-    onPointerMove: ((X, Y) -> Unit)? = null,
+    onPointerEvent: (XYGraphPointerEventScope<X, Y>.(PointerEvent) -> Unit)? = null,
     content: @Composable XYGraphScope<X, Y>.() -> Unit,
 ) {
     HoverableElementArea(modifier = modifier) {
@@ -147,7 +164,7 @@ public fun <X, Y> XYGraph(
                             Modifier
                                 .clip(RectangleShape)
                                 .then(panZoomModifier)
-                                .onPointerMove(xAxisModel, yAxisModel, onPointerMove),
+                                .onPointerMove(xAxisModel, yAxisModel, onPointerEvent),
                     ) {
                         val chartScope =
                             XYGraphScopeImpl(
@@ -302,7 +319,12 @@ public fun <X, Y> XYGraph(
                 verticalMinorStyle = verticalMinorGridLineStyle,
             ),
         gestureConfig = gestureConfig,
-        onPointerMove = onPointerMove,
+        onPointerEvent = {
+            if (it.type == PointerEventType.Move) {
+                val p = scale(it.changes.last().position)
+                onPointerMove?.invoke(p.x, p.y)
+            }
+        },
         content = content,
     )
 }
@@ -310,25 +332,46 @@ public fun <X, Y> XYGraph(
 /**
  * Modifier that tracks pointer movement
  *
- * @param onPointerMove Callback invoked when the pointer moves, receives the current position
+ * @param onPointerEvent Callback invoked when a pointer event occurs.
  */
 private fun <X, Y> Modifier.onPointerMove(
     xAxisModel: AxisModel<X>,
     yAxisModel: AxisModel<Y>,
-    onPointerMove: ((X, Y) -> Unit)?,
-) = this.pointerInput(xAxisModel, yAxisModel, onPointerMove) {
+    onPointerEvent: (XYGraphPointerEventScope<X, Y>.(PointerEvent) -> Unit)?,
+) = this.pointerInput(xAxisModel, yAxisModel, onPointerEvent) {
+    val xyGraphPointerEventScope = XYGraphPointerEventScopeImpl(xAxisModel, yAxisModel, this.size)
     awaitPointerEventScope {
         while (true) {
             val event = awaitPointerEvent()
-            if (event.type == PointerEventType.Move) {
-                val change = event.changes.last()
-                onPointerMove?.invoke(
-                    xAxisModel.offsetToValue((change.position.x / size.width).coerceIn(0f, 1f)),
-                    yAxisModel.offsetToValue(1f - (change.position.y / size.height).coerceIn(0f, 1f)),
-                )
-            }
+            onPointerEvent?.invoke(xyGraphPointerEventScope, event)
         }
     }
+}
+
+/**
+ * A scope that provides context for pointer events within an [XYGraph], allowing conversion
+ * between screen coordinates and graph data coordinates.
+ *
+ * @param X The data type of the x-axis.
+ * @param Y The data type of the y-axis.
+ */
+public interface XYGraphPointerEventScope<X, Y> {
+    /**
+     * Transforms a screen coordinate [position] in pixels, relative to the plot area, to a [Point]
+     * in the graph's data coordinate system.
+     */
+    public fun scale(position: Offset): Point<X, Y>
+}
+
+private class XYGraphPointerEventScopeImpl<X, Y>(
+    val xAxisModel: AxisModel<X>,
+    val yAxisModel: AxisModel<Y>,
+    val size: IntSize,
+) : XYGraphPointerEventScope<X, Y> {
+    override fun scale(position: Offset): Point<X, Y> = DefaultPoint(
+        xAxisModel.offsetToValue((position.x / size.width).coerceIn(0f, 1f)),
+        yAxisModel.offsetToValue(1f - (position.y / size.height).coerceIn(0f, 1f)),
+    )
 }
 
 private fun <T> zoomAxis(
@@ -912,7 +955,12 @@ public fun <X, Y> XYGraph(
                 verticalMinorStyle = verticalMinorGridLineStyle,
             ),
         gestureConfig = gestureConfig,
-        onPointerMove = onPointerMove,
+        onPointerEvent = {
+            if (it.type == PointerEventType.Move) {
+                val p = scale(it.changes.last().position)
+                onPointerMove?.invoke(p.x, p.y)
+            }
+        },
         content = content,
     )
 }
