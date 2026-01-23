@@ -14,6 +14,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   relative to the origin.
 - AxisContent and GridStyle to shorten the function signature of XYGraph.
 - Support for cubic Bezier curves in line, area, and stacked area plots.
+- Heatmap plots
 
 ### Changed
 
