@@ -2,10 +2,10 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.dokka)
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint.gradle)
@@ -18,14 +18,16 @@ repositories {
 }
 
 group = "io.github.koalaplot"
-version = "0.11.0-dev.2"
+version = "0.11.0-dev.3"
 
 kotlin {
     explicitApi()
 
-    androidTarget {
-        publishLibraryVariants("release")
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    androidLibrary {
+        namespace = "io.github.koalaplot"
+        compileSdk = 36
+        minSdk = 24
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -53,11 +55,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            api(compose.ui)
-            api(compose.animation)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            api(libs.compose.ui)
+            api(libs.compose.animation)
             implementation(libs.kotlinx.coroutines)
         }
 
@@ -65,16 +67,15 @@ kotlin {
             implementation(kotlin("test"))
         }
 
-        val desktopMain by getting {
+        named("desktopMain") {
             dependsOn(commonMain.get())
             dependencies {}
         }
 
-        val desktopTest by getting {
+        named("desktopTest") {
             dependencies {
                 implementation(kotlin("test"))
-                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-                implementation(compose.desktop.uiTestJUnit4)
+                implementation(libs.compose.ui.test.junit4)
                 implementation(compose.desktop.currentOs)
             }
         }
@@ -82,7 +83,7 @@ kotlin {
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
-        val iosMain by creating {
+        iosMain {
             dependsOn(commonMain.get())
             dependencies { }
             iosX64Main.dependsOn(this)
@@ -94,26 +95,6 @@ kotlin {
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
         freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
-    }
-}
-
-android {
-    namespace = "io.github.koalaplot"
-    compileSdk = 36
-
-    defaultConfig {
-        minSdk = 23
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-        }
     }
 }
 

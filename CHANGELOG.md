@@ -3,8 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
-adheres
-to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
@@ -19,7 +18,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Deprecated XYGraph overload that does not use AxisContent and GridStyle.
-- Update dependencies: Compose 1.9.3, AGP 8.13.1
+- Update dependencies: Compose 1.10.0, AGP 9.0.0, Kotlin 2.3.0
 - Deprecated Composable functions that did not comply with Compose coding standards, and implemented
   compliant replacements.
 - Renamed ConstantLine to HorizontalLine for area plot baselines.
@@ -29,11 +28,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - Incorrect padding on y-axis labels for XYPlot overload that uses a String producer for axis labels
-  instead of a
-  Composable.
+  instead of a Composable.
 - XYGraph pointer tracking would throw an exception if the pointer event had a position outside the
-  bounds of the
-  component.
+  bounds of the component.
 
 ## [0.10.4]
 
@@ -46,8 +43,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - XYGraph pointer tracking would throw an exception if the pointer event had a position outside the
-  bounds of the
-  component.
+  bounds of the component.
 
 ## [0.10.2]
 
@@ -64,8 +60,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Deprecated AreaPlot, LinePlot, PolarPlotSeries, StairstepPlot to replace with AreaPlot2,
-  LinePlot2, PolarPlotSeries2,
-  StairstepPlot2 as part of deprecation of HoverableElementArea.
+  LinePlot2, PolarPlotSeries2, StairstepPlot2 as part of deprecation of HoverableElementArea.
 
 ## [0.10.0]
 
@@ -105,8 +100,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Move the logic of enabling/disabling pan and zoom to the gesture handler
 - A separate object has been created for the gesture configuration GestureConfig
 - Removing the gesture logic "pastTouchSlop", in practice it turned out to be inconsistent when
-  capturing panning
-  from the parent container
+  capturing panning from the parent container
 - Upgrade Gradle and detekt versions
 - Update dependencies: Kotlin, Coroutines, Compose
 
@@ -133,8 +127,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Android Gradle Plugin to 8.7.2
 - Android compileSDK to 34 and minSDK to 23
 - BulletGraph using default qualitative range indicators will accept a max of 5 values when being
-  configured rather
-  than throwing a null pointer exception when Composing.
+  configured rather than throwing a null pointer exception when Composing.
 
 ### Fixed
 
@@ -144,11 +137,9 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - BulletGraph qualitative range default shading not according to spec under some conditions.
 - Divide by 0 in XYGraph if an axis has no tick labels (#105).
 - XYGraph size changes when panning (#101). **Important Note**: This required a change to the
-  XYGraph size
-  calculation that may result in clipping of the rightmost x-axis tick label and/or topmost y-axis
-  tick label. Padding
-  can be explicitly added to the parent Composable to leave space for labels that extend beyond the
-  graph edge.
+  XYGraph size calculation that may result in clipping of the rightmost x-axis tick label and/or
+  topmost y-axis tick label. Padding can be explicitly added to the parent Composable to leave space
+  for labels that extend beyond the graph edge.
 
 ## [0.7.1]
 
@@ -176,8 +167,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Upgrade coroutines to 1.9.0
 - Rename PieChart's animationSpec parameter to pieAnimationSpec
 - zoomRangeLimit in LinearAxisModel implementations replaced with minViewExtent and maxViewExtent to
-  control both the
-  allowed upper and lower bounds of the visible range
+  control both the allowed upper and lower bounds of the visible range
 
 ### Fixed
 
@@ -212,8 +202,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Upgrade versions: Kotlin to 2.0.0, coroutines to 1.8.1, compose to 1.6.11, dokka to 1.9.20, detekt
   to 1.23.6
 - ZoomRangeLimitDefault applied to Int and Long linear axis models to be consistent with the
-  original
-  FloatLinearAxisModel
+  original FloatLinearAxisModel
 
 ## [0.6.1]
 
@@ -280,21 +269,18 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update Kotlin version to 1.9.21
 - Moved package for AreaStyle, LineStyle, Point, DefaultPoint, and KoalaPlotTheme
 - Line/Area chart scaling applied to paths instead of canvas so PathEffects scale the same as
-  drawing on an unscaled
-  Canvas
+  drawing on an unscaled Canvas
 - Deprecated XYChart and renamed to XYGraph - behavior and breaking changes introduced into
   XYGraph (see below)
 - Deprecated LineChart, StairStepChart, and StackedAreaChart and renamed to LinePlot, StairStepPlot,
   and AreaPlot
 - Separated variants of VerticalBarChart, depending on grouping or stacking, into
-  GroupedVerticalBarPlot,
-  VerticalBarPlot, and StackedVerticalBarPlot
+  GroupedVerticalBarPlot, VerticalBarPlot, and StackedVerticalBarPlot
 - Area plots no longer require LineStyle to be non-null
 - Separate AreaPlot from LinePlot to simplify null/not-null requirements on parameters to LinePlot
 - X and Y-axis titles in XYGraph fill entire width/height of plot so user can choose to align
-  content along the axis
-  rather than centered-only. Consequently, default behavior is for titles to be "start" positioned
-  instead of centered.
+  content along the axis rather than centered-only. Consequently, default behavior is for titles to
+  be "start" positioned instead of centered.
 
 ### Added
 
@@ -324,8 +310,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - forceCenteredPie parameter to PieChart that always places the pie in the center of the component,
-  adjusting its size
-  as needed to accommodate the labels.
+  adjusting its size as needed to accommodate the labels.
 - Support for ios
 - Step chart
 - Support for rotating x-axis and y-axis labels on XYCharts
@@ -355,8 +340,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Update Android compileSdk and targetSdk versions to 33
 - Migrate to Material 3
 - CategoryAxisModel.computeOffset will throw an IllegalArgumentException instead of returning NaN if
-  an invalid
-  category value is provided.
+  an invalid category value is provided.
 
 ### Fixed
 
@@ -369,8 +353,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - Add anti-alias option to default pie slice, which when false avoids visual artifacts appearing
-  between adjacent
-  slices.
+  between adjacent slices.
 
 ## [0.2.0]
 
@@ -384,8 +367,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Improve Bullet axis auto range implementation
 - PieChart to use a StraightLineConnector as the default labelConnector instead of none
 - StraightLineConnector and BezierLabelConnector to use a default color of the Material theme's
-  onBackground instead of
-  black
+  onBackground instead of black
 
 ### Fixed
 
@@ -401,8 +383,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.1.1]
 
 - Fixed bug in BulletGraph where a height of 0 would cause an exception due to trying to set a
-  negative height
-  constraint
+  negative height constraint
 - Fix pie chart size calculation that caused clipping of pie or labels in some circumstances
 - Fix pie slice not showing when slice is a full circle
 - Fix pie chart infinite measuring loop

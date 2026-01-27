@@ -39,7 +39,7 @@ fun getExtraString(name: String) = ext[name]?.toString()
 
 tasks.withType<AbstractPublishToMaven>().configureEach {
     // Fix errors related to declared dependencies between publishing tasks and signing tasks
-    dependsOn.add("signAndroidReleasePublication")
+    dependsOn.add("signAndroidPublication")
     dependsOn.add("signJsPublication")
     dependsOn.add("signDesktopPublication")
     dependsOn.add("signKotlinMultiplatformPublication")
