@@ -9,7 +9,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Update dependencies: Compose 1.10.1, kotlin 2.3.10
+- Update dependencies: Compose 1.10.3, kotlin 2.3.20
+
+### Removed
+
+- iosX64 build target due to JetBrains' plans to deprecate all x86_64 Apple targets.
 
 ## [0.11.0]
 

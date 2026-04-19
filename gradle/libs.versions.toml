@@ -23,11 +23,21 @@ androidGradlePlugin = "9.0.1"
 ##               ⬆ = "9.1.0-alpha08"
 ##               ⬆ = "9.1.0-alpha09"
 ##               ⬆ = "9.1.0-rc01"
+##               ⬆ = "9.1.0"
+##               ⬆ = "9.1.1"
 ##               ⬆ = "9.2.0-alpha01"
 ##               ⬆ = "9.2.0-alpha02"
+##               ⬆ = "9.2.0-alpha03"
+##               ⬆ = "9.2.0-alpha04"
+##               ⬆ = "9.2.0-alpha05"
+##               ⬆ = "9.2.0-alpha06"
+##               ⬆ = "9.2.0-alpha07"
+##               ⬆ = "9.2.0-alpha08"
+##               ⬆ = "9.2.0-rc01"
+##               ⬆ = "9.3.0-alpha01"
 
-composeMultiplatform = "1.10.1"
-##                ⬆ = "1.10.2-SNAPSHOT+release-1-10"
+composeMultiplatform = "1.10.3"
+##                ⬆ = "1.10.4-SNAPSHOT+release-1-10"
 ##                ⬆ = "1.10.10-SNAPSHOT+default"
 ##                ⬆ = "1.10.10-SNAPSHOT+shish-remove-uikit-target"
 ##                ⬆ = "1.10.10-alpha01+dev3290"
@@ -51,6 +61,7 @@ composeMultiplatform = "1.10.1"
 ##                ⬆ = "1.11.0-SNAPSHOT+igor-demin-ui-common-constraints"
 ##                ⬆ = "1.11.0-SNAPSHOT+ivan-matkov-fix-sourceset-names"
 ##                ⬆ = "1.11.0-SNAPSHOT+andrei-salavei-compose-view"
+##                ⬆ = "1.11.0-SNAPSHOT+release-1-11"
 ##                ⬆ = "1.11.0-alpha01+dev3366"
 ##                ⬆ = "1.11.0-alpha01+dev3367"
 ##                ⬆ = "1.11.0-alpha01+dev3375"
@@ -90,19 +101,21 @@ composeMultiplatform = "1.10.1"
 ##                ⬆ = "1.11.0-alpha01"
 ##                ⬆ = "1.11.0-alpha02"
 ##                ⬆ = "1.11.0-alpha03"
+##                ⬆ = "1.11.0-alpha04"
+##                ⬆ = "1.11.0-beta01"
+##                ⬆ = "1.11.0-beta02"
 
 detekt = "1.23.8"
 
-dokka = "2.1.0"
-## ⬆ = "2.2.0-Beta"
+dokka = "2.2.0"
 
-kotlin = "2.3.10"
-##  ⬆ = "2.3.20-Beta1"
-##  ⬆ = "2.3.20-Beta2"
-##  ⬆ = "2.3.20-RC"
+kotlin = "2.3.20"
+##  ⬆ = "2.3.21-RC"
+##  ⬆ = "2.3.21-RC2"
+##  ⬆ = "2.4.0-Beta1"
 
-ktlint-compose = "0.5.6"
-ktlint-gradle = "14.0.1"
+ktlint-compose = "0.5.7"
+ktlint-gradle = "14.2.0"
 
 material3 = "1.9.0"
 ##     ⬆ = "1.10.0-alpha01"
@@ -113,6 +126,9 @@ material3 = "1.9.0"
 ##     ⬆ = "1.11.0-alpha01"
 ##     ⬆ = "1.11.0-alpha02"
 ##     ⬆ = "1.11.0-alpha03"
+##     ⬆ = "1.11.0-alpha04"
+##     ⬆ = "1.11.0-alpha05"
+##     ⬆ = "1.11.0-alpha06"
 
 [libraries]
 
@@ -125,5 +141,6 @@ compose-ui-test-junit4 = {module = "org.jetbrains.compose.ui:ui-test-junit4", ve
 
 # dokka-base = { group = "org.jetbrains.dokka", name = "dokka-base", version.ref = "dokka" }
 kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version = "1.10.2" }
+##                                                                                             ⬆ = "1.11.0-rc01" }
 
 ktlint-compose = { module = "io.nlopez.compose.rules:ktlint", version.ref = "ktlint-compose" }

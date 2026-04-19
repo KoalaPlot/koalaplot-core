@@ -35,7 +35,6 @@ kotlin {
 
     iosArm64()
     iosSimulatorArm64()
-    iosX64()
 
     js(IR) {
         browser()
@@ -80,13 +79,11 @@ kotlin {
             }
         }
 
-        val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
         iosMain {
             dependsOn(commonMain.get())
             dependencies { }
-            iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
         }
