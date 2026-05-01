@@ -334,8 +334,8 @@ public fun PieChart(
 
             val pieMeasurable = subcompose("pie") { Pie(pieSliceData, slice, holeSize) }[0]
 
-            val labelMeasurables = subcompose("labels") {
-                pieSliceData.indices.forEach { index ->
+            val labelMeasurables = pieSliceData.indices.flatMapIndexed { index, _ ->
+                subcompose("label $index") {
                     // Wrapping in box ensures there is 1 measurable element
                     // emitted per label & applies fade animation
                     Box(modifier = Modifier.alpha(labelAlpha.value)) { label(index) }
