@@ -276,6 +276,7 @@ public fun PieChart(
  * @param pieExtendAngle Sets a max angle for the pie to extend to, with a value between 1 and 360.
  * Defaults to [DegreesFullCircle].
  */
+@Suppress("LongMethod")
 @ExperimentalKoalaPlotApi
 @Composable
 public fun PieChart(
@@ -333,12 +334,15 @@ public fun PieChart(
                 PieMeasurePolicy(finalPieSliceData, holeSize, labelPositionProvider, InitOuterRadius, forceCenteredPie)
 
             val pieMeasurable = subcompose("pie") { Pie(pieSliceData, slice, holeSize) }[0]
-
             val labelMeasurables = pieSliceData.indices.flatMapIndexed { index, _ ->
                 subcompose("label $index") {
                     // Wrapping in box ensures there is 1 measurable element
                     // emitted per label & applies fade animation
-                    Box(modifier = Modifier.alpha(labelAlpha.value)) { label(index) }
+                    Box(modifier = Modifier.alpha(labelAlpha.value)) {
+                        if (index < pieSliceData.size) {
+                            label(index)
+                        }
+                    }
                 }
             }
 
@@ -381,7 +385,11 @@ public fun PieChart(
                     subcompose("connector $index") {
                         Box(modifier = Modifier.fillMaxSize().alpha(labelAlpha.value)) {
                             labelConnectorTranslations[index]?.let {
-                                with(it.second) { labelConnector(index) }
+                                with(it.second) {
+                                    if (index < pieSliceData.size) {
+                                        labelConnector(index)
+                                    }
+                                }
                             }
                         }
                     }.map { it.measure(constraints) }
