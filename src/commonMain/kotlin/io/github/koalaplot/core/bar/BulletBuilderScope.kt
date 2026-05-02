@@ -1,7 +1,5 @@
 package io.github.koalaplot.core.bar
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,12 +7,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -28,10 +24,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.layout.Measurable
-import androidx.compose.ui.layout.Placeable
-import androidx.compose.ui.layout.SubcomposeMeasureScope
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -40,32 +32,15 @@ import io.github.koalaplot.core.DiamondShape
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.xygraph.Axis
-import io.github.koalaplot.core.xygraph.AxisDelegate
 import io.github.koalaplot.core.xygraph.AxisStyle
 import io.github.koalaplot.core.xygraph.LinearAxisModel
 import io.github.koalaplot.core.xygraph.rememberAxisStyle
-import kotlin.math.abs
-import kotlin.math.absoluteValue
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.roundToInt
 
 private const val DefaultSizeFraction = 0.75f
 private const val FeaturedMeasureDefaultSize = 0.33f
 
-private val DefaultRangeShades = listOf(
-    listOf(0.65f),
-    listOf(0.65f, 0.9f),
-    listOf(0.6f, 0.75f, 0.9f),
-    listOf(0.5f, 0.65f, 0.8f, 0.9f),
-    listOf(0.5f, 0.65f, 0.8f, 0.9f, 0.97f),
-)
-
-// Max number of qualitative ranges supported by the DefaultRangeShades above
+// Max number of qualitative ranges supported by the DefaultRangeShades
 private const val MaxQualitativeRanges = 5
-
-private const val MinRangeShade = 0.99f
 
 /**
  * A scope for configuring a bullet graph.
@@ -75,8 +50,9 @@ private const val MinRangeShade = 0.99f
  */
 @ExperimentalKoalaPlotApi
 @BulletGraphDslMarker
+@Stable
 public class BulletBuilderScope<T>(
-    private val axisModel: LinearAxisModel<T>,
+    internal val axisModel: LinearAxisModel<T>,
 ) where T : Comparable<T>, T : Number {
     internal class ComparativeMeasure<T>(
         val value: T,
@@ -128,7 +104,7 @@ public class BulletBuilderScope<T>(
      */
     public fun comparativeMeasure(
         value: T,
-        indicator: @Composable () -> Unit = { LineIndicator() },
+        indicator: @Composable () -> Unit = { LineIndicator(Modifier) },
     ) {
         comparativeMeasures += ComparativeMeasure(value, indicator)
     }
@@ -270,353 +246,13 @@ public class BulletBuilderScope<T>(
         val indicator: (@Composable () -> Unit)? = null,
     )
 
-    private enum class Slots {
-        AXIS_LABELS,
-        AXIS,
-        RANGES,
-        FEATURE,
-        COMPARATIVE,
-    }
-
     @Composable
-    internal fun createBulletGraphBuilder(slotId: Int): BulletGraphBuilder = BulletGraphBuilder(
-        slotId,
-        AxisSettings.fromScope(this),
-    )
-
-    internal inner class BulletGraphBuilder
-        @OptIn(ExperimentalKoalaPlotApi::class)
-        constructor(
-            private val slotId: Int,
-            private val axisSettings: AxisSettings<T>,
-        ) {
-            internal var bulletHeight: Int = 0
-
-            var labelPlaceable: Placeable? = null
-            var axis: AxisDelegate<T>? = null
-            var axisLabelPlaceables: List<Placeable>? = null
-            private var axisHeight: Int? = null
-            private var axisPlaceable: Placeable? = null
-            private val axisLabelsHeight: Int by lazy {
-                requireNotNull(axisLabelPlaceables)
-                axisLabelPlaceables?.let { placeables ->
-                    placeables.maxOfOrNull { it.height }
-                } ?: 0
-            }
-            private val rangeHeight: Int by lazy {
-                requireNotNull(axisHeight) { "axisHeight must not be null in order to calculate rangeHeight" }
-                (bulletHeight - axisHeight!! - axisLabelsHeight).coerceAtLeast(0)
-            }
-            private var rangePlaceables: List<Placeable>? = null
-            private var featurePlaceable: Placeable? = null
-            private var comparativeMeasurePlaceables: List<Placeable>? = null
-
-            @OptIn(ExperimentalKoalaPlotApi::class)
-            fun measureLabel(
-                scope: SubcomposeMeasureScope,
-                labelWidthMaxConstraint: Int,
-            ) {
-                labelPlaceable = scope.measureLabel(
-                    this@BulletBuilderScope,
-                    Constraints(maxWidth = labelWidthMaxConstraint, maxHeight = bulletHeight),
-                )
-            }
-
-            private fun slotId(slot: Slots): String = "$slotId.${slot.name}"
-
-            /**
-             * @param width of the non-label graph area: constraints.maxWidth - labelWidth
-             */
-            @OptIn(ExperimentalKoalaPlotApi::class)
-            fun measureAxisLabels(
-                scope: SubcomposeMeasureScope,
-                width: Int,
-            ) {
-                with(scope) {
-                    val axis = AxisDelegate.createHorizontalAxis(
-                        this@BulletBuilderScope.axisModel,
-                        axisSettings.style!!,
-                        width.toDp(),
-                    )
-                    axisHeight = (axis.thicknessDp - axis.axisOffset).toPx().roundToInt()
-
-                    val measurable = subcompose(slotId(Slots.AXIS_LABELS)) {
-                        axis.majorTickValues.forEach { Box { axisSettings.Label(it) } }
-                    }
-                    axisLabelPlaceables = measurable.map {
-                        it.measure(
-                            Constraints(
-                                maxWidth =
-                                    (width / axis.majorTickValues.size.coerceAtLeast(1)).coerceAtLeast(0),
-                                maxHeight = bulletHeight,
-                            ),
-                        )
-                    }
-
-                    this@BulletGraphBuilder.axis = axis
-                }
-            }
-
-            /**
-             * @param rangeWidth Width of the axis
-             */
-            fun measureAxis(
-                scope: SubcomposeMeasureScope,
-                rangeWidth: Int,
-            ) {
-                requireNotNull(axis) { "axis must not be null" }
-                axisPlaceable =
-                    scope.subcompose(slotId(Slots.AXIS)) { Axis(axis!!) }[0].measure(Constraints.fixedWidth(rangeWidth))
-            }
-
-            @OptIn(ExperimentalKoalaPlotApi::class)
-            fun measureRanges(
-                scope: SubcomposeMeasureScope,
-                rangeWidth: Int,
-            ) {
-                val rangeMeasurables: List<Measurable> =
-                    scope.subcompose(slotId(Slots.RANGES)) {
-                        // RangeIndicators(this@BulletBuilderScope)
-                        val builtScope = this@BulletBuilderScope
-                        for (rangeIndex in 1 until builtScope.rangesScope.ranges.size) {
-                            val range = builtScope.rangesScope.ranges[rangeIndex]
-                            if (range.indicator == null) {
-                                val shadeIndex = min(builtScope.rangesScope.ranges.size - 2, DefaultRangeShades.lastIndex)
-                                    .coerceIn(0..DefaultRangeShades.lastIndex)
-                                val numShades = DefaultRangeShades[shadeIndex].size
-                                val shade = if (rangeIndex - 1 >= numShades) {
-                                    MinRangeShade
-                                } else {
-                                    DefaultRangeShades[shadeIndex][rangeIndex - 1]
-                                }
-                                HorizontalBarIndicator(SolidColor(Color(shade, shade, shade)))
-                            } else {
-                                Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.fillMaxSize()) {
-                                    range.indicator.invoke()
-                                }
-                            }
-                        }
-                    }
-
-                val ranges = this@BulletBuilderScope.rangesScope.ranges
-                rangePlaceables = rangeMeasurables.mapIndexed { rangeIndex, measurable ->
-                    val maxWidth = (
-                        (rangeWidth * axisModel.computeOffset(ranges[rangeIndex + 1].value)).roundToInt() -
-                            (rangeWidth * axisModel.computeOffset(ranges[rangeIndex].value)).roundToInt()
-                    ).absoluteValue
-                    measurable.measure(Constraints.fixed(maxWidth, rangeHeight))
-                }
-            }
-
-//            @OptIn(ExperimentalKoalaPlotApi::class)
-//            @Composable
-//            private fun <T> RangeIndicators(builtScope: BulletBuilderScope<T>) where T : Comparable<T>, T : Number {
-//                for (rangeIndex in 1 until builtScope.rangesScope.ranges.size) {
-//                    val range = builtScope.rangesScope.ranges[rangeIndex]
-//                    if (range.indicator == null) {
-//                        val shadeIndex = min(builtScope.rangesScope.ranges.size - 2, DefaultRangeShades.lastIndex)
-//                            .coerceIn(0..DefaultRangeShades.lastIndex)
-//                        val numShades = DefaultRangeShades[shadeIndex].size
-//                        val shade = if (rangeIndex - 1 >= numShades) {
-//                            MinRangeShade
-//                        } else {
-//                            DefaultRangeShades[shadeIndex][rangeIndex - 1]
-//                        }
-//                        HorizontalBarIndicator(SolidColor(Color(shade, shade, shade)))
-//                    } else {
-//                        Box(contentAlignment = Alignment.CenterStart, modifier = Modifier.fillMaxSize()) {
-//                            range.indicator.invoke()
-//                        }
-//                    }
-//                }
-//            }
-
-            @OptIn(ExperimentalKoalaPlotApi::class)
-            fun measureFeature(
-                scope: SubcomposeMeasureScope,
-                rangeWidth: Int,
-                animationSpec: AnimationSpec<Float>,
-            ) {
-                this@BulletBuilderScope.featuredMeasure?.let { featuredMeasure ->
-                    val origin = computeFeatureBarOrigin(featuredMeasure.value, axisModel.range)
-                    val featureWidth = rangeWidth * abs(
-                        axisModel.computeOffset(featuredMeasure.value) - axisModel.computeOffset(
-                            origin,
-                        ),
-                    )
-
-                    val measurable = scope.subcompose(slotId(Slots.FEATURE)) {
-                        // Animation scale factor
-                        val beta = remember(featuredMeasure) { Animatable(0f) }
-                        LaunchedEffect(featuredMeasure) {
-                            beta.animateTo(1f, animationSpec = animationSpec)
-                        }
-
-                        with(scope) {
-                            val sizeModifier =
-                                if (featuredMeasure.type == FeaturedMeasureType.BAR) {
-                                    Modifier.size((beta.value * featureWidth).toDp(), rangeHeight.toDp())
-                                } else {
-                                    Modifier.size(rangeHeight.toDp(), rangeHeight.toDp())
-                                }
-
-                            Box(contentAlignment = Alignment.Center, modifier = sizeModifier) {
-                                featuredMeasure.indicator()
-                            }
-                        }
-                    }[0]
-
-                    featurePlaceable = measurable.measure(Constraints(maxWidth = rangeWidth, maxHeight = rangeHeight))
-                }
-            }
-
-            @OptIn(ExperimentalKoalaPlotApi::class)
-            fun measureComparativeMeasures(scope: SubcomposeMeasureScope) {
-                val measurables: List<Measurable> =
-                    scope.subcompose(slotId(Slots.COMPARATIVE)) {
-                        this@BulletBuilderScope.comparativeMeasures.forEach {
-                            Box(contentAlignment = Alignment.Center) { it.indicator() }
-                        }
-                    }
-
-                comparativeMeasurePlaceables = measurables.map {
-                    it.measure(Constraints.fixed(rangeHeight, rangeHeight))
-                }
-            }
-
-            @OptIn(ExperimentalKoalaPlotApi::class)
-            fun Placeable.PlacementScope.layout(
-                yPos: Int,
-                labelWidth: Int,
-                firstAxisLabelWidth: Int,
-                rangeWidth: Int,
-            ) {
-                requireNotNull(axis) { "axis must not be null during layout" }
-                requireNotNull(axisLabelPlaceables) { "axis label placeables must not be null during layout" }
-                requireNotNull(labelPlaceable) { "labelPlacesable must not be null during layout" }
-                requireNotNull(axisPlaceable) { "axisPlaceable must not be null during layout" }
-                requireNotNull(rangePlaceables) { "rangePlaceables must not be null during layout" }
-                requireNotNull(comparativeMeasurePlaceables) {
-                    "comparativeMeasurePlaceables must not be null during layout"
-                }
-
-                val axis = axis!!
-                val axisLabelPlaceables = axisLabelPlaceables!!
-                val labelPlaceable = labelPlaceable!!
-                val axisPlaceable = axisPlaceable!!
-                val rangePlaceables = rangePlaceables!!
-                val comparativeMeasurePlaceables = comparativeMeasurePlaceables!!
-
-                val rangeStart = labelWidth + firstAxisLabelWidth / 2
-
-                labelPlaceable.place(
-                    labelWidth - labelPlaceable.width,
-                    (yPos + bulletHeight / 2 - labelPlaceable.height / 2).coerceAtLeast(0),
-                )
-
-                axisPlaceable.place(rangeStart, yPos + rangeHeight)
-
-                // place axis labels
-                axis.majorTickValues.forEachIndexed { index, fl ->
-                    axisLabelPlaceables[index].place(
-                        (
-                            rangeStart + rangeWidth * axisModel.computeOffset(fl) - axisLabelPlaceables[index].width / 2
-                        ).roundToInt(),
-                        yPos + (bulletHeight - axisLabelsHeight).coerceAtLeast(0),
-                    )
-                }
-
-                // place range indicators
-                rangePlaceables.forEachIndexed { index, placeable ->
-                    val xPos =
-                        rangeStart +
-                            rangeWidth * axisModel.computeOffset(this@BulletBuilderScope.rangesScope.ranges[index].value)
-                    placeable.place(xPos.roundToInt(), yPos)
-                }
-
-                // place comparative measures
-                comparativeMeasurePlaceables.forEachIndexed { index, placeable ->
-                    val xPos =
-                        rangeStart +
-                            rangeWidth * axisModel.computeOffset(this@BulletBuilderScope.comparativeMeasures[index].value) -
-                            placeable.width / 2
-                    placeable.place(xPos.roundToInt(), yPos)
-                }
-
-                // place feature
-                featurePlaceable?.let {
-                    val value = this@BulletBuilderScope.featuredMeasure!!.value
-                    val xPos = rangeStart + if (this@BulletBuilderScope.featuredMeasure!!.type == FeaturedMeasureType.BAR) {
-                        val origin = computeFeatureBarOrigin(value, axisModel.range)
-                        if (value.toDouble() < 0) {
-                            rangeWidth * axisModel.computeOffset(origin) - it.width
-                        } else {
-                            rangeWidth * axisModel.computeOffset(origin)
-                        }
-                    } else {
-                        rangeWidth * axisModel.computeOffset(value) - it.width / 2
-                    }
-                    it.place(xPos.roundToInt(), yPos)
-                }
-            }
-
-            /**
-             * Technically per the BulletGraph spec a bar is not to be used if the origin of the axis does not include
-             * 0, but this will force the feature bar to have an origin of 0 or a bound of the axis in order to display
-             * in a reasonable way.
-             * @param featuredMeasureValue The value of the featured measure
-             * @param axisRange the range of the axis
-             */
-            private fun computeFeatureBarOrigin(
-                featuredMeasureValue: T,
-                axisRange: ClosedRange<T>,
-            ): T {
-                val r = if (featuredMeasureValue.toDouble() >= 0) {
-                    max(0.0, axisRange.start.toDouble())
-                } else {
-                    min(0.0, axisRange.endInclusive.toDouble())
-                }
-
-                return when (featuredMeasureValue) {
-                    is Int -> {
-                        r.toInt()
-                    }
-
-                    is Long -> {
-                        r.toLong()
-                    }
-
-                    is Double -> {
-                        r
-                    }
-
-                    is Float -> {
-                        r.toFloat()
-                    }
-
-                    is Short -> {
-                        r.toInt().toShort()
-                    }
-
-                    is Byte -> {
-                        r.toInt().toByte()
-                    }
-
-                    else -> {
-                        throw IllegalArgumentException("Unexpected Number type")
-                    }
-                } as T
-            }
+    internal fun generateBulletGraphItem(): BulletGraphItem {
+        val axisSettings = AxisSettings.fromScope(this)
+        return remember(this, axisSettings) {
+            BulletGraphItemImpl(this, axisSettings)
         }
-}
-
-@OptIn(ExperimentalKoalaPlotApi::class)
-internal fun <T> SubcomposeMeasureScope.measureLabel(
-    bulletScope: BulletBuilderScope<T>,
-    constraints: Constraints,
-): Placeable where T : Comparable<T>, T : Number = with(bulletScope) {
-    val labelMeasurable = subcompose(label) { Box { label.value() } }[0]
-    labelMeasurable.measure(constraints)
+    }
 }
 
 /**
@@ -883,17 +519,6 @@ public class AxisSettings<T> where T : Comparable<T>, T : Number {
             settings.style = settings.style ?: rememberAxisStyle()
             return settings
         }
-
-//        private fun <T> createLinearAxisModel(builtScope: BulletBuilderScope<T>):
-        //        FloatLinearAxisModel where T : Comparable<T>, T : Number {
-//            val range = (
-//                builtScope.rangesScope.ranges.map { it.value } +
-//                    builtScope.featuredMeasure.value +
-//                    builtScope.comparativeMeasures.map { it.value }
-//                ).autoScaleRange()
-//
-//            return FloatLinearAxisModel(range, allowZooming = false, allowPanning = false)
-//        }
     }
 }
 

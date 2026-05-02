@@ -2,6 +2,7 @@ package io.github.koalaplot.core.bar
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Placeable
@@ -40,9 +41,7 @@ public fun BulletGraphs(
         return
     }
 
-    val builders = graphScope.scopes.mapIndexed { index, scope ->
-        scope.createBulletGraphBuilder(index)
-    }
+    val items = graphScope.scopes.map { scope -> key(scope) { scope.generateBulletGraphItem() } }
 
     SubcomposeLayout(modifier = modifier) { constraints ->
         val bulletHeight =
@@ -51,36 +50,43 @@ public fun BulletGraphs(
                     graphScope.scopes.size.coerceAtLeast(1)
             ).coerceAtLeast(0)
 
-        builders.forEach { it.bulletHeight = bulletHeight }
+        // Measure labels
+        val labelWidthMaxConstraint = calculateLabelWidthMaxConstraint(graphScope.labelWidth, constraints)
+        val labelPlaceables = items.map { it.measureLabel(this, Constraints(maxWidth = labelWidthMaxConstraint, maxHeight = bulletHeight)) }
+        val labelWidth = calculateLabelWidth(graphScope.labelWidth, labelWidthMaxConstraint, labelPlaceables)
 
-        val labelWidthMaxConstraint = calculateLabelWidthMaxConstraint(graphScope, constraints)
+        // Measure Axis labels
+        val graphAreaWidth = constraints.maxWidth - labelWidth
+        val axisMeasurements = items.map { it.measureAxisLabels(this, graphAreaWidth, bulletHeight) }
 
-        builders.forEach { it.measureLabel(this, labelWidthMaxConstraint) }
+        val firstAxisLabelWidth = axisMeasurements.maxOf { it.labelPlaceables.first().width }
+        val lastAxisLabelWidth = axisMeasurements.maxOf { it.labelPlaceables.last().width }
+        val rangeWidth = (graphAreaWidth - firstAxisLabelWidth / 2 - lastAxisLabelWidth / 2).coerceAtLeast(0)
+        val rangeStart = labelWidth + firstAxisLabelWidth / 2
 
-        val labelWidth =
-            calculateLabelWidth(graphScope, labelWidthMaxConstraint, builders.map { it.labelPlaceable!! })
-
-        builders.forEach { it.measureAxisLabels(this, constraints.maxWidth - labelWidth) }
-
-        val firstAxisLabelWidth = builders.maxOf { it.axisLabelPlaceables!!.first().width }
-        val lastAxisLabelWidth = builders.maxOf { it.axisLabelPlaceables!!.last().width }
-        val rangeWidth =
-            (constraints.maxWidth - firstAxisLabelWidth / 2 - lastAxisLabelWidth / 2 - labelWidth).coerceAtLeast(0)
-
-        builders.forEach {
-            it.measureAxis(this, rangeWidth)
-            it.measureRanges(this, rangeWidth)
-            it.measureFeature(this, rangeWidth, animationSpec)
-            it.measureComparativeMeasures(this)
+        // Measure main content
+        val contentMeasurements = items.mapIndexed { index, item ->
+            item.measureContent(this, axisMeasurements[index], rangeWidth, bulletHeight, animationSpec)
         }
 
         layout(constraints.maxWidth, constraints.maxHeight) {
             var yPos = 0
 
-            builders.forEach {
-                with(it) {
-                    layout(yPos, labelWidth, firstAxisLabelWidth, rangeWidth)
-                }
+            val layoutPosition = BulletLayoutPosition(
+                labelWidth = labelWidth,
+                rangeStart = rangeStart,
+                rangeWidth = rangeWidth,
+                yPos = yPos,
+                bulletHeight = bulletHeight,
+            )
+
+            items.forEachIndexed { index, _ ->
+                layoutBullet(
+                    layoutPosition.copy(yPos = yPos),
+                    labelPlaceable = labelPlaceables[index],
+                    axisMeasurement = axisMeasurements[index],
+                    bulletContentMeasurement = contentMeasurements[index],
+                )
                 yPos += bulletHeight + gap.roundToPx()
             }
         }
@@ -89,10 +95,10 @@ public fun BulletGraphs(
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 private fun Density.calculateLabelWidthMaxConstraint(
-    graphScope: BulletGraphScope,
+    labelWidth: LabelWidth,
     constraints: Constraints,
 ): Int {
-    val labelWidthMaxConstraint = when (val labelWidth = graphScope.labelWidth) {
+    val labelWidthMaxConstraint = when (labelWidth) {
         is FixedFraction -> {
             (constraints.maxWidth * labelWidth.fraction).roundToInt()
         }
@@ -110,17 +116,13 @@ private fun Density.calculateLabelWidthMaxConstraint(
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 private fun calculateLabelWidth(
-    graphScope: BulletGraphScope,
+    labelWidth: LabelWidth,
     labelWidthMaxConstraint: Int,
     labelPlaceable: List<Placeable>,
-): Int {
-    val labelWidth = graphScope.labelWidth
-
-    return if (labelWidth is VariableFraction) {
-        labelPlaceable.maxOf { it.width }
-    } else {
-        labelWidthMaxConstraint
-    }
+): Int = if (labelWidth is VariableFraction) {
+    labelPlaceable.maxOf { it.width }
+} else {
+    labelWidthMaxConstraint
 }
 
 /**

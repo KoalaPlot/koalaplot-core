@@ -15,6 +15,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - iosX64 build target due to JetBrains' plans to deprecate all x86_64 Apple targets.
 
+## [0.11.1]
+
+### Fixed
+
+- Index out of bounds exception in BulletGraph under resize/animation conditions. Corrected same
+  code pattern used in PieChart since it was also theoretically possible there due to composition
+  skipping.
+
 ## [0.11.0]
 
 ### Added
