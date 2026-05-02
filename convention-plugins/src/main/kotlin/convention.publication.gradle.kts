@@ -46,7 +46,6 @@ tasks.withType<AbstractPublishToMaven>().configureEach {
     dependsOn.add("signWasmJsPublication")
     dependsOn.add("signIosArm64Publication")
     dependsOn.add("signIosSimulatorArm64Publication")
-    dependsOn.add("signIosX64Publication")
 }
 
 publishing {
