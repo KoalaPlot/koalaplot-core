@@ -227,6 +227,7 @@ private fun <X, Y> Modifier.onPointerMove(
     awaitPointerEventScope {
         while (true) {
             val event = awaitPointerEvent()
+            xyGraphPointerEventScope.size = this.size
             onPointerEvent?.invoke(xyGraphPointerEventScope, event)
         }
     }
@@ -250,7 +251,7 @@ public interface XYGraphPointerEventScope<X, Y> {
 private class XYGraphPointerEventScopeImpl<X, Y>(
     val xAxisModel: AxisModel<X>,
     val yAxisModel: AxisModel<Y>,
-    val size: IntSize,
+    var size: IntSize,
 ) : XYGraphPointerEventScope<X, Y> {
     override fun scale(position: Offset): Point<X, Y> = DefaultPoint(
         xAxisModel.offsetToValue((position.x / size.width).coerceIn(0f, 1f)),
