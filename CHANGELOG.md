@@ -15,6 +15,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - iosX64 build target due to JetBrains' plans to deprecate all x86_64 Apple targets.
 
+## [0.11.2]
+
+### Fixed
+
+- update XYGraphPointerEventScope size on each pointer event (#150)
+
 ## [0.11.1]
 
 ### Fixed
