@@ -26,12 +26,10 @@ import androidx.compose.ui.unit.Constraints
 import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
-import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
 import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraphScope
-import kotlin.apply
 import kotlin.math.min
 
 internal const val DefaultTau = 0.5f
@@ -46,32 +44,11 @@ internal const val DefaultTau = 0.5f
  * @param modifier Modifier for the plot.
  */
 @Composable
-public fun <X, Y> XYGraphScope<X, Y>.LinePlot2(
-    data: List<Point<X, Y>>,
-    modifier: Modifier = Modifier,
-    lineStyle: LineStyle? = null,
-    symbol: (@Composable (Point<X, Y>) -> Unit)? = null,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
-) {
-    LinePlot(data, modifier, lineStyle, { symbol?.invoke(it) }, animationSpec)
-}
-
-/**
- * A line plot that draws data as points and lines on an XYGraph.
- * @param X The type of the x-axis values
- * @param Y The type of the y-axis values
- * @param data Data series to plot.
- * @param lineStyle Style to use for the line that connects the data points. If null, no line is drawn.
- * @param symbol Composable for the symbol to be shown at each data point.
- * @param modifier Modifier for the plot.
- */
-@Deprecated("Use LinePlot2 instead", replaceWith = ReplaceWith("LinePlot2"))
-@Composable
 public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
     data: List<Point<X, Y>>,
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
-    symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    symbol: (@Composable (Point<X, Y>) -> Unit)? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
     if (data.isEmpty()) return
@@ -80,7 +57,7 @@ public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
         data,
         modifier,
         lineStyle,
-        symbol,
+        { symbol?.invoke(it) },
         null,
         null,
         animationSpec,
@@ -93,10 +70,31 @@ public fun <X, Y> XYGraphScope<X, Y>.LinePlot(
 }
 
 /**
+ * A line plot that draws data as points and lines on an XYGraph.
+ * @param X The type of the x-axis values
+ * @param Y The type of the y-axis values
+ * @param data Data series to plot.
+ * @param lineStyle Style to use for the line that connects the data points. If null, no line is drawn.
+ * @param symbol Composable for the symbol to be shown at each data point.
+ * @param modifier Modifier for the plot.
+ */
+@Deprecated("Use LinePlot instead", ReplaceWith("LinePlot(data, modifier, lineStyle, symbol, animationSpec)"))
+@Composable
+public fun <X, Y> XYGraphScope<X, Y>.LinePlot2(
+    data: List<Point<X, Y>>,
+    modifier: Modifier = Modifier,
+    lineStyle: LineStyle? = null,
+    symbol: (@Composable (Point<X, Y>) -> Unit)? = null,
+    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
+) {
+    LinePlot(data, modifier, lineStyle, symbol, animationSpec)
+}
+
+/**
  * A line plot that draws a smooth, curved line that passes through each data point.
  *
  * This plot is ideal for representing continuous data sets where a visually smooth path is desired,
- * such as in signal processing or natural phenomena graphs. It differs from a standard [LinePlot2] by using
+ * such as in signal processing or natural phenomena graphs. It differs from a standard [LinePlot] by using
  * cubic Bézier curves between points instead of straight lines.
  *
  * @param X The type of the x-axis values.
@@ -150,6 +148,7 @@ public fun <X, Y> XYGraphScope<X, Y>.CubicBezierLinePlot(
  * @param symbol Composable for the symbol to be shown at each data point.
  * @param modifier Modifier for the chart.
  */
+@Deprecated("Renamed to StairstepPlot")
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot2(
     data: List<Point<X, Y>>,
@@ -160,7 +159,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot2(
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
-    StairstepPlot(data, lineStyle, modifier, { symbol?.invoke(it) }, areaStyle, areaBaseline, animationSpec)
+    StairstepPlot(data, lineStyle, modifier, symbol, areaStyle, areaBaseline, animationSpec)
 }
 
 /**
@@ -179,13 +178,12 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot2(
  * @param symbol Composable for the symbol to be shown at each data point.
  * @param modifier Modifier for the chart.
  */
-@Deprecated("Use StairstepPlot2 instead", replaceWith = ReplaceWith("StairstepPlot2"))
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     data: List<Point<X, Y>>,
     lineStyle: LineStyle,
     modifier: Modifier = Modifier,
-    symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    symbol: (@Composable (Point<X, Y>) -> Unit)? = null,
     areaStyle: AreaStyle? = null,
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
@@ -205,7 +203,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
         data,
         modifier,
         lineStyle,
-        symbol,
+        { symbol?.invoke(it) },
         areaStyle,
         areaBaseline,
         animationSpec,
@@ -243,8 +241,8 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
  * @param symbol Composable for the symbol to be shown at each data point.
  * @param modifier Modifier for the chart.
  */
+@Deprecated("Renamed to StairstepPlot")
 @Composable
-@Suppress("ktlint:compose:param-order-check")
 public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot3(
     data: List<Point<X, Y>>,
     lineStyle: LineStyle,
@@ -256,17 +254,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot3(
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
-    StairstepPlot(
-        data,
-        lineStyle,
-        levelLineStyle,
-        cap,
-        modifier,
-        { symbol?.invoke(it) },
-        areaStyle,
-        areaBaseline,
-        animationSpec,
-    )
+    StairstepPlot(data, lineStyle, levelLineStyle, modifier, cap, symbol, areaStyle, areaBaseline, animationSpec)
 }
 
 /**
@@ -288,62 +276,15 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot3(
  * @param symbol Composable for the symbol to be shown at each data point.
  * @param modifier Modifier for the chart.
  */
+@Suppress("LongMethod")
 @Composable
-@Suppress("ktlint:compose:param-order-check")
-@Deprecated("Use StairstepPlot3 instead", replaceWith = ReplaceWith("StairstepPlot3"))
-public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot2(
-    data: List<Point<X, Y>>,
-    lineStyle: LineStyle,
-    levelLineStyle: (Y) -> LineStyle,
-    cap: StrokeCap = StrokeCap.Square,
-    modifier: Modifier = Modifier,
-    symbol: @Composable ((Point<X, Y>) -> Unit)? = null,
-    areaStyle: ((Y) -> AreaStyle)? = null,
-    areaBaseline: AreaBaseline<X, Y>? = null,
-    animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
-) {
-    StairstepPlot(
-        data,
-        lineStyle,
-        levelLineStyle,
-        cap,
-        modifier,
-        { symbol?.invoke(it) },
-        areaStyle,
-        areaBaseline,
-        animationSpec,
-    )
-}
-
-/**
- * A [StairstepPlot] that differentiate [lineStyle] & [areaBaseline] at each [Y]-values based on [levelLineStyle].
- * @param X The type of the x-axis values
- * @param Y The type of the y-axis values
- * @param data Data series to plot.
- * @param lineStyle Style to use for the line that connects the data points.
- * @param levelLineStyle Style to use for emphasizing the y-axis values. (Used for line that connects same-level
- *  data points, data that have same value ([Y]) should have the same style).
- * @param cap Choose the [StrokeCap] used for level lines ending.
- * @param areaStyle Style to use for filling the area between the line and the 0-cross of the y-axis, or the
- *  y-axis value closest to 0 if the axis does not include 0. If null, no area will be drawn.
- *  [lineStyle] must also be non-null for the area to be drawn.
- * each point having the same x-axis value.
- * @param areaBaseline Baseline location for the area. Must be not be null if areaStyle and lineStyle are also not null.
- * If [areaBaseline] is an [AreaBaseline.ArbitraryLine] then the size of the line data must be equal to that of
- * [data], and their x-axis values must match.
- * @param symbol Composable for the symbol to be shown at each data point.
- * @param modifier Modifier for the chart.
- */
-@Deprecated("Use StairstepPlot2 instead", replaceWith = ReplaceWith("StairstepPlot2"))
-@Composable
-@Suppress("LongMethod", "CyclomaticComplexMethod")
 public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     data: List<Point<X, Y>>,
     lineStyle: LineStyle,
     levelLineStyle: (Y) -> LineStyle,
-    cap: StrokeCap = StrokeCap.Square,
     modifier: Modifier = Modifier,
-    symbol: @Composable (HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    cap: StrokeCap = StrokeCap.Square,
+    symbol: @Composable ((Point<X, Y>) -> Unit)? = null,
     areaStyle: ((Y) -> AreaStyle)? = null,
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
@@ -361,8 +302,6 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
             }
         }
     }
-
-    // Modified version of [GeneralLinePlot].
 
     // Animation scale factor
     val beta = remember { Animatable(0f) }
@@ -417,8 +356,6 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                                         when (areaBaseline) {
                                             is AreaBaseline.HorizontalLine -> areaBaseline.value
 
-                                            is AreaBaseline.ConstantLine -> areaBaseline.value
-
                                             is AreaBaseline.ArbitraryLine -> areaBaseline.values[i].y
 
                                             is AreaBaseline.CubicBezierLine -> error(
@@ -464,7 +401,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
                     },
                 )
             }
-            Symbols(data, symbol)
+            Symbols(data, { symbol?.invoke(it) })
         },
     ) { measurables: List<Measurable>, constraints: Constraints ->
         layout(constraints.maxWidth, constraints.maxHeight) {
@@ -488,7 +425,7 @@ internal fun <X, Y> XYGraphScope<X, Y>.GeneralLinePlot(
     data: List<Point<X, Y>>,
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
-    symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    symbol: (@Composable (Point<X, Y>) -> Unit)? = null,
     areaStyle: AreaStyle? = null,
     areaBaseline: AreaBaseline<X, Y>? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
@@ -575,14 +512,6 @@ private fun <X, Y> XYGraphScope<X, Y>.generateArea(
             }
         }
 
-        is AreaBaseline.ConstantLine -> {
-            // right edge
-            lineTo(scale(Point(data.last().x, areaBaseline.value), size))
-
-            // baseline
-            lineTo(scale(Point(data.first().x, areaBaseline.value), size))
-        }
-
         is AreaBaseline.HorizontalLine -> {
             // right edge
             lineTo(scale(Point(data.last().x, areaBaseline.value), size))
@@ -617,14 +546,14 @@ private fun DrawScope.fillRectangle(
 @Composable
 private fun <X, Y, P : Point<X, Y>> XYGraphScope<X, Y>.Symbols(
     data: List<P>,
-    symbol: (@Composable HoverableElementAreaScope.(P) -> Unit)? = null,
+    symbol: (@Composable (P) -> Unit)? = null,
 ) {
     if (symbol != null) {
         Layout(
             modifier = Modifier.fillMaxSize(),
             content = {
                 data.indices.forEach {
-                    symbol.invoke(this, data[it])
+                    symbol.invoke(data[it])
                 }
             },
         ) { measurables: List<Measurable>, constraints: Constraints ->

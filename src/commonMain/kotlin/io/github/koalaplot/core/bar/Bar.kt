@@ -20,8 +20,6 @@ import io.github.koalaplot.core.xygraph.XYGraphScope
  * @param brush The brush to paint the bar with
  * @param shape An optional shape for the bar.
  * @param border An optional border for the bar.
- * @param hoverElement An optional Composable to be displayed over the bar when hovered over by the
- * mouse or pointer.
  */
 @Composable
 public fun BarScope.DefaultBar(
@@ -29,15 +27,13 @@ public fun BarScope.DefaultBar(
     modifier: Modifier = Modifier,
     shape: Shape = RectangleShape,
     border: BorderStroke? = null,
-    hoverElement: @Composable () -> Unit = {},
 ) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .then(if (border != null) Modifier.border(border, shape) else Modifier)
             .background(brush = brush, shape = shape)
-            .clip(shape)
-            .hoverableElement(hoverElement),
+            .clip(shape),
     )
 }
 
@@ -52,19 +48,6 @@ public fun BarScope.DefaultBar(
 ) {
     DefaultBar(SolidColor(color), shape = shape, border = border)
 }
-
-/**
- * Factory function to create a Composable that emits a solid colored bar.
- */
-@Deprecated(
-    message = "Delegates to vertical solid bar. Use explicitly dedicated factory function.",
-    replaceWith = ReplaceWith("verticalSolidBar(color, shape, border)"),
-)
-public fun <X, Y> solidBar(
-    color: Color,
-    shape: Shape = RectangleShape,
-    border: BorderStroke? = null,
-): DefaultVerticalBarComposable<X, Y> = verticalSolidBar(color, shape, border)
 
 /**
  * Factory function to create a Composable that emits a solid colored bar.

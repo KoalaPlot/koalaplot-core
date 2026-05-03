@@ -9,11 +9,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Update dependencies: Compose 1.10.3, kotlin 2.3.20
+- Updated dependencies: Compose 1.10.3, Kotlin 2.3.20.
+- Restored original names for several components by updating their signatures to match their "v2" (or "v3") counterparts and deprecating the numbered versions. This includes `AreaPlot`, `ColumnLegend`, `FlowLegend`, `LinePlot`, `PolarPlotSeries`, `StairstepPlot`, and `VerticalBarPlot`.
+- `BarScope` and `PieSliceScope` interfaces no longer extend `HoverableElementAreaScope`.
 
 ### Removed
 
-- iosX64 build target due to JetBrains' plans to deprecate all x86_64 Apple targets.
+- `iosX64` build target.
+- `HoverableElementAreaScope` and its usage in deprecated functions.
+- `AreaBaseline.ConstantLine` (replaced by `HorizontalLine`).
+- `DiamondIndicator` (replaced by `DiamondIndicatorDp`).
+- `Symbol` overload with `Modifier` as its first parameter.
+- `LineIndicator`, `HorizontalBarPlot`, and `PolarGraph` overloads with non-standard parameter orders (to align with Compose API guidelines).
+- `io.github.koalaplot.core.style.Axis.tickPosition` property.
+- `PolarGraphDefaults.PolarGraphPropertyDefaults`.
+- `hoverElement` parameter from `PieSliceScope` (`BiConvexSlice`, `ConcaveConvexSlice`, `DefaultSlice`) and `BarScope.DefaultBar`.
 
 ## [0.11.1]
 

@@ -67,35 +67,6 @@ public fun Symbol(
  */
 @ExperimentalKoalaPlotApi
 @Composable
-@Deprecated(
-    "Use Symbol with sizeFraction as first parameter.",
-    replaceWith = ReplaceWith("Symbol(sizeFraction, modifier, shape, fillBrush, outlineBrush, outlineStroke, alpha"),
-)
-public fun Symbol(
-    modifier: Modifier = Modifier,
-    shape: Shape = RectangleShape,
-    sizeFraction: Float,
-    fillBrush: Brush? = null,
-    outlineBrush: Brush? = null,
-    outlineStroke: Stroke = Stroke(),
-    alpha: Float = 1.0f,
-) {
-    BoxWithConstraints {
-        val size = if (maxHeight > maxWidth) {
-            maxHeight
-        } else {
-            maxWidth
-        } * sizeFraction
-
-        Symbol(modifier, shape, size, fillBrush, outlineBrush, outlineStroke, alpha)
-    }
-}
-
-/**
- * Draws a [Symbol] where [size] is specified as a fraction of the maximum incoming constraint dimension.
- */
-@ExperimentalKoalaPlotApi
-@Composable
 public fun Symbol(
     sizeFraction: Float,
     modifier: Modifier = Modifier,

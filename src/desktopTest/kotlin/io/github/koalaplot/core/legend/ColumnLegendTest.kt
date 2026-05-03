@@ -14,7 +14,7 @@ class ColumnLegendTest {
     @Test
     fun basicColumnLegendTest() {
         composeTestRule.setContent {
-            ColumnLegend2(5)
+            ColumnLegend(5)
         }
     }
 }

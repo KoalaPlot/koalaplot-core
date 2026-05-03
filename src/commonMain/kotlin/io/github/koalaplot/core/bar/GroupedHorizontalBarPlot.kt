@@ -51,7 +51,7 @@ public fun <X, Y, E : BarPlotGroupedPointEntry<Y, X>> XYGraphScope<X, Y>.Grouped
     require(startAnimationUseCase.animatables.size == 1) { "startAnimationUseCase must have one animatable" }
     if (data.isEmpty()) return
 
-    val barScope = remember { BarScopeImpl(this) }
+    val barScope = remember { BarScopeImpl() }
 
     // Animation scale factor
     val beta = remember(data) { startAnimationUseCase.animatables[0] }

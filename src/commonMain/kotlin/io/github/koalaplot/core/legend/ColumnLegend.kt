@@ -24,20 +24,20 @@ private const val ColumnLegendColumns = 3
  * Each row of the legend consists of a symbol, label, and value.
  */
 @Deprecated(
-    "Use ColumnLegend2 with modifier as first default parameter instead.",
-    replaceWith = ReplaceWith("ColumnLegend2(itemCount, modifier, symbol, label, value, rowGap, columnGap)"),
+    "Use ColumnLegend instead.",
+    replaceWith = ReplaceWith("ColumnLegend(itemCount, modifier, symbol, label, value, rowGap, columnGap)"),
 )
 @Composable
-public fun ColumnLegend(
+public fun ColumnLegend2(
     itemCount: Int,
+    modifier: Modifier = Modifier,
     symbol: @Composable LegendScope.(item: Int) -> Unit = {},
     label: @Composable LegendScope.(item: Int) -> Unit = {},
     value: @Composable LegendScope.(item: Int) -> Unit = {},
     rowGap: Dp = KoalaPlotTheme.sizes.gap,
     columnGap: Dp = KoalaPlotTheme.sizes.gap,
-    modifier: Modifier = Modifier,
 ) {
-    ColumnLegend2(itemCount, modifier, symbol, label, value, rowGap, columnGap)
+    ColumnLegend(itemCount, modifier, symbol, label, value, rowGap, columnGap)
 }
 
 /**
@@ -45,7 +45,7 @@ public fun ColumnLegend(
  * Each row of the legend consists of a symbol, label, and value.
  */
 @Composable
-public fun ColumnLegend2(
+public fun ColumnLegend(
     itemCount: Int,
     modifier: Modifier = Modifier,
     symbol: @Composable LegendScope.(item: Int) -> Unit = {},

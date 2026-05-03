@@ -7,11 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -20,7 +16,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.PointerEvent
-import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.MeasureResult
@@ -32,14 +27,9 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
 import io.github.koalaplot.core.gestures.GestureConfig
-import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.Deg2Rad
-import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.util.HoverableElementArea
-import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.util.Vector
 import io.github.koalaplot.core.util.length
 import io.github.koalaplot.core.util.lineDistance
@@ -94,119 +84,116 @@ public fun <X, Y> XYGraph(
     onPointerEvent: (XYGraphPointerEventScope<X, Y>.(PointerEvent) -> Unit)? = null,
     content: @Composable XYGraphScope<X, Y>.() -> Unit,
 ) {
-    HoverableElementArea(modifier = modifier) {
-        SubcomposeLayout { constraints ->
-            val xAxisTitleMeasurable =
-                subcompose("xaxistitle") {
-                    Box(modifier = Modifier.fillMaxWidth()) { xAxisContent.title() }
-                }[0]
+    SubcomposeLayout(modifier) { constraints ->
+        val xAxisTitleMeasurable =
+            subcompose("xaxistitle") {
+                Box(modifier = Modifier.fillMaxWidth()) { xAxisContent.title() }
+            }[0]
 
-            val yAxisTitleMeasurable =
-                subcompose("yaxistitle") {
-                    Box(modifier = Modifier.fillMaxHeight()) { yAxisContent.title() }
-                }[0]
+        val yAxisTitleMeasurable =
+            subcompose("yaxistitle") {
+                Box(modifier = Modifier.fillMaxHeight()) { yAxisContent.title() }
+            }[0]
 
-            // Computing the tick values isn't exact because composables can't be measured twice
-            // and there's no way to compute the height/width of the axis tick labels before knowing
-            // how many tick labels there should be. So we leave them out of the calculation for
-            // the axis length constraints, meaning the actual min distance of the axis tick labels
-            // may be closer than specified because the actual axis lengths computed later, which
-            // take into account the axis label sizes, will be smaller than the lengths computed here.
-            val xAxis =
-                AxisDelegate.createHorizontalAxis(
-                    xAxisModel,
-                    xAxisContent.style,
-                    (constraints.maxWidth - -yAxisTitleMeasurable.maxIntrinsicWidth(constraints.maxHeight)).toDp(),
-                )
+        // Computing the tick values isn't exact because composables can't be measured twice
+        // and there's no way to compute the height/width of the axis tick labels before knowing
+        // how many tick labels there should be. So we leave them out of the calculation for
+        // the axis length constraints, meaning the actual min distance of the axis tick labels
+        // may be closer than specified because the actual axis lengths computed later, which
+        // take into account the axis label sizes, will be smaller than the lengths computed here.
+        val xAxis =
+            AxisDelegate.createHorizontalAxis(
+                xAxisModel,
+                xAxisContent.style,
+                (constraints.maxWidth - -yAxisTitleMeasurable.maxIntrinsicWidth(constraints.maxHeight)).toDp(),
+            )
 
-            val yAxis =
-                AxisDelegate.createVerticalAxis(
-                    yAxisModel,
-                    yAxisContent.style,
-                    (constraints.maxHeight - -xAxisTitleMeasurable.maxIntrinsicHeight(constraints.maxWidth)).toDp(),
-                )
+        val yAxis =
+            AxisDelegate.createVerticalAxis(
+                yAxisModel,
+                yAxisContent.style,
+                (constraints.maxHeight - -xAxisTitleMeasurable.maxIntrinsicHeight(constraints.maxWidth)).toDp(),
+            )
 
-            val xAxisMeasurable = subcompose("xaxis") { Axis(xAxis) }[0]
-            val yAxisMeasurable = subcompose("yaxis") { Axis(yAxis) }[0]
+        val xAxisMeasurable = subcompose("xaxis") { Axis(xAxis) }[0]
+        val yAxisMeasurable = subcompose("yaxis") { Axis(yAxis) }[0]
 
-            val chartMeasurable =
-                subcompose("chart") {
-                    val panZoomModifier =
-                        if (gestureConfig.gesturesEnabled) {
-                            Modifier.onGestureInput(
-                                key1 = xAxisModel,
-                                key2 = yAxisModel,
-                                gestureConfig = gestureConfig,
-                                onZoomChange = { size, centroid, zoom ->
-                                    val normalizedCentroid = centroid.normalizeCentroid(size)
-                                    zoomAxis(xAxisModel, size.width, normalizedCentroid.x, zoom.x)
-                                    zoomAxis(yAxisModel, size.height, normalizedCentroid.y, zoom.y)
-                                },
-                                onPanChange = { size, pan ->
-                                    val normalizedPan = pan.normalizePan()
-                                    val xPanChanged = panAxis(xAxisModel, size.width, normalizedPan.x)
-                                    val yPanChanged = panAxis(yAxisModel, size.height, normalizedPan.y)
+        val chartMeasurable =
+            subcompose("chart") {
+                val panZoomModifier =
+                    if (gestureConfig.gesturesEnabled) {
+                        Modifier.onGestureInput(
+                            key1 = xAxisModel,
+                            key2 = yAxisModel,
+                            gestureConfig = gestureConfig,
+                            onZoomChange = { size, centroid, zoom ->
+                                val normalizedCentroid = centroid.normalizeCentroid(size)
+                                zoomAxis(xAxisModel, size.width, normalizedCentroid.x, zoom.x)
+                                zoomAxis(yAxisModel, size.height, normalizedCentroid.y, zoom.y)
+                            },
+                            onPanChange = { size, pan ->
+                                val normalizedPan = pan.normalizePan()
+                                val xPanChanged = panAxis(xAxisModel, size.width, normalizedPan.x)
+                                val yPanChanged = panAxis(yAxisModel, size.height, normalizedPan.y)
 
-                                    val allowXPanConsumption =
-                                        xPanChanged && gestureConfig.panXConsumptionEnabled
-                                    val allowYPanConsumption =
-                                        yPanChanged && gestureConfig.panYConsumptionEnabled
+                                val allowXPanConsumption =
+                                    xPanChanged && gestureConfig.panXConsumptionEnabled
+                                val allowYPanConsumption =
+                                    yPanChanged && gestureConfig.panYConsumptionEnabled
 
-                                    return@onGestureInput allowXPanConsumption || allowYPanConsumption
-                                },
-                            )
-                        } else {
-                            Modifier
-                        }
-
-                    Box(
-                        modifier =
-                            Modifier
-                                .clip(RectangleShape)
-                                .then(panZoomModifier)
-                                .onPointerMove(xAxisModel, yAxisModel, onPointerEvent),
-                    ) {
-                        val chartScope =
-                            XYGraphScopeImpl(
-                                xAxisModel,
-                                yAxisModel,
-                                xAxis,
-                                yAxis,
-                                this@HoverableElementArea,
-                            )
-                        chartScope.content()
+                                return@onGestureInput allowXPanConsumption || allowYPanConsumption
+                            },
+                        )
+                    } else {
+                        Modifier
                     }
-                }[0]
 
-            val gridMeasurable = subcompose("grid") {
-                Grid(
-                    xAxis,
-                    yAxis,
-                    gridStyle.horizontalMajorStyle,
-                    gridStyle.horizontalMinorStyle,
-                    gridStyle.verticalMajorStyle,
-                    gridStyle.verticalMinorStyle,
-                )
-            }
+                Box(
+                    modifier =
+                        Modifier
+                            .clip(RectangleShape)
+                            .then(panZoomModifier)
+                            .onPointerMove(xAxisModel, yAxisModel, onPointerEvent),
+                ) {
+                    val chartScope =
+                        XYGraphScopeImpl(
+                            xAxisModel,
+                            yAxisModel,
+                            xAxis,
+                            yAxis,
+                        )
+                    chartScope.content()
+                }
+            }[0]
 
-            val xAxisLabelMeasurables = axisLabels("xAxisLabels", xAxis, xAxisContent)
-            val yAxisLabelMeasurables = axisLabels("yAxisLabels", yAxis, yAxisContent)
+        val gridMeasurable = subcompose("grid") {
+            Grid(
+                xAxis,
+                yAxis,
+                gridStyle.horizontalMajorStyle,
+                gridStyle.horizontalMinorStyle,
+                gridStyle.verticalMajorStyle,
+                gridStyle.verticalMinorStyle,
+            )
+        }
 
-            val measurablesMap =
-                Measurables(
-                    gridMeasurable[0],
-                    chartMeasurable,
-                    xAxisMeasurable,
-                    xAxisLabelMeasurables,
-                    xAxisTitleMeasurable,
-                    yAxisMeasurable,
-                    yAxisLabelMeasurables,
-                    yAxisTitleMeasurable,
-                )
+        val xAxisLabelMeasurables = axisLabels("xAxisLabels", xAxis, xAxisContent)
+        val yAxisLabelMeasurables = axisLabels("yAxisLabels", yAxis, yAxisContent)
 
-            with(XYAxisMeasurePolicy(xAxis, yAxis)) {
-                measure(measurablesMap, constraints)
-            }
+        val measurablesMap =
+            Measurables(
+                gridMeasurable[0],
+                chartMeasurable,
+                xAxisMeasurable,
+                xAxisLabelMeasurables,
+                xAxisTitleMeasurable,
+                yAxisMeasurable,
+                yAxisLabelMeasurables,
+                yAxisTitleMeasurable,
+            )
+
+        with(XYAxisMeasurePolicy(xAxis, yAxis)) {
+            measure(measurablesMap, constraints)
         }
     }
 }
@@ -224,109 +211,6 @@ private fun <T> SubcomposeMeasureScope.axisLabels(
                 }
             }
         }.flatten()
-}
-
-/**
- * Provides a set of X-Y axes and grid for displaying X-Y plots.
- *
- * @param X The data type for the x-axis
- * @param Y The data type for the y-axis
- * @param xAxisModel x-axis state controlling the display of the axis and coordinate transformation
- * @param yAxisModel y-axis state controlling the display of the axis and coordinate transformation
- * @param xAxisStyle Style for the x-axis
- * @param xAxisLabels Composable to display labels for specific x-axis values
- * @param xAxisTitle Title for the X-axis
- * @param yAxisStyle Style for the y-axis
- * @param yAxisLabels Composable to display labels for specific y-axis values
- * @param yAxisTitle Title for the y-axis
- * @param gestureConfig Configuration for gesture handling. See [GestureConfig]
- * @param onPointerMove Callback invoked when the pointer moves with the current pointer position in plot coordinates
- * @param content The content to be displayed, which should include one plot for each series to be
- * plotted on this XYGraph.
- */
-@Suppress("LongMethod") // expected
-@Deprecated(
-    "Use the overload that accepts AxisContent and GridStyle objects instead.",
-    replaceWith =
-        ReplaceWith(
-            """XYGraph(
-        xAxisModel = xAxisModel,
-        yAxisModel = yAxisModel,
-        modifier = modifier,
-        xAxisContent = AxisContent(
-            style = xAxisStyle,
-            labels = { xAxisLabels(it) },
-            title = xAxisTitle,
-        ),
-        yAxisContent = AxisContent(
-            style = yAxisStyle,
-            labels = { yAxisLabels(it) },
-            title = yAxisTitle,
-        ),
-        gridStyle = GridStyle(
-            horizontalMajorStyle = horizontalMajorGridLineStyle,
-            horizontalMinorStyle = horizontalMinorGridLineStyle,
-            verticalMajorStyle = verticalMajorGridLineStyle,
-            verticalMinorStyle = verticalMinorGridLineStyle,
-        ),
-        gestureConfig = gestureConfig,
-        onPointerMove = onPointerMove,
-        content = content,
-    )""",
-        ),
-    level = DeprecationLevel.WARNING,
-)
-@Composable
-public fun <X, Y> XYGraph(
-    xAxisModel: AxisModel<X>,
-    yAxisModel: AxisModel<Y>,
-    modifier: Modifier = Modifier,
-    xAxisStyle: AxisStyle = rememberAxisStyle(),
-    xAxisLabels: @Composable (X) -> Unit = {},
-    xAxisTitle: @Composable () -> Unit = {},
-    yAxisStyle: AxisStyle = rememberAxisStyle(),
-    yAxisLabels: @Composable (Y) -> Unit = {},
-    yAxisTitle: @Composable () -> Unit = {},
-    horizontalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
-    horizontalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
-    verticalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
-    verticalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
-    gestureConfig: GestureConfig = GestureConfig(),
-    onPointerMove: ((X, Y) -> Unit)? = null,
-    content: @Composable XYGraphScope<X, Y>.() -> Unit,
-) {
-    XYGraph(
-        xAxisModel = xAxisModel,
-        yAxisModel = yAxisModel,
-        modifier = modifier,
-        xAxisContent =
-            AxisContent(
-                style = xAxisStyle,
-                labels = @Composable { xAxisLabels(it) },
-                title = xAxisTitle,
-            ),
-        yAxisContent =
-            AxisContent(
-                style = yAxisStyle,
-                labels = @Composable { yAxisLabels(it) },
-                title = yAxisTitle,
-            ),
-        gridStyle =
-            GridStyle(
-                horizontalMajorStyle = horizontalMajorGridLineStyle,
-                horizontalMinorStyle = horizontalMinorGridLineStyle,
-                verticalMajorStyle = verticalMajorGridLineStyle,
-                verticalMinorStyle = verticalMinorGridLineStyle,
-            ),
-        gestureConfig = gestureConfig,
-        onPointerEvent = {
-            if (it.type == PointerEventType.Move) {
-                val p = scale(it.changes.last().position)
-                onPointerMove?.invoke(p.x, p.y)
-            }
-        },
-        content = content,
-    )
 }
 
 /**
@@ -718,7 +602,7 @@ private class XYAxisMeasurePolicy<X, Y>(
 /**
  * A scope for XY plots providing axis and state context.
  */
-public interface XYGraphScope<X, Y> : HoverableElementAreaScope {
+public interface XYGraphScope<X, Y> {
     public val xAxisModel: AxisModel<X>
     public val yAxisModel: AxisModel<Y>
     public val xAxisState: AxisState
@@ -741,9 +625,7 @@ private class XYGraphScopeImpl<X, Y>(
     override val yAxisModel: AxisModel<Y>,
     override val xAxisState: AxisState,
     override val yAxisState: AxisState,
-    val hoverableElementAreaScope: HoverableElementAreaScope,
-) : XYGraphScope<X, Y>,
-    HoverableElementAreaScope by hoverableElementAreaScope
+) : XYGraphScope<X, Y>
 
 @Composable
 private fun Grid(
@@ -832,135 +714,4 @@ private fun DrawScope.drawGridLine(
             )
         }
     }
-}
-
-/**
- * An XYGraph overload that takes Strings for axis labels and titles instead of Composables for use cases where
- * custom styling is not required.
- *
- * Provides a set of X-Y axes and grid for displaying an X-Y plot.
- *
- * @param X The data type for the x-axis
- * @param Y The data type for the y-axis
- * @param xAxisModel x-axis state controlling the display of the axis and coordinate transformation
- * @param yAxisModel y-axis state controlling the display of the axis and coordinate transformation
- * @param xAxisStyle Style for the x-axis
- * @param xAxisLabels String factory of x-axis label Strings
- * @param xAxisTitle Title for the X-axis
- * @param yAxisStyle Style for the y-axis
- * @param yAxisLabels String factory of y-axis label Strings
- * @param yAxisTitle Title for the y-axis
- * @param gestureConfig Configuration for gesture handling. See [GestureConfig]
- * @param onPointerMove Callback invoked when the pointer moves with the current pointer position in plot coordinates
- * @param content The content to be displayed within this graph, which should include one plot for each
- * data series to be plotted.
- */
-@ExperimentalKoalaPlotApi
-@Deprecated(
-    "This overload is deprecated. Call the primary XYGraph function and use the" +
-        " rememberXAxisContent() and rememberYAxisContent() helpers.",
-    replaceWith =
-        ReplaceWith(
-            """XYGraph(
-        xAxisModel = xAxisModel,
-        yAxisModel = yAxisModel,
-        modifier = modifier,
-        xAxisContent = rememberStringAxisContent(label = xAxisLabels, title = xAxisTitle, style = xAxisStyle),
-        yAxisContent = rememberStringAxisContent(label = yAxisLabels, title = yAxisTitle, style = yAxisStyle),
-        gridStyle = GridStyle(
-            horizontalMajorStyle = horizontalMajorGridLineStyle,
-            horizontalMinorStyle = horizontalMinorGridLineStyle,
-            verticalMajorStyle = verticalMajorGridLineStyle,
-            verticalMinorStyle = verticalMinorGridLineStyle
-        ),
-        gestureConfig = gestureConfig,
-        onPointerMove = onPointerMove,
-        content = content
-    )""",
-        ),
-    level = DeprecationLevel.WARNING,
-)
-@Composable
-public fun <X, Y> XYGraph(
-    xAxisModel: AxisModel<X>,
-    yAxisModel: AxisModel<Y>,
-    modifier: Modifier = Modifier,
-    xAxisStyle: AxisStyle = rememberAxisStyle(),
-    xAxisLabels: (X) -> String = { it.toString() },
-    xAxisTitle: String? = null,
-    yAxisStyle: AxisStyle = rememberAxisStyle(),
-    yAxisLabels: (Y) -> String = { it.toString() },
-    yAxisTitle: String? = null,
-    horizontalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
-    horizontalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
-    verticalMajorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.majorGridlineStyle,
-    verticalMinorGridLineStyle: LineStyle? = KoalaPlotTheme.axis.minorGridlineStyle,
-    gestureConfig: GestureConfig = GestureConfig(),
-    onPointerMove: ((X, Y) -> Unit)? = null,
-    content: @Composable XYGraphScope<X, Y>.() -> Unit,
-) {
-    XYGraph(
-        xAxisModel = xAxisModel,
-        yAxisModel = yAxisModel,
-        modifier = modifier,
-        xAxisContent = AxisContent(
-            style = xAxisStyle,
-            labels = {
-                Text(
-                    xAxisLabels(it),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(2.dp),
-                )
-            },
-            title = {
-                if (xAxisTitle != null) {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text(
-                            xAxisTitle,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
-                }
-            },
-        ),
-        yAxisContent = AxisContent(
-            style = yAxisStyle,
-            labels = {
-                Text(
-                    yAxisLabels(it),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(2.dp),
-                )
-            },
-            title = {
-                if (yAxisTitle != null) {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text(
-                            yAxisTitle,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
-                }
-            },
-        ),
-        gridStyle =
-            GridStyle(
-                horizontalMajorStyle = horizontalMajorGridLineStyle,
-                horizontalMinorStyle = horizontalMinorGridLineStyle,
-                verticalMajorStyle = verticalMajorGridLineStyle,
-                verticalMinorStyle = verticalMinorGridLineStyle,
-            ),
-        gestureConfig = gestureConfig,
-        onPointerEvent = {
-            if (it.type == PointerEventType.Move) {
-                val p = scale(it.changes.last().position)
-                onPointerMove?.invoke(p.x, p.y)
-            }
-        },
-        content = content,
-    )
 }

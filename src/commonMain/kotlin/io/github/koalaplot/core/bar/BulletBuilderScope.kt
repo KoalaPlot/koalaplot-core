@@ -262,21 +262,6 @@ public class BulletBuilderScope<T>(
  */
 @ExperimentalKoalaPlotApi
 @Composable
-@Deprecated("Use DiamondIndicatorDp instead", replaceWith = ReplaceWith("DiamondIndicatorDp"))
-public fun DiamondIndicator(
-    color: Color = MaterialTheme.colorScheme.primary,
-    size: Dp,
-) {
-    Symbol(shape = DiamondShape, size = size, fillBrush = SolidColor(color))
-}
-
-/**
- * A diamond-shaped indicator that may be used as a feature marker.
- * @param color The color for the marker
- * @param size The size for the marker in Dp
- */
-@ExperimentalKoalaPlotApi
-@Composable
 public fun DiamondIndicatorDp(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
@@ -297,25 +282,6 @@ public fun DiamondIndicator(
     sizeFraction: Float = DefaultSizeFraction,
 ) {
     Symbol(sizeFraction, shape = DiamondShape, fillBrush = SolidColor(color))
-}
-
-/**
- * A line for comparative measure indicators.
- * @param heightFraction The fraction of the overall bullet graph bar area height for the extent of the line
- * @param width The thickness of the line, defaults to 2.dp
- */
-@Deprecated(
-    "Use LineIndicator with a modifier parameter instead",
-    replaceWith = ReplaceWith("LineIndicator(modifier, color, heightFraction, width)"),
-)
-@ExperimentalKoalaPlotApi
-@Composable
-public fun LineIndicator(
-    color: Color = MaterialTheme.colorScheme.primary,
-    heightFraction: Float = DefaultSizeFraction,
-    width: Dp = 2.dp,
-) {
-    LineIndicator(modifier = Modifier, color = color, heightFraction = heightFraction, width = width)
 }
 
 /**

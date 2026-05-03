@@ -58,8 +58,6 @@ import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.AngularValue
 import io.github.koalaplot.core.util.DegreesFullCircle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.util.HoverableElementArea
-import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.util.circumscribedSquareSize
 import io.github.koalaplot.core.util.deg
 import io.github.koalaplot.core.util.generateHueColorPalette
@@ -122,7 +120,7 @@ private fun makePieSliceData(
  * @property outerRadius The outside radius of the slice, as a fraction of its constraint's width,
  * must be between 0 and 1 inclusive
  */
-public interface PieSliceScope : HoverableElementAreaScope {
+public interface PieSliceScope {
     public val pieSliceData: PieSliceData
     public val innerRadius: Float
     public val outerRadius: Float
@@ -132,9 +130,7 @@ private data class PieSliceScopeImpl(
     override val pieSliceData: PieSliceData,
     override val innerRadius: Float,
     override val outerRadius: Float,
-    val hoverableElementAreaScope: HoverableElementAreaScope,
-) : PieSliceScope,
-    HoverableElementAreaScope by hoverableElementAreaScope
+) : PieSliceScope
 
 /**
  * The LabelConnectorScope provides geometry information to LabelConnector implementations so they
@@ -328,82 +324,80 @@ public fun PieChart(
         derivedStateOf { makePieSliceData(currentValues, 1f, pieStartAngle, pieExtendAngle) }
     }
 
-    HoverableElementArea(modifier = modifier) {
-        SubcomposeLayout(modifier = Modifier.clipToBounds()) { constraints ->
-            val pieMeasurePolicy =
-                PieMeasurePolicy(finalPieSliceData, holeSize, labelPositionProvider, InitOuterRadius, forceCenteredPie)
+    SubcomposeLayout(modifier = modifier.clipToBounds()) { constraints ->
+        val pieMeasurePolicy =
+            PieMeasurePolicy(finalPieSliceData, holeSize, labelPositionProvider, InitOuterRadius, forceCenteredPie)
 
-            val pieMeasurable = subcompose("pie") { Pie(pieSliceData, slice, holeSize) }[0]
-            val labelMeasurables = pieSliceData.indices.flatMapIndexed { index, _ ->
-                subcompose("label $index") {
-                    // Wrapping in box ensures there is 1 measurable element
-                    // emitted per label & applies fade animation
-                    Box(modifier = Modifier.alpha(labelAlpha.value)) {
-                        if (index < pieSliceData.size) {
-                            label(index)
-                        }
+        val pieMeasurable = subcompose("pie") { Pie(pieSliceData, slice, holeSize) }[0]
+        val labelMeasurables = pieSliceData.indices.flatMapIndexed { index, _ ->
+            subcompose("label $index") {
+                // Wrapping in box ensures there is 1 measurable element
+                // emitted per label & applies fade animation
+                Box(modifier = Modifier.alpha(labelAlpha.value)) {
+                    if (index < pieSliceData.size) {
+                        label(index)
                     }
                 }
             }
+        }
 
-            val (pieDiameter, piePlaceable, labelPlaceables) = pieMeasurePolicy.measure(
-                pieMeasurable,
-                labelMeasurables,
-                constraints,
-                minPieDiameter.toPx(),
-                maxPieDiameter.toPx(),
+        val (pieDiameter, piePlaceable, labelPlaceables) = pieMeasurePolicy.measure(
+            pieMeasurable,
+            labelMeasurables,
+            constraints,
+            minPieDiameter.toPx(),
+            maxPieDiameter.toPx(),
+        )
+
+        val labelPositions =
+            labelPositionProvider.computeLabelPositions(
+                pieDiameter * InitOuterRadius,
+                holeSize,
+                labelPlaceables,
+                finalPieSliceData,
             )
 
-            val labelPositions =
-                labelPositionProvider.computeLabelPositions(
-                    pieDiameter * InitOuterRadius,
-                    holeSize,
-                    labelPlaceables,
-                    finalPieSliceData,
-                )
+        val size = pieMeasurePolicy.computeSize(labelPlaceables, labelPositions, pieDiameter).run {
+            // add one due to later float to int conversion dropping the fraction part
+            copy(
+                (width + 1).coerceAtMost(constraints.maxWidth.toFloat()),
+                (height + 1).coerceAtMost(constraints.maxHeight.toFloat()),
+            )
+        }
 
-            val size = pieMeasurePolicy.computeSize(labelPlaceables, labelPositions, pieDiameter).run {
-                // add one due to later float to int conversion dropping the fraction part
-                copy(
-                    (width + 1).coerceAtMost(constraints.maxWidth.toFloat()),
-                    (height + 1).coerceAtMost(constraints.maxHeight.toFloat()),
-                )
+        val labelConnectorTranslations = pieMeasurePolicy.computeLabelConnectorScopes(labelPositions, pieDiameter)
+
+        val holeDiameter = (pieDiameter * holeSize)
+        val holeSafeEdgeLength = circumscribedSquareSize(holeDiameter)
+        val holePlaceable = subcompose("hole") {
+            Box(modifier = Modifier.clip(CircleShape)) {
+                holeContent(PaddingValues(((holeDiameter - holeSafeEdgeLength) / 2.0f).toDp()))
             }
+        }[0].measure(Constraints.fixed(holeDiameter.toInt(), holeDiameter.toInt()))
 
-            val labelConnectorTranslations = pieMeasurePolicy.computeLabelConnectorScopes(labelPositions, pieDiameter)
-
-            val holeDiameter = (pieDiameter * holeSize)
-            val holeSafeEdgeLength = circumscribedSquareSize(holeDiameter)
-            val holePlaceable = subcompose("hole") {
-                Box(modifier = Modifier.clip(CircleShape)) {
-                    holeContent(PaddingValues(((holeDiameter - holeSafeEdgeLength) / 2.0f).toDp()))
-                }
-            }[0].measure(Constraints.fixed(holeDiameter.toInt(), holeDiameter.toInt()))
-
-            val connectorPlaceables = pieSliceData
-                .mapIndexed { index, _ ->
-                    subcompose("connector $index") {
-                        Box(modifier = Modifier.fillMaxSize().alpha(labelAlpha.value)) {
-                            labelConnectorTranslations[index]?.let {
-                                with(it.second) {
-                                    if (index < pieSliceData.size) {
-                                        labelConnector(index)
-                                    }
+        val connectorPlaceables = pieSliceData
+            .mapIndexed { index, _ ->
+                subcompose("connector $index") {
+                    Box(modifier = Modifier.fillMaxSize().alpha(labelAlpha.value)) {
+                        labelConnectorTranslations[index]?.let {
+                            with(it.second) {
+                                if (index < pieSliceData.size) {
+                                    labelConnector(index)
                                 }
                             }
                         }
-                    }.map { it.measure(constraints) }
-                }.flatten()
+                    }
+                }.map { it.measure(constraints) }
+            }.flatten()
 
-            with(pieMeasurePolicy) {
-                layoutPie(
-                    size,
-                    labelPositions,
-                    labelConnectorTranslations.map { it?.first },
-                    pieDiameter,
-                    PieMeasurePolicy.PiePlaceables(piePlaceable, holePlaceable, labelPlaceables, connectorPlaceables),
-                )
-            }
+        with(pieMeasurePolicy) {
+            layoutPie(
+                size,
+                labelPositions,
+                labelConnectorTranslations.map { it?.first },
+                pieDiameter,
+                PieMeasurePolicy.PiePlaceables(piePlaceable, holePlaceable, labelPlaceables, connectorPlaceables),
+            )
         }
     }
 }
@@ -544,7 +538,7 @@ public fun PieChart(
 }
 
 @Composable
-private fun HoverableElementAreaScope.Pie(
+private fun Pie(
     internalPieData: List<PieSliceData>,
     slice: @Composable PieSliceScope.(Int) -> Unit,
     holeSize: Float,
@@ -557,7 +551,6 @@ private fun HoverableElementAreaScope.Pie(
                         sliceData,
                         holeSize,
                         InitOuterRadius,
-                        this@Pie,
                     ),
                 )
             }
@@ -598,7 +591,6 @@ private fun HoverableElementAreaScope.Pie(
  * @param hoverExpandFactor Amount the slice expands when hovered. 1 is no expansion, values greater
  * than 1 expand outward from the pie, and values less than 1 shrink. If expansion on hover is
  * desired, a good starting value is 1.05.
- * @param hoverElement Content to show when the mouse/pointer hovers over the slice
  * @param clickable If clicking should be enabled.
  * @param antiAlias Set to true if the slice should be drawn with anti-aliasing, false otherwise
  * @param gap Specifies the gap between slices. It is the angular distance, in degrees, between the
@@ -612,7 +604,6 @@ public fun PieSliceScope.DefaultSlice(
     modifier: Modifier = Modifier,
     border: BorderStroke? = null,
     hoverExpandFactor: Float = 1.0f,
-    hoverElement: @Composable () -> Unit = {},
     clickable: Boolean = false,
     antiAlias: Boolean = false,
     gap: Float = 0.0f,
@@ -691,8 +682,7 @@ public fun PieSliceScope.DefaultSlice(
                 } else {
                     Modifier
                 },
-            ).hoverableElement(hoverElement)
-            .hoverable(interactionSource),
+            ).hoverable(interactionSource),
     ) {}
 }
 

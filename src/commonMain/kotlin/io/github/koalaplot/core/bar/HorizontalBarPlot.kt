@@ -184,36 +184,6 @@ internal class GroupedEntryToHorizontalEntryAdapter<X, Y>(
  * @param content A block which describes the content for the plot.
  */
 @Composable
-@Deprecated(
-    "Use HorizontalBarPlot with modifier as first parameter instead.",
-    replaceWith = ReplaceWith(
-        "HorizontalBarPlot(modifier, defaultBar, barWidth, startAnimationUseCase, content)",
-    ),
-)
-public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
-    defaultBar: DefaultHorizontalBarComposable<X, Y> = horizontalSolidBar(Color.Blue),
-    modifier: Modifier = Modifier,
-    barWidth: Float = 0.9f,
-    startAnimationUseCase: StartAnimationUseCase =
-        StartAnimationUseCase(
-            executionType = StartAnimationUseCase.ExecutionType.Default,
-            // chart animation
-            KoalaPlotTheme.animationSpec,
-        ),
-    content: HorizontalBarPlotScope<X, Y>.() -> Unit,
-) {
-    HorizontalBarPlot(modifier, defaultBar, barWidth, startAnimationUseCase, content)
-}
-
-/**
- * Creates a Horizontal Bar Plot.
- *
- * @param defaultBar A Composable to provide the bar if not specified on an individually added item.
- * @param barWidth The fraction of space between adjacent x-axis bars that may be used. Must be between 0 and 1,
- *  defaults to 0.9.
- * @param content A block which describes the content for the plot.
- */
-@Composable
 public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
     modifier: Modifier = Modifier,
     defaultBar: DefaultHorizontalBarComposable<X, Y> = horizontalSolidBar(Color.Blue),

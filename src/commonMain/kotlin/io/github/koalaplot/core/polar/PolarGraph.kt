@@ -25,8 +25,6 @@ import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.AngularValue
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.util.HoverableElementArea
-import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.util.cos
 import io.github.koalaplot.core.util.deg
 import io.github.koalaplot.core.util.maximize
@@ -44,7 +42,7 @@ import kotlin.math.roundToInt
 /**
  * Scope for plot series content placed on a [PolarGraph].
  */
-public interface PolarGraphScope<T> : HoverableElementAreaScope {
+public interface PolarGraphScope<T> {
     /**
      * Provides the [FloatRadialAxisModel] for the plot to scale coordinates.
      */
@@ -100,21 +98,6 @@ public object PolarGraphDefaults {
     /**
      * Default values for [PolarGraphProperties].
      */
-    @Suppress("ComposableNaming")
-    @Deprecated("Use polarGraphPropertyDefaults", ReplaceWith("polarGraphPropertyDefaults()"))
-    @Composable
-    public fun PolarGraphPropertyDefaults(): PolarGraphProperties = PolarGraphProperties(
-        CIRCLES,
-        KoalaPlotTheme.axis.majorGridlineStyle,
-        KoalaPlotTheme.axis.majorGridlineStyle,
-        KoalaPlotTheme.sizes.gap,
-        KoalaPlotTheme.sizes.gap,
-        null,
-    )
-
-    /**
-     * Default values for [PolarGraphProperties].
-     */
     @Composable
     public fun polarGraphPropertyDefaults(): PolarGraphProperties = PolarGraphProperties(
         CIRCLES,
@@ -147,47 +130,46 @@ public fun <T> PolarGraph(
     radialAxisLabels: @Composable (Float) -> Unit,
     angularAxisLabels: @Composable (T) -> Unit,
     modifier: Modifier = Modifier,
-    polarGraphProperties: PolarGraphProperties = PolarGraphDefaults.PolarGraphPropertyDefaults(),
+    polarGraphProperties: PolarGraphProperties = PolarGraphDefaults.polarGraphPropertyDefaults(),
     content: @Composable PolarGraphScope<T>.() -> Unit,
 ) {
-    HoverableElementArea(modifier = modifier) {
-        val scope = object : PolarGraphScope<T>, HoverableElementAreaScope by this {
-            override val radialAxisModel = radialAxisModel
-            override val angularAxisModel = angularAxisModel
+    val scope = object : PolarGraphScope<T> {
+        override val radialAxisModel = radialAxisModel
+        override val angularAxisModel = angularAxisModel
 
-            override fun polarToCartesian(
-                point: PolarPoint<Float, T>,
-                size: Size,
-            ): Offset = polarToCartesianPlot(point, angularAxisModel, radialAxisModel, size)
-        }
-
-        Layout(
-            contents = buildList {
-                add { scope.Grid(polarGraphProperties) }
-                add {
-                    radialAxisModel.tickValues.forEach {
-                        Box { radialAxisLabels(it) }
-                    }
-                }
-                add {
-                    angularAxisModel.getTickValues().forEach {
-                        Box { angularAxisLabels(it) }
-                    }
-                }
-                add {
-                    Box(
-                        modifier = Modifier.drawWithContent {
-                            val clipPath = scope.generateGridBoundaryPath(size, polarGraphProperties.radialGridType)
-                            clipPath(clipPath) {
-                                this@drawWithContent.drawContent()
-                            }
-                        },
-                    ) { scope.content() }
-                }
-            },
-            measurePolicy = PolarGraphMeasurePolicy(angularAxisModel, radialAxisModel, polarGraphProperties),
-        )
+        override fun polarToCartesian(
+            point: PolarPoint<Float, T>,
+            size: Size,
+        ): Offset = polarToCartesianPlot(point, angularAxisModel, radialAxisModel, size)
     }
+
+    Layout(
+        contents = buildList {
+            add { scope.Grid(polarGraphProperties) }
+            add {
+                radialAxisModel.tickValues.forEach {
+                    Box { radialAxisLabels(it) }
+                }
+            }
+            add {
+                angularAxisModel.getTickValues().forEach {
+                    Box { angularAxisLabels(it) }
+                }
+            }
+            add {
+                Box(
+                    modifier = Modifier.drawWithContent {
+                        val clipPath = scope.generateGridBoundaryPath(size, polarGraphProperties.radialGridType)
+                        clipPath(clipPath) {
+                            this@drawWithContent.drawContent()
+                        }
+                    },
+                ) { scope.content() }
+            }
+        },
+        modifier,
+        measurePolicy = PolarGraphMeasurePolicy(angularAxisModel, radialAxisModel, polarGraphProperties),
+    )
 }
 
 /**
@@ -498,57 +480,6 @@ private data class AngularSector(
         @Suppress("MagicNumber")
         return (angle.toDegrees().value % 360.0 + 360.0) % 360.0
     }
-}
-
-/**
- * A Graph using polar coordinates - a radial axis and an angular axis.
- * Multiple series of data can be plotted on a polar graph as lines and/or shaded regions with or without
- * symbols at each plotted point.
- *
- * @param T The data type for the angular axis
- * @param radialAxisModel Provides the radial axis coordinate system
- * @param angularAxisModel An [AngularAxisModel] providing the angular axis coordinate system
- * @param radialAxisLabelText Provides strings for radial axis labels.
- * @param angularAxisLabelText Provides strings for angular axis labels.
- * @param polarGraphProperties Properties to customize plot styling.
- * @param content Content to display on the plot, see [PolarPlotSeries].
- */
-@ExperimentalKoalaPlotApi
-@Deprecated(
-    "Use PolarGraph overload with modifier in correct position.",
-    replaceWith = ReplaceWith(
-        """PolarGraph(
-            radialAxisModel,
-            angularAxisModel,
-            modifier,
-            radialAxisLabelText,
-            angularAxisLabelText,
-            polarGraphProperties,
-            content,
-        )
-    """,
-    ),
-)
-@Suppress("compose:param-order-check", "ktlint:compose:param-order-check")
-@Composable
-public fun <T> PolarGraph(
-    radialAxisModel: FloatRadialAxisModel,
-    angularAxisModel: AngularAxisModel<T>,
-    radialAxisLabelText: (Float) -> String = { it.toString() },
-    angularAxisLabelText: (T) -> String = { it.toString() },
-    modifier: Modifier = Modifier,
-    polarGraphProperties: PolarGraphProperties = PolarGraphDefaults.polarGraphPropertyDefaults(),
-    content: @Composable PolarGraphScope<T>.() -> Unit,
-) {
-    PolarGraph(
-        radialAxisModel,
-        angularAxisModel,
-        modifier,
-        radialAxisLabelText,
-        angularAxisLabelText,
-        polarGraphProperties,
-        content,
-    )
 }
 
 /**

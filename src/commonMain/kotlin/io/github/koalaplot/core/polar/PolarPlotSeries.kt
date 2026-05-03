@@ -20,7 +20,6 @@ import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.util.HoverableElementAreaScope
 
 /**
  * Plots a series on a [PolarGraph].
@@ -33,6 +32,7 @@ import io.github.koalaplot.core.util.HoverableElementAreaScope
  * @param symbols [Composable] providing for the symbol to draw at each data point. Use null, the default, for no
  * symbols.
  */
+@Deprecated("Use PolarPlotSeries instead", replaceWith = ReplaceWith("PolarPlotSeries2"))
 @ExperimentalKoalaPlotApi
 @Composable
 public fun <T> PolarGraphScope<T>.PolarPlotSeries2(
@@ -57,7 +57,6 @@ public fun <T> PolarGraphScope<T>.PolarPlotSeries2(
  * @param symbols [Composable] providing for the symbol to draw at each data point. Use null, the default, for no
  * symbols.
  */
-@Deprecated("Use PolarPlotSeries2 instead", replaceWith = ReplaceWith("PolarPlotSeries2"))
 @ExperimentalKoalaPlotApi
 @Composable
 public fun <T> PolarGraphScope<T>.PolarPlotSeries(
@@ -65,7 +64,7 @@ public fun <T> PolarGraphScope<T>.PolarPlotSeries(
     modifier: Modifier = Modifier,
     lineStyle: LineStyle? = null,
     areaStyle: AreaStyle? = null,
-    symbols: (@Composable HoverableElementAreaScope.(PolarPoint<Float, T>) -> Unit)? = null,
+    symbols: (@Composable (PolarPoint<Float, T>) -> Unit)? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
     if (data.isEmpty()) return
@@ -120,14 +119,14 @@ public fun <T> PolarGraphScope<T>.PolarPlotSeries(
 private fun <T> PolarGraphScope<T>.Symbols(
     data: List<PolarPoint<Float, T>>,
     beta: Float,
-    symbol: (@Composable HoverableElementAreaScope.(PolarPoint<Float, T>) -> Unit)? = null,
+    symbol: (@Composable (PolarPoint<Float, T>) -> Unit)? = null,
 ) {
     if (symbol != null) {
         Layout(
             modifier = Modifier.fillMaxSize(),
             content = {
                 data.indices.forEach {
-                    Box { symbol.invoke(this@Symbols, data[it]) }
+                    Box { symbol.invoke(data[it]) }
                 }
             },
         ) { measurables: List<Measurable>, constraints: Constraints ->

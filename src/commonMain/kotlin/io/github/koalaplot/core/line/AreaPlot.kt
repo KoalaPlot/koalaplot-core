@@ -7,7 +7,6 @@ import androidx.compose.ui.geometry.Size
 import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
-import io.github.koalaplot.core.util.HoverableElementAreaScope
 import io.github.koalaplot.core.util.lineTo
 import io.github.koalaplot.core.util.moveTo
 import io.github.koalaplot.core.xygraph.Point
@@ -17,14 +16,6 @@ import io.github.koalaplot.core.xygraph.XYGraphScope
  * Specifies baseline coordinates for drawing filled areas on line charts.
  */
 public sealed interface AreaBaseline<X, Y> {
-    /**
-     * Specifies that the area should be drawn to a constant y-axis value across the x-axis range.
-     */
-    @Deprecated("Renamed to HorizontalLine", replaceWith = ReplaceWith("HorizontalLine<X, Y>(value)"))
-    public data class ConstantLine<X, Y>(
-        val value: Y,
-    ) : AreaBaseline<X, Y>
-
     public data class HorizontalLine<X, Y>(
         val value: Y,
     ) : AreaBaseline<X, Y>
@@ -102,6 +93,7 @@ public sealed class StackArea<X, Y>(
  * left and right area bounds will be vertical.
  * @param modifier Modifier for the plot.
  */
+@Deprecated("Renamed to AreaPlot")
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.AreaPlot2(
     data: List<Point<X, Y>>,
@@ -112,7 +104,7 @@ public fun <X, Y> XYGraphScope<X, Y>.AreaPlot2(
     symbol: (@Composable (Point<X, Y>) -> Unit)? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
-    AreaPlot(data, areaBaseline, areaStyle, modifier, lineStyle, { symbol?.invoke(it) }, animationSpec)
+    AreaPlot(data, areaBaseline, areaStyle, modifier, lineStyle, symbol, animationSpec)
 }
 
 /**
@@ -128,15 +120,14 @@ public fun <X, Y> XYGraphScope<X, Y>.AreaPlot2(
  * left and right area bounds will be vertical.
  * @param modifier Modifier for the plot.
  */
-@Deprecated("Use AreaPlot2 instead", replaceWith = ReplaceWith("AreaPlot2"))
 @Composable
 public fun <X, Y> XYGraphScope<X, Y>.AreaPlot(
     data: List<Point<X, Y>>,
     areaBaseline: AreaBaseline<X, Y>,
     areaStyle: AreaStyle,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.Companion,
     lineStyle: LineStyle? = null,
-    symbol: (@Composable HoverableElementAreaScope.(Point<X, Y>) -> Unit)? = null,
+    symbol: (@Composable (Point<X, Y>) -> Unit)? = null,
     animationSpec: AnimationSpec<Float> = KoalaPlotTheme.animationSpec,
 ) {
     if (data.isEmpty()) return

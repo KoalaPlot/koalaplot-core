@@ -23,20 +23,20 @@ import kotlin.math.max
  * row until all horizontal space is consumed.
  */
 @Deprecated(
-    "Use FlowLegend2",
-    replaceWith = ReplaceWith("FlowLegend2(itemCount, modifier, symbol, label, symbolGap, columnGap, rowGap)"),
+    "Use FlowLegend",
+    replaceWith = ReplaceWith("FlowLegend(itemCount, modifier, symbol, label, symbolGap, columnGap, rowGap)"),
 )
 @Composable
-public fun FlowLegend(
+public fun FlowLegend2(
     itemCount: Int,
+    modifier: Modifier = Modifier,
     symbol: @Composable LegendScope.(item: Int) -> Unit = {},
     label: @Composable LegendScope.(item: Int) -> Unit = {},
     symbolGap: Dp = KoalaPlotTheme.sizes.gap,
     columnGap: Dp = KoalaPlotTheme.sizes.gap,
     rowGap: Dp = KoalaPlotTheme.sizes.gap,
-    modifier: Modifier = Modifier,
 ) {
-    FlowLegend2(itemCount, modifier, symbol, label, symbolGap, columnGap, rowGap)
+    FlowLegend(itemCount, modifier, symbol, label, symbolGap, columnGap, rowGap)
 }
 
 /**
@@ -45,7 +45,7 @@ public fun FlowLegend(
  * row until all horizontal space is consumed.
  */
 @Composable
-public fun FlowLegend2(
+public fun FlowLegend(
     itemCount: Int,
     modifier: Modifier = Modifier,
     symbol: @Composable LegendScope.(item: Int) -> Unit = {},

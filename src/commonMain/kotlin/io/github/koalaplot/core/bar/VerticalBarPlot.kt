@@ -4,7 +4,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import io.github.koalaplot.core.animation.StartAnimationUseCase
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.xygraph.XYGraphScope
@@ -185,14 +184,14 @@ internal class GroupedEntryToVerticalEntryAdapter<X, Y>(
  * @param content A block which describes the content for the plot.
  */
 @Deprecated(
-    "Use VerticalBarPlot2",
-    ReplaceWith("VerticalBarPlot2(modifier, defaultBar, barWidth, startAnimationUseCase, content)"),
+    "Use VerticalBarPlot",
+    ReplaceWith("VerticalBarPlot(modifier, defaultBar, barWidth, startAnimationUseCase, content)"),
 )
 @Composable
 @Suppress("ktlint:compose:param-order-check")
-public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot(
-    defaultBar: DefaultVerticalBarComposable<X, Y> = verticalSolidBar(MaterialTheme.colorScheme.primary),
+public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot2(
     modifier: Modifier = Modifier,
+    defaultBar: DefaultVerticalBarComposable<X, Y> = verticalSolidBar(MaterialTheme.colorScheme.primary),
     barWidth: Float = 0.9f,
     startAnimationUseCase: StartAnimationUseCase =
         StartAnimationUseCase(
@@ -202,7 +201,7 @@ public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot(
         ),
     content: VerticalBarPlotScope<X, Y>.() -> Unit,
 ) {
-    VerticalBarPlot2(modifier, defaultBar, barWidth, startAnimationUseCase, content)
+    VerticalBarPlot(modifier, defaultBar, barWidth, startAnimationUseCase, content)
 }
 
 /**
@@ -214,7 +213,7 @@ public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot(
  * @param content A block which describes the content for the plot.
  */
 @Composable
-public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot2(
+public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot(
     modifier: Modifier = Modifier,
     defaultBar: DefaultVerticalBarComposable<X, Y> = verticalSolidBar(MaterialTheme.colorScheme.primary),
     barWidth: Float = 0.9f,

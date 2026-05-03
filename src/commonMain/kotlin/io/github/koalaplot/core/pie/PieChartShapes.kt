@@ -42,7 +42,6 @@ import kotlin.math.sin
  * @receiver Provides drawing and interaction parameters for the slice scope
  * @param color The Color of the Slice
  * @param modifier The modifier to be applied to this item
- * @param hoverElement Content to show when the mouse/pointer hovers over the slice
  * @param clickable If clicking should be enabled.
  * @param antiAlias Set to true if the slice should be drawn with anti-aliasing, false otherwise
  * @param gap Specifies the gap between slices. It is the angular distance, in degrees, between the
@@ -54,7 +53,6 @@ import kotlin.math.sin
 public fun PieSliceScope.BiConvexSlice(
     color: Color,
     modifier: Modifier = Modifier,
-    hoverElement: @Composable () -> Unit = {},
     clickable: Boolean = false,
     antiAlias: Boolean = false,
     gap: Float = 0.0f,
@@ -102,7 +100,7 @@ public fun PieSliceScope.BiConvexSlice(
                 } else {
                     Modifier
                 },
-            ).hoverableElement(hoverElement),
+            ),
     ) {}
 }
 
@@ -113,7 +111,6 @@ public fun PieSliceScope.BiConvexSlice(
  * @receiver Provides drawing and interaction parameters for the slice scope
  * @param color The Color of the Slice
  * @param modifier The modifier to be applied to this item
- * @param hoverElement Content to show when the mouse/pointer hovers over the slice
  * @param clickable If clicking should be enabled.
  * @param antiAlias Set to true if the slice should be drawn with anti-aliasing, false otherwise
  * @param gap Specifies the gap between slices. It is the angular distance, in degrees, between the
@@ -125,7 +122,6 @@ public fun PieSliceScope.BiConvexSlice(
 public fun PieSliceScope.ConcaveConvexSlice(
     color: Color,
     modifier: Modifier = Modifier,
-    hoverElement: @Composable () -> Unit = {},
     clickable: Boolean = false,
     antiAlias: Boolean = false,
     gap: Float = 0.0f,
@@ -173,7 +169,7 @@ public fun PieSliceScope.ConcaveConvexSlice(
                 } else {
                     Modifier
                 },
-            ).hoverableElement(hoverElement),
+            ),
     ) {}
 }
 
