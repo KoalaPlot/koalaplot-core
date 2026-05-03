@@ -1,6 +1,7 @@
 package io.github.koalaplot.core.xygraph
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 
 /**
  * Defines the content and styling for an axis on an [XYGraph].
@@ -15,3 +16,12 @@ public data class AxisContent<T>(
     val title: @Composable () -> Unit,
     val style: AxisStyle,
 )
+
+@Composable
+public fun <T> rememberAxisContent(
+    labels: @Composable AxisLabelScope<T>.(T) -> Unit = {},
+    title: @Composable () -> Unit = {},
+    style: AxisStyle = rememberAxisStyle(),
+): AxisContent<T> = remember(labels, title, style) {
+    AxisContent(labels, title, style)
+}
