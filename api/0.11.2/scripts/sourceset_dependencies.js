@@ -1,0 +1,1 @@
+sourceset_dependencies='{":/androidMain":[":/commonMain"],":/commonMain":[],":/desktopMain":[":/commonMain"],":/iosArm64Main":[":/commonMain",":/iosMain"],":/iosMain":[":/commonMain"],":/iosSimulatorArm64Main":[":/commonMain",":/iosMain"],":/iosX64Main":[":/commonMain",":/iosMain"],":/jsMain":[":/commonMain"],":/wasmJsMain":[":/commonMain"]}'
