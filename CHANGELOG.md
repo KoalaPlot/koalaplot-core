@@ -10,7 +10,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Updated dependencies: Compose 1.10.3, Kotlin 2.3.20.
-- Restored original names for several components by updating their signatures to match their "v2" (or "v3") counterparts and deprecating the numbered versions. This includes `AreaPlot`, `ColumnLegend`, `FlowLegend`, `LinePlot`, `PolarPlotSeries`, `StairstepPlot`, and `VerticalBarPlot`.
+- Restored original names for several components by updating their signatures to match their "v2" (
+  or "v3") counterparts and deprecating the numbered versions. This includes `AreaPlot`,
+  `ColumnLegend`, `FlowLegend`, `LinePlot`, `PolarPlotSeries`, `StairstepPlot`, and
+  `VerticalBarPlot`.
 - `BarScope` and `PieSliceScope` interfaces no longer extend `HoverableElementAreaScope`.
 
 ### Removed
@@ -20,10 +23,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `AreaBaseline.ConstantLine` (replaced by `HorizontalLine`).
 - `DiamondIndicator` (replaced by `DiamondIndicatorDp`).
 - `Symbol` overload with `Modifier` as its first parameter.
-- `LineIndicator`, `HorizontalBarPlot`, and `PolarGraph` overloads with non-standard parameter orders (to align with Compose API guidelines).
+- `LineIndicator`, `HorizontalBarPlot`, and `PolarGraph` overloads with non-standard parameter
+  orders (to align with Compose API guidelines).
 - `io.github.koalaplot.core.style.Axis.tickPosition` property.
 - `PolarGraphDefaults.PolarGraphPropertyDefaults`.
-- `hoverElement` parameter from `PieSliceScope` (`BiConvexSlice`, `ConcaveConvexSlice`, `DefaultSlice`) and `BarScope.DefaultBar`.
+- `hoverElement` parameter from `PieSliceScope` (`BiConvexSlice`, `ConcaveConvexSlice`,
+  `DefaultSlice`) and `BarScope.DefaultBar`.
+
+### Fixed
+
+- update XYGraphPointerEventScope size on each pointer event (#150)
 
 ## [0.11.1]
 
