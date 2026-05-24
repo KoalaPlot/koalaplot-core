@@ -19,7 +19,7 @@ import kotlin.math.min
  * @param forceCenteredPie If true, will force the pie to be centered in the parent component by adjusting its size to
  * accommodate asymmetric label sizes and positions.
  */
-internal class PieMeasurePolicy constructor(
+internal class PieMeasurePolicy(
     private val pieSliceData: List<PieSliceData>,
     private val holeSize: Float,
     private val labelPositionProvider: LabelPositionProvider,
@@ -32,11 +32,12 @@ internal class PieMeasurePolicy constructor(
         labelConnectorTranslations: List<Offset?>,
         pieDiameter: Float,
         piePlaceables: PiePlaceables,
+        targetLabelPositions: List<LabelPosition>? = null,
     ) = layout(size.width.toInt(), size.height.toInt()) {
         val translation = if (forceCenteredPie) {
             Offset(size.width / 2, size.height / 2)
         } else {
-            val positions = labelPositions.mapNotNull { it.getPositionOrNull() }
+            val positions = (targetLabelPositions ?: labelPositions).mapNotNull { it.getPositionOrNull() }
             Offset(
                 max(-(positions.minOfOrNull { it.x } ?: 0f), pieDiameter / 2),
                 max(-(positions.minOfOrNull { it.y } ?: 0f), pieDiameter / 2),
@@ -51,8 +52,8 @@ internal class PieMeasurePolicy constructor(
         }
 
         piePlaceables.pie.place(
-            (translation.x - pieDiameter / 2).toInt(),
-            (translation.y - pieDiameter / 2).toInt(),
+            (translation.x - (pieDiameter / 2)).toInt(),
+            (translation.y - (pieDiameter / 2)).toInt(),
         )
 
         piePlaceables.labels.forEachIndexed { index, placeable ->
@@ -88,12 +89,13 @@ internal class PieMeasurePolicy constructor(
     internal fun computeLabelConnectorScopes(
         labelPositions: List<LabelPosition>,
         pieDiameter: Float,
+        currentPieSliceData: List<PieSliceData>,
     ): List<Pair<Offset, LabelConnectorScope>?> = buildList {
         for (i in labelPositions.indices) {
             if (labelPositions[i] is ExternalLabelPosition) {
                 val labelConnectorScope = LabelConnectorScopeImpl()
                 with(labelConnectorScope) {
-                    startAngle.value = pieSliceData[i].startAngle + (pieSliceData[i].angle / 2f)
+                    startAngle.value = currentPieSliceData[i].startAngle + (currentPieSliceData[i].angle / 2f)
                     startPosition.value = polarToCartesian(pieDiameter / 2f * initOuterRadius, startAngle.value)
                     endPosition.value = (labelPositions[i] as ExternalLabelPosition).anchorPoint
                     endAngle.value = (labelPositions[i] as ExternalLabelPosition).anchorAngle
@@ -121,12 +123,11 @@ internal class PieMeasurePolicy constructor(
     }
 
     internal fun measure(
-        pie: Measurable,
         labels: List<Measurable>,
         constraints: Constraints,
         minPieDiameterPx: Float,
         maxPieDiameterPx: Float,
-    ): Triple<Float, Placeable, List<Placeable>> {
+    ): Pair<Float, List<Placeable>> {
         val labelConstraint = constraints.copy(
             maxWidth = ((constraints.maxWidth - minPieDiameterPx) / 2)
                 .toInt()
@@ -142,10 +143,7 @@ internal class PieMeasurePolicy constructor(
             findMaxDiameter(constraints, labelPlaceables, minPieDiameterPx).coerceIn(minPieDiameterPx, maxPieDiameterPx),
         )
 
-        val piePlaceable =
-            pie.measure(Constraints.fixed(pieDiameter.toInt(), pieDiameter.toInt()))
-
-        return Triple(pieDiameter, piePlaceable, labelPlaceables)
+        return Pair(pieDiameter, labelPlaceables)
     }
 
     /**
@@ -187,11 +185,15 @@ internal class PieMeasurePolicy constructor(
     /**
      * Computes the size required to contain the pie + its surrounding labels based on the
      * labels as represented by the placeables, their labelOffsets, and the pieDiameter.
+     *
+     * @param constraints Optional constraints to coerce the calculated size. If provided, the width
+     * and height will be incremented by 1 and coerced to the maximum allowed by the constraints.
      */
     internal fun computeSize(
         placeables: List<Placeable>,
         labelPositions: List<LabelPosition>,
         pieDiameter: Float,
+        constraints: Constraints? = null,
     ): Size {
         // Compute height/width required for the pie plus all labels
         // calculate min/max label extents used for computing overall component width/height
@@ -208,15 +210,29 @@ internal class PieMeasurePolicy constructor(
             }
         }
 
-        val width = if (forceCenteredPie) {
+        var width = if (forceCenteredPie) {
             2 * max(abs(maxX), abs(minX)) // this works because the label positions were based on a pie center at (0,0)
         } else {
             maxX - minX
         }
-        val height = if (forceCenteredPie) {
+        var height = if (forceCenteredPie) {
             2 * max(abs(maxY), abs(minY)) // this works because the label positions were based on a pie center at (0,0)
         } else {
             maxY - minY
+        }
+
+        if (constraints != null) {
+            width = if (forceCenteredPie && constraints.hasBoundedWidth) {
+                constraints.maxWidth.toFloat()
+            } else {
+                (width + 1).coerceIn(constraints.minWidth.toFloat(), constraints.maxWidth.toFloat())
+            }
+
+            height = if (forceCenteredPie && constraints.hasBoundedHeight) {
+                constraints.maxHeight.toFloat()
+            } else {
+                (height + 1).coerceIn(constraints.minHeight.toFloat(), constraints.maxHeight.toFloat())
+            }
         }
 
         return Size(width, height)

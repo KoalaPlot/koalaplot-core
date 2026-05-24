@@ -69,7 +69,7 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-private const val DefaultLabelDiameterScale = 1.1f
+internal const val DefaultLabelDiameterScale = 1.1f
 
 /**
  * Defines the angular position of a single Pie Slice in terms of the starting angle for the slice, [startAngle], and
@@ -81,9 +81,9 @@ public data class PieSliceData(
     val angle: AngularValue,
 )
 
-private const val AngleCCWTop = -90f
+internal const val AngleCCWTop = -90f
 
-private fun makePieSliceData(
+internal fun makePieSliceData(
     data: List<Float>,
     beta: Float,
     pieStartAngle: AngularValue,
@@ -168,9 +168,9 @@ internal data class LabelConnectorScopeImpl(
 ) : LabelConnectorScope
 
 // Initial outer radius as a fraction of size before hover expansion
-private const val InitOuterRadius = 0.95f
+internal const val InitOuterRadius = 0.95f
 
-private const val LabelFadeInDuration = 1000
+internal const val LabelFadeInDuration = 1000
 
 /**
  * Creates a Pie Chart or, optionally, a Donut Chart if holeSize is nonZero, with optional
@@ -341,15 +341,17 @@ public fun PieChart(
             }
         }
 
-        val (pieDiameter, piePlaceable, labelPlaceables) = pieMeasurePolicy.measure(
-            pieMeasurable,
+        val (pieDiameter, labelPlaceables) = pieMeasurePolicy.measure(
             labelMeasurables,
             constraints,
             minPieDiameter.toPx(),
             maxPieDiameter.toPx(),
         )
 
-        val labelPositions =
+        val piePlaceable =
+            pieMeasurable.measure(Constraints.fixed(pieDiameter.toInt(), pieDiameter.toInt()))
+
+        val targetLabelPositions =
             labelPositionProvider.computeLabelPositions(
                 pieDiameter * InitOuterRadius,
                 holeSize,
@@ -357,15 +359,18 @@ public fun PieChart(
                 finalPieSliceData,
             )
 
-        val size = pieMeasurePolicy.computeSize(labelPlaceables, labelPositions, pieDiameter).run {
-            // add one due to later float to int conversion dropping the fraction part
-            copy(
-                (width + 1).coerceAtMost(constraints.maxWidth.toFloat()),
-                (height + 1).coerceAtMost(constraints.maxHeight.toFloat()),
-            )
-        }
+        val size = pieMeasurePolicy.computeSize(labelPlaceables, targetLabelPositions, pieDiameter, constraints)
 
-        val labelConnectorTranslations = pieMeasurePolicy.computeLabelConnectorScopes(labelPositions, pieDiameter)
+        val labelPositions =
+            labelPositionProvider.computeLabelPositions(
+                pieDiameter * InitOuterRadius,
+                holeSize,
+                labelPlaceables,
+                pieSliceData,
+            )
+
+        val labelConnectorTranslations =
+            pieMeasurePolicy.computeLabelConnectorScopes(labelPositions, pieDiameter, pieSliceData)
 
         val holeDiameter = (pieDiameter * holeSize)
         val holeSafeEdgeLength = circumscribedSquareSize(holeDiameter)
@@ -397,6 +402,7 @@ public fun PieChart(
                 labelConnectorTranslations.map { it?.first },
                 pieDiameter,
                 PieMeasurePolicy.PiePlaceables(piePlaceable, holePlaceable, labelPlaceables, connectorPlaceables),
+                targetLabelPositions,
             )
         }
     }
@@ -538,7 +544,7 @@ public fun PieChart(
 }
 
 @Composable
-private fun Pie(
+internal fun Pie(
     internalPieData: List<PieSliceData>,
     slice: @Composable PieSliceScope.(Int) -> Unit,
     holeSize: Float,
