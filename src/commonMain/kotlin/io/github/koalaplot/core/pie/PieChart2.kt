@@ -15,7 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -109,7 +109,7 @@ private class PieChartScopeImpl : PieChartScope {
  * @param maxPieDiameter Maximum diameter allowed for the pie. May be Infinity but not Unspecified.
  * @param centeredAlignment If true, will center the pie within its parent, by adjusting (decreasing) the
  * pie size to accommodate label sizes and positions. If false, will maximize the pie diameter and place it in the top-left most corner
- * of the parent.
+ * of the parent. For the best visual experience when animating the pie due to slice value changes, set centeredAlignment to true.
  * @param startAnimationUseCase Controls the initial grow and fade-in animations of the chart.
  * @param pieStartAngle Sets an angle for the pie data to start at. Defaults to the top center of the pie.
  * @param pieExtendAngle Sets a max angle for the pie to extend to, with a value between 1 and 360 degrees.
@@ -142,7 +142,7 @@ public fun PieChart(
     val colors = remember(pieItems.size) { generateHueColorPalette(pieItems.size) }
     val state = rememberPieChartState(pieItems, startAnimationUseCase, pieStartAngle, pieExtendAngle)
 
-    val targetDiameterState = remember { mutableStateOf(0f) }
+    val targetDiameterState = remember { mutableFloatStateOf(0f) }
     val animatedDiameter by animateFloatAsState(
         targetValue = targetDiameterState.value,
         animationSpec = KoalaPlotTheme.animationSpec,
