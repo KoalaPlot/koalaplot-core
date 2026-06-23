@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.semantics.Role
@@ -27,7 +28,6 @@ import io.github.koalaplot.core.util.polarToCartesian
 import io.github.koalaplot.core.util.rad
 import io.github.koalaplot.core.util.toDegrees
 import io.github.koalaplot.core.util.toRadians
-import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.max
 import kotlin.math.sin
@@ -179,6 +179,115 @@ public fun PieSliceScope.ConcaveConvexSlice(
  * The pie diameter is equal to the Shape's size width. The slice is positioned with its vertex
  * at the center.
  *
+ * The slice shape starts with a concave and ends with a convex shape.
+ */
+private class ConcaveConvexSlice(
+    private val startAngle: Float,
+    private val angle: Float,
+    private val innerRadius: Float = 0.5F,
+    private val outerRadius: Float = 1.0F,
+) : Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density,
+    ): Outline {
+        val radius = size.width / 2f * outerRadius
+        val holeRadius = size.width / 2f * innerRadius
+        val center = Offset(size.width / 2f, size.width / 2f)
+
+        val innerRect = Rect(center, holeRadius)
+        val outerRect = Rect(center, radius)
+
+        // Clamp to a valid range; sweeps > 360° degenerate the same way as exactly 360°.
+        val sweepAngle = angle.coerceIn(0f, 360f)
+        val innerCircleRadius = (radius - holeRadius) / 2f
+        val innerCircleCenterRadius = (radius + holeRadius) / 2f
+
+        return Path().apply {
+            // Full-circle special case: a 360° sweep cannot be drawn as an arc.
+            // Skia reduces an arc with a 360° sweep to a single point — the start and
+            // end unit vectors coincide, so arcTo()/addArc() emit only a moveTo/lineTo
+            // and no curve — which would render nothing at all. The 0.01f tolerance also
+            // catches sweeps that land just below 360° through float accumulation (e.g.
+            // value * 360f / total): those are equally fragile and would otherwise leave
+            // a seam with overlapping caps instead of a closed ring.
+            // A full ring has no start/end caps, so draw the outer and inner ovals and
+            // cut the hole with the even-odd fill rule.
+            if (sweepAngle >= 360f - 0.01f) {
+                addOval(outerRect)
+                if (holeRadius > 0f) addOval(innerRect)
+                fillType = PathFillType.EvenOdd
+                return@apply
+            }
+
+            // Outer arc. forceMoveTo = true starts a fresh contour at the arc's start
+            // point; on an empty Path the current point is the origin, so 'false' here
+            // would draw a stray line from (0, 0).
+            arcTo(
+                rect = outerRect,
+                startAngleDegrees = startAngle,
+                sweepAngleDegrees = sweepAngle,
+                forceMoveTo = true
+            )
+
+            // Convex cap at the end angle, bridging the outer to the inner radius. It is
+            // a half-circle (InnerCircleSweepAngleDegrees == 180°), so its endpoints land
+            // exactly on the inner/outer radius — which is what lets the arcs chain.
+            // forceMoveTo = false from here on keeps everything in ONE contour: a single
+            // closed path fills correctly, whereas separate subpaths each self-close on
+            // fill and produce the overlapping wedge artifacts.
+            arcTo(
+                rect = Rect(
+                    center = center + polarToCartesian(
+                        radius = innerCircleCenterRadius,
+                        angle = (startAngle + sweepAngle).deg,
+                    ),
+                    radius = innerCircleRadius,
+                ),
+                startAngleDegrees = startAngle + sweepAngle,
+                sweepAngleDegrees = InnerCircleSweepAngleDegrees,
+                forceMoveTo = false,
+            )
+
+            // Inner arc, traversed backwards (negative sweep) so the contour stays
+            // continuous; it ends back on the inner radius at the start angle.
+            arcTo(
+                rect = innerRect,
+                startAngleDegrees = startAngle + sweepAngle,
+                sweepAngleDegrees = -sweepAngle,
+                forceMoveTo = false
+            )
+
+            // Concave cap at the start angle, traversed backwards (inner -> outer) to
+            // close the loop. Its end point coincides with the outer arc's start point.
+            arcTo(
+                rect = Rect(
+                    center = center + polarToCartesian(
+                        radius = innerCircleCenterRadius,
+                        angle = startAngle.deg,
+                    ),
+                    radius = innerCircleRadius,
+                ),
+                startAngleDegrees = startAngle + InnerCircleSweepAngleDegrees,
+                sweepAngleDegrees = -InnerCircleSweepAngleDegrees,
+                forceMoveTo = false,
+            )
+
+            // Seal the contour. The end already meets the start, so this adds at most a
+            // zero-length line, but it marks the seam as a join (not two stroke caps) and
+            // guarantees a watertight region for fill and clip().
+            close()
+        }.let(Outline::Generic)
+    }
+}
+
+/**
+ * Creates a pie chart slice shape with a total angular extent of [angle] degrees with an
+ * optional holeSize that is specified as a percentage of the overall slice radius.
+ * The pie diameter is equal to the Shape's size width. The slice is positioned with its vertex
+ * at the center.
+ *
  * Each slice features a convex shape on both its starting and ending sides.
  * For very small values, the slice gradually transitions into a shrinking circle to ensure accurate rendering
  * and maintain the intended visual appearance.
@@ -239,6 +348,10 @@ private class BiConvexSlice(
         // the donut slice gradually transitions into a smaller circular shape.
         // This prevents rendering artifacts and keeps the shape visually consistent.
         // As a result, the slice consists of two convex arcs forming a smooth circular shape.
+
+        // Calculates the maximum radius of the inner circle.
+        // This corresponds to the opposite side of the triangle:
+        // Max inner circle radius = opposite side = sin(angle) * hypotenuse
         val maxInnerCircleRadius =
             sin((sweepAngle / 2).deg.toRadians().value).toFloat() * innerCircleCenterRadius
 
@@ -281,255 +394,4 @@ private class BiConvexSlice(
     }
 }
 
-/**
- * Creates a pie chart slice shape with a total angular extent of [angle] degrees with an
- * optional holeSize that is specified as a percentage of the overall slice radius.
- * The pie diameter is equal to the Shape's size width. The slice is positioned with its vertex
- * at the center.
- *
- * The slice shape starts with a concave and ends with a convex shape.
- */
-private class ConcaveConvexSlice(
-    private val startAngle: Float,
-    private val angle: Float,
-    private val innerRadius: Float = 0.5F,
-    private val outerRadius: Float = 1.0F,
-) : Shape {
-    override fun createOutline(
-        size: Size,
-        layoutDirection: LayoutDirection,
-        density: Density,
-    ): Outline {
-        val radius = size.width / 2F * outerRadius
-        val holeRadius = size.width / 2F * innerRadius
-        val center = Offset(size.width / 2F, size.width / 2F)
-
-        val innerRect = Rect(center, holeRadius)
-        val outerRect = Rect(center, radius)
-        val layout = Layout(
-            center = center,
-            innerRect = innerRect,
-            outerRect = outerRect,
-        )
-
-        // Gap can lead to negative sweep angle which causes rendering issues
-        val sweepAngle = max(0F, angle)
-        val innerCircleRadius = (radius - holeRadius) / 2F
-        val innerCircleCenterRadius = (radius + holeRadius) / 2F
-
-        val innerCircleDegrees =
-            asin(innerCircleRadius / innerCircleCenterRadius)
-                .rad
-                .toDegrees()
-                .value
-                .toFloat()
-        val innerCircle = InnerCircle(
-            innerCircleCenterRadius = innerCircleCenterRadius,
-            innerCircleDegrees = innerCircleDegrees,
-            innerCircleRadius = innerCircleRadius,
-        )
-
-        val concaveRingSlice = concaveRingSlice(
-            layout = layout,
-            startAngle = startAngle,
-            sweepAngle = sweepAngle,
-            innerCircle = innerCircle,
-        )
-
-        val ringSlice = ringSlice(
-            layout = layout,
-            startAngle = startAngle,
-            sweepAngle = sweepAngle,
-            innerCircle = innerCircle,
-        )
-
-        val convexRingSlice = convexRingSlice(
-            layout = layout,
-            startAngle = startAngle,
-            sweepAngle = sweepAngle,
-            innerCircle = innerCircle,
-        )
-
-        return Path()
-            .apply {
-                addPath(convexRingSlice)
-                addPath(ringSlice)
-                addPath(concaveRingSlice)
-            }.let(Outline::Generic)
-    }
-}
-
 private const val InnerCircleSweepAngleDegrees = 180F
-
-/**
- * Path provider function for concave part of ring/donut slice.
- *
- * @param layout Specifies layout of pie chart.
- * @param startAngle The start angle of the slice.
- * @param sweepAngle The sweepAngle of the slice.
- * @param innerCircle Specifies shape of concave/convex part of ring/donut slice.
- */
-private fun concaveRingSlice(
-    layout: Layout,
-    startAngle: Float,
-    sweepAngle: Float,
-    innerCircle: InnerCircle,
-): Path {
-    val (center, innerRect, outerRect) = layout
-    val (innerCircleCenterRadius, innerCircleDegrees, innerCircleRadius) = innerCircle
-    val deltaSmallSweepAngle =
-        if (sweepAngle < innerCircleDegrees) abs(sweepAngle - innerCircleDegrees) else 0F
-
-    val toOuterStartAngleDegrees = startAngle - innerCircleDegrees / 2F
-    val toInnerStartAngleDegrees = startAngle + innerCircleDegrees / 2F - deltaSmallSweepAngle
-    val outerSweepAngleDegrees = innerCircleDegrees - deltaSmallSweepAngle
-
-    val slice = Path().apply {
-        arcTo(
-            rect = outerRect,
-            startAngleDegrees = toOuterStartAngleDegrees,
-            sweepAngleDegrees = outerSweepAngleDegrees,
-            false,
-        )
-        arcTo(
-            rect = innerRect,
-            startAngleDegrees = toInnerStartAngleDegrees,
-            sweepAngleDegrees = -outerSweepAngleDegrees,
-            false,
-        )
-    }
-
-    val toInnerCircleDegrees = startAngle - (innerCircleDegrees / 2F)
-
-    val convexSemicircle = Path().apply {
-        addArc(
-            oval = Rect(
-                center = center + polarToCartesian(
-                    radius = innerCircleCenterRadius,
-                    angle = toInnerCircleDegrees.deg,
-                ),
-                radius = innerCircleRadius,
-            ),
-            startAngleDegrees = toInnerCircleDegrees,
-            sweepAngleDegrees = InnerCircleSweepAngleDegrees,
-        )
-    }
-    return slice - convexSemicircle
-}
-
-/**
- * Path provider function for ring part of ring/donut slice.
- * Returns empty path if slice consists only of concave/convex pieces.
- *
- * @param layout Specifies layout of pie chart.
- * @param startAngle The start angle of the slice.
- * @param sweepAngle The sweepAngle of the slice.
- * @param innerCircle Specifies shape of concave/convex part of ring/donut slice.
- */
-private fun ringSlice(
-    layout: Layout,
-    startAngle: Float,
-    sweepAngle: Float,
-    innerCircle: InnerCircle,
-): Path {
-    val (_, innerRect, outerRect) = layout
-    val (_, innerCircleDegrees, _) = innerCircle
-    if (sweepAngle <= innerCircleDegrees) return Path()
-
-    val toOuterStartAngleDegrees = startAngle + (innerCircleDegrees / 2F)
-    val toInnerStartAngleDegrees = startAngle + sweepAngle - innerCircleDegrees / 2F
-    val outerSweepAngleDegrees = sweepAngle - innerCircleDegrees
-
-    return Path().apply {
-        addArc(
-            oval = outerRect,
-            startAngleDegrees = toOuterStartAngleDegrees,
-            sweepAngleDegrees = outerSweepAngleDegrees,
-        )
-        arcTo(
-            rect = innerRect,
-            startAngleDegrees = toInnerStartAngleDegrees,
-            sweepAngleDegrees = -outerSweepAngleDegrees,
-            forceMoveTo = false,
-        )
-    }
-}
-
-/**
- * Path provider function for convex part of ring/donut slice.
- *
- * @param layout Specifies layout of pie chart.
- * @param startAngle The start angle of the slice.
- * @param sweepAngle The sweepAngle of the slice.
- * @param innerCircle Specifies shape of concave/convex part of ring/donut slice.
- */
-private fun convexRingSlice(
-    layout: Layout,
-    startAngle: Float,
-    sweepAngle: Float,
-    innerCircle: InnerCircle,
-): Path {
-    val (center, _, _) = layout
-    val (innerCircleCenterRadius, innerCircleDegrees, innerCircleRadius) = innerCircle
-    val toInnerCircleDegrees = (startAngle + sweepAngle - innerCircleDegrees / 2F)
-
-    val convexSemicircle = Path().apply {
-        addArc(
-            oval = Rect(
-                center = center + polarToCartesian(
-                    radius = innerCircleCenterRadius,
-                    angle = toInnerCircleDegrees.deg,
-                ),
-                radius = innerCircleRadius,
-            ),
-            startAngleDegrees = toInnerCircleDegrees,
-            sweepAngleDegrees = InnerCircleSweepAngleDegrees,
-        )
-    }
-
-    if (sweepAngle < innerCircleDegrees) {
-        val toConcaveInnerCircleDegrees = startAngle - (innerCircleDegrees / 2F)
-        val concaveSemicircle = Path().apply {
-            addArc(
-                oval = Rect(
-                    center = center + polarToCartesian(
-                        radius = innerCircleCenterRadius,
-                        angle = toConcaveInnerCircleDegrees.deg,
-                    ),
-                    radius = innerCircleRadius,
-                ),
-                startAngleDegrees = toConcaveInnerCircleDegrees,
-                sweepAngleDegrees = InnerCircleSweepAngleDegrees,
-            )
-        }
-
-        return convexSemicircle - concaveSemicircle
-    }
-    return convexSemicircle
-}
-
-/**
- * Parameter class specifying layout of concave/convex shaped pie chart slices.
- *
- * @param center The center of the pie chart.
- * @param innerRect Rect corresponding to pie chart's hole.
- * @param outerRect Rect corresponding to pie chart's outer radius.
- */
-private data class Layout(
-    val center: Offset,
-    val innerRect: Rect,
-    val outerRect: Rect,
-)
-
-/**
- * Parameter class providing inner circle values specifying shape of concave/convex part of ring/donut slice.
- *
- * @param innerCircleCenterRadius Radius pointing to average of outer and inner radius.
- * @param innerCircleDegrees Angle from center which encompasses slice's inner circle.
- * @param innerCircleRadius Radius of slice's inner circle.
- */
-private data class InnerCircle(
-    val innerCircleCenterRadius: Float,
-    val innerCircleDegrees: Float,
-    val innerCircleRadius: Float,
-)
