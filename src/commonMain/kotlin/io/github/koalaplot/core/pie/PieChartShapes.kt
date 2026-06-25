@@ -217,129 +217,131 @@ private class BiConvexSlice(
         // tangent lines at ±asin(r / R). Each cap is inset by this angle so the rounded
         // slice occupies exactly [startAngle, startAngle + sweepAngle] and never spills
         // into the neighboring slice.
-        val innerCircleDegrees = asin(innerCircleRadius / innerCircleCenterRadius).rad.toDegrees().value.toFloat()
+        val innerCircleDegrees = asin(innerCircleRadius / innerCircleCenterRadius)
+            .rad
+            .toDegrees()
+            .value
+            .toFloat()
 
-        return Path().apply {
-            // Full-circle special case: a 360° sweep cannot be drawn as an arc. Skia reduces
-            // it to a single point — start and end unit vectors coincide, so arcTo()/addArc()
-            // emit only a moveTo/lineTo and no curve — which would render nothing at all. The
-            // 0.01f tolerance also catches sweeps that land just below 360° through float
-            // accumulation (e.g. value * 360f / total): those are equally fragile and would
-            // otherwise leave a seam with overlapping caps instead of a closed shape. A full
-            // circle has no caps, so draw the outer oval (plus the inner oval for donuts) and
-            // cut the hole with the even-odd fill rule.
-            if (sweepAngle >= FullAngleDegrees - FullAngleToleranceDegrees) {
-                addOval(outerRect)
-                if (holeRadius > 0f) addOval(innerRect)
-                fillType = PathFillType.EvenOdd
-                return@apply
-            }
+        return Path()
+            .apply {
+                // Full-circle special case: a 360° sweep cannot be drawn as an arc. Skia reduces
+                // it to a single point — start and end unit vectors coincide, so arcTo()/addArc()
+                // emit only a moveTo/lineTo and no curve — which would render nothing at all. The
+                // 0.01f tolerance also catches sweeps that land just below 360° through float
+                // accumulation (e.g. value * 360f / total): those are equally fragile and would
+                // otherwise leave a seam with overlapping caps instead of a closed shape. A full
+                // circle has no caps, so draw the outer oval (plus the inner oval for donuts) and
+                // cut the hole with the even-odd fill rule.
+                if (sweepAngle >= FullAngleDegrees - FullAngleToleranceDegrees) {
+                    addOval(outerRect)
+                    if (holeRadius > 0f) addOval(innerRect)
+                    fillType = PathFillType.EvenOdd
+                    return@apply
+                }
 
-            // Pie mode (no hole): the convex caps round the angular ends of a *ring*, so they
-            // are undefined without a ring thickness. At holeRadius == 0 the cap radius would
-            // be radius / 2 and innerCircleDegrees would be 90°, which both bulges the ends into
-            // blobs and pushes the thin-slice threshold up to 180°, so most slices would
-            // mis-render. A holeless slice is therefore drawn as a plain sector: forceMoveTo =
-            // false turns the implicit move-to-arc-start into the first radius (center -> rim),
-            // the arc draws the outer edge, and close() draws the second radius back to center.
-            if (holeRadius <= 0f) {
-                moveTo(center.x, center.y)
-                arcTo(rect = outerRect, startAngleDegrees = startAngle, sweepAngleDegrees = sweepAngle, forceMoveTo = false)
-                close()
-                return@apply
-            }
+                // Pie mode (no hole): the convex caps round the angular ends of a *ring*, so they
+                // are undefined without a ring thickness. At holeRadius == 0 the cap radius would
+                // be radius / 2 and innerCircleDegrees would be 90°, which both bulges the ends into
+                // blobs and pushes the thin-slice threshold up to 180°, so most slices would
+                // mis-render. A holeless slice is therefore drawn as a plain sector: forceMoveTo =
+                // false turns the implicit move-to-arc-start into the first radius (center -> rim),
+                // the arc draws the outer edge, and close() draws the second radius back to center.
+                if (holeRadius <= 0f) {
+                    moveTo(center.x, center.y)
+                    arcTo(rect = outerRect, startAngleDegrees = startAngle, sweepAngleDegrees = sweepAngle, forceMoveTo = false)
+                    close()
+                    return@apply
+                }
 
-            // Thin-slice fallback (donut only). Below this threshold the two convex caps meet
-            // and the outer arc's sweep (sweepAngle - 2 * innerCircleDegrees) would be <= 0, so
-            // the four-arc path would self-overlap and produce artifacts. Draw a single circle
-            // instead, sized to shrink smoothly toward a point as the sweep approaches zero. At
-            // exactly the threshold the two semicircular caps coincide into this circle, so the
-            // transition into the arc-based shape is seamless.
-            if (sweepAngle <= 2 * innerCircleDegrees) {
-                // Largest circle that fits inside the angular wedge, tangent to both slice
-                // edges. In the right triangle (center -> cap center -> edge tangent point) the
-                // wedge half-angle sits at the center, innerCircleCenterRadius is the hypotenuse,
-                // and the inscribed radius is the opposite side = sin(sweep / 2) * hypotenuse.
-                val maxInnerCircleRadius = sin((sweepAngle / 2).deg.toRadians().value).toFloat() * innerCircleCenterRadius
+                // Thin-slice fallback (donut only). Below this threshold the two convex caps meet
+                // and the outer arc's sweep (sweepAngle - 2 * innerCircleDegrees) would be <= 0, so
+                // the four-arc path would self-overlap and produce artifacts. Draw a single circle
+                // instead, sized to shrink smoothly toward a point as the sweep approaches zero. At
+                // exactly the threshold the two semicircular caps coincide into this circle, so the
+                // transition into the arc-based shape is seamless.
+                if (sweepAngle <= 2 * innerCircleDegrees) {
+                    // Largest circle that fits inside the angular wedge, tangent to both slice
+                    // edges. In the right triangle (center -> cap center -> edge tangent point) the
+                    // wedge half-angle sits at the center, innerCircleCenterRadius is the hypotenuse,
+                    // and the inscribed radius is the opposite side = sin(sweep / 2) * hypotenuse.
+                    val maxInnerCircleRadius = sin((sweepAngle / 2).deg.toRadians().value).toFloat() * innerCircleCenterRadius
 
-                // Never exceed the ring thickness (the regular cap radius).
-                val resultingInnerCircleRadius = min(innerCircleRadius, maxInnerCircleRadius)
+                    // Never exceed the ring thickness (the regular cap radius).
+                    val resultingInnerCircleRadius = min(innerCircleRadius, maxInnerCircleRadius)
 
-                // Center offset from startAngle: half the sweep puts the circle on the slice's
-                // angular bisector (clamped so it never moves past the regular cap position).
-                val resultingInnerCircleDegrees = min(innerCircleDegrees, sweepAngle / 2)
+                    // Center offset from startAngle: half the sweep puts the circle on the slice's
+                    // angular bisector (clamped so it never moves past the regular cap position).
+                    val resultingInnerCircleDegrees = min(innerCircleDegrees, sweepAngle / 2)
 
-                addOval(
-                    oval = Rect(
+                    addOval(
+                        oval = Rect(
+                            center = center + polarToCartesian(
+                                radius = innerCircleCenterRadius,
+                                angle = (startAngle + resultingInnerCircleDegrees).deg,
+                            ),
+                            radius = resultingInnerCircleRadius,
+                        ),
+                    )
+                    return@apply
+                }
+
+                // Outer arc, shortened by innerCircleDegrees at each end to leave room for the caps.
+                // forceMoveTo = true starts a fresh contour at the arc's start point; on an empty
+                // Path the current point is the origin, so 'false' here would draw a stray line
+                // from (0, 0).
+                arcTo(
+                    rect = outerRect,
+                    startAngleDegrees = startAngle + innerCircleDegrees,
+                    sweepAngleDegrees = sweepAngle - 2 * innerCircleDegrees,
+                    forceMoveTo = true,
+                )
+
+                // Convex end cap: a half-circle (assumes InnerCircleSweepAngleDegrees == 180°)
+                // centered on the mid-radius and tangent to both the outer and inner circle at this
+                // angle, so its endpoints land exactly on outerRect and innerRect. forceMoveTo =
+                // false from here on keeps everything in ONE contour: a single closed path fills
+                // correctly, whereas separate subpaths each self-close on fill and produce the
+                // overlapping-wedge artifacts.
+                arcTo(
+                    rect = Rect(
                         center = center + polarToCartesian(
                             radius = innerCircleCenterRadius,
-                            angle = (startAngle + resultingInnerCircleDegrees).deg,
+                            angle = (startAngle + sweepAngle - innerCircleDegrees).deg,
                         ),
-                        radius = resultingInnerCircleRadius,
-                    )
+                        radius = innerCircleRadius,
+                    ),
+                    startAngleDegrees = startAngle + sweepAngle - innerCircleDegrees,
+                    sweepAngleDegrees = InnerCircleSweepAngleDegrees,
+                    forceMoveTo = false,
                 )
-                return@apply
-            }
 
-            // Outer arc, shortened by innerCircleDegrees at each end to leave room for the caps.
-            // forceMoveTo = true starts a fresh contour at the arc's start point; on an empty
-            // Path the current point is the origin, so 'false' here would draw a stray line
-            // from (0, 0).
-            arcTo(
-                rect = outerRect,
-                startAngleDegrees = startAngle + innerCircleDegrees,
-                sweepAngleDegrees = sweepAngle - 2 * innerCircleDegrees,
-                forceMoveTo = true
-            )
+                // Inner arc, traversed backwards (negative sweep) so the contour stays continuous;
+                // it ends back on the inner radius where the start cap begins.
+                arcTo(
+                    rect = innerRect,
+                    startAngleDegrees = startAngle + sweepAngle - innerCircleDegrees,
+                    sweepAngleDegrees = -(sweepAngle - 2 * innerCircleDegrees),
+                    forceMoveTo = false,
+                )
 
-            // Convex end cap: a half-circle (assumes InnerCircleSweepAngleDegrees == 180°)
-            // centered on the mid-radius and tangent to both the outer and inner circle at this
-            // angle, so its endpoints land exactly on outerRect and innerRect. forceMoveTo =
-            // false from here on keeps everything in ONE contour: a single closed path fills
-            // correctly, whereas separate subpaths each self-close on fill and produce the
-            // overlapping-wedge artifacts.
-            arcTo(
-                rect = Rect(
-                    center = center + polarToCartesian(
-                        radius = innerCircleCenterRadius,
-                        angle = (startAngle + sweepAngle - innerCircleDegrees).deg,
+                // Convex start cap, mirroring the end cap. Its end point coincides with the outer
+                // arc's start point, closing the loop.
+                arcTo(
+                    rect = Rect(
+                        center = center + polarToCartesian(radius = innerCircleCenterRadius, angle = (startAngle + innerCircleDegrees).deg),
+                        radius = innerCircleRadius,
                     ),
-                    radius = innerCircleRadius,
-                ),
-                startAngleDegrees = startAngle + sweepAngle - innerCircleDegrees,
-                sweepAngleDegrees = InnerCircleSweepAngleDegrees,
-                forceMoveTo = false,
-            )
+                    startAngleDegrees = startAngle + innerCircleDegrees + InnerCircleSweepAngleDegrees,
+                    sweepAngleDegrees = InnerCircleSweepAngleDegrees,
+                    forceMoveTo = false,
+                )
 
-            // Inner arc, traversed backwards (negative sweep) so the contour stays continuous;
-            // it ends back on the inner radius where the start cap begins.
-            arcTo(
-                rect = innerRect,
-                startAngleDegrees = startAngle + sweepAngle - innerCircleDegrees,
-                sweepAngleDegrees = -(sweepAngle - 2 * innerCircleDegrees),
-                forceMoveTo = false
-            )
-
-            // Convex start cap, mirroring the end cap. Its end point coincides with the outer
-            // arc's start point, closing the loop.
-            arcTo(
-                rect = Rect(
-                    center = center + polarToCartesian(
-                        radius = innerCircleCenterRadius,
-                        angle = (startAngle + innerCircleDegrees).deg,
-                    ),
-                    radius = innerCircleRadius,
-                ),
-                startAngleDegrees = startAngle + innerCircleDegrees + InnerCircleSweepAngleDegrees,
-                sweepAngleDegrees = InnerCircleSweepAngleDegrees,
-                forceMoveTo = false,
-            )
-
-            // Seal the contour. The end already meets the start, so this adds at most a
-            // zero-length line, but it marks the seam as a join (not two-stroke caps) and
-            // guarantees a watertight region for fill and clip().
-            close()
-        }.let(Outline::Generic)
+                // Seal the contour. The end already meets the start, so this adds at most a
+                // zero-length line, but it marks the seam as a join (not two-stroke caps) and
+                // guarantees a watertight region for fill and clip().
+                close()
+            }.let(Outline::Generic)
     }
 }
 
@@ -374,81 +376,82 @@ private class ConcaveConvexSlice(
         val innerCircleRadius = (radius - holeRadius) / 2f
         val innerCircleCenterRadius = (radius + holeRadius) / 2f
 
-        return Path().apply {
-            // Full-circle special case: a 360° sweep cannot be drawn as an arc.
-            // Skia reduces an arc with a 360° sweep to a single point — the start and
-            // end unit vectors coincide, so arcTo()/addArc() emit only a moveTo/lineTo
-            // and no curve — which would render nothing at all. The 0.01f tolerance also
-            // catches sweeps that land just below 360° through float accumulation (e.g.
-            // value * 360f / total): those are equally fragile and would otherwise leave
-            // a seam with overlapping caps instead of a closed ring.
-            // A full ring has no start/end caps, so draw the outer and inner ovals and
-            // cut the hole with the even-odd fill rule.
-            if (sweepAngle >= FullAngleDegrees - FullAngleToleranceDegrees) {
-                addOval(outerRect)
-                if (holeRadius > 0f) addOval(innerRect)
-                fillType = PathFillType.EvenOdd
-                return@apply
-            }
+        return Path()
+            .apply {
+                // Full-circle special case: a 360° sweep cannot be drawn as an arc.
+                // Skia reduces an arc with a 360° sweep to a single point — the start and
+                // end unit vectors coincide, so arcTo()/addArc() emit only a moveTo/lineTo
+                // and no curve — which would render nothing at all. The 0.01f tolerance also
+                // catches sweeps that land just below 360° through float accumulation (e.g.
+                // value * 360f / total): those are equally fragile and would otherwise leave
+                // a seam with overlapping caps instead of a closed ring.
+                // A full ring has no start/end caps, so draw the outer and inner ovals and
+                // cut the hole with the even-odd fill rule.
+                if (sweepAngle >= FullAngleDegrees - FullAngleToleranceDegrees) {
+                    addOval(outerRect)
+                    if (holeRadius > 0f) addOval(innerRect)
+                    fillType = PathFillType.EvenOdd
+                    return@apply
+                }
 
-            // Outer arc. forceMoveTo = true starts a fresh contour at the arc's start
-            // point; on an empty Path the current point is the origin, so 'false' here
-            // would draw a stray line from (0, 0).
-            arcTo(
-                rect = outerRect,
-                startAngleDegrees = startAngle,
-                sweepAngleDegrees = sweepAngle,
-                forceMoveTo = true
-            )
+                // Outer arc. forceMoveTo = true starts a fresh contour at the arc's start
+                // point; on an empty Path the current point is the origin, so 'false' here
+                // would draw a stray line from (0, 0).
+                arcTo(
+                    rect = outerRect,
+                    startAngleDegrees = startAngle,
+                    sweepAngleDegrees = sweepAngle,
+                    forceMoveTo = true,
+                )
 
-            // Convex cap at the end angle, bridging the outer to the inner radius. It is
-            // a half-circle (InnerCircleSweepAngleDegrees == 180°), so its endpoints land
-            // exactly on the inner/outer radius — which is what lets the arcs chain.
-            // forceMoveTo = false from here on keeps everything in ONE contour: a single
-            // closed path fills correctly, whereas separate subpaths each self-close on
-            // fill and produce the overlapping wedge artifacts.
-            arcTo(
-                rect = Rect(
-                    center = center + polarToCartesian(
-                        radius = innerCircleCenterRadius,
-                        angle = (startAngle + sweepAngle).deg,
+                // Convex cap at the end angle, bridging the outer to the inner radius. It is
+                // a half-circle (InnerCircleSweepAngleDegrees == 180°), so its endpoints land
+                // exactly on the inner/outer radius — which is what lets the arcs chain.
+                // forceMoveTo = false from here on keeps everything in ONE contour: a single
+                // closed path fills correctly, whereas separate subpaths each self-close on
+                // fill and produce the overlapping wedge artifacts.
+                arcTo(
+                    rect = Rect(
+                        center = center + polarToCartesian(
+                            radius = innerCircleCenterRadius,
+                            angle = (startAngle + sweepAngle).deg,
+                        ),
+                        radius = innerCircleRadius,
                     ),
-                    radius = innerCircleRadius,
-                ),
-                startAngleDegrees = startAngle + sweepAngle,
-                sweepAngleDegrees = InnerCircleSweepAngleDegrees,
-                forceMoveTo = false,
-            )
+                    startAngleDegrees = startAngle + sweepAngle,
+                    sweepAngleDegrees = InnerCircleSweepAngleDegrees,
+                    forceMoveTo = false,
+                )
 
-            // Inner arc, traversed backwards (negative sweep) so the contour stays
-            // continuous; it ends back on the inner radius at the start angle.
-            arcTo(
-                rect = innerRect,
-                startAngleDegrees = startAngle + sweepAngle,
-                sweepAngleDegrees = -sweepAngle,
-                forceMoveTo = false
-            )
+                // Inner arc, traversed backwards (negative sweep) so the contour stays
+                // continuous; it ends back on the inner radius at the start angle.
+                arcTo(
+                    rect = innerRect,
+                    startAngleDegrees = startAngle + sweepAngle,
+                    sweepAngleDegrees = -sweepAngle,
+                    forceMoveTo = false,
+                )
 
-            // Concave cap at the start angle, traversed backwards (inner -> outer) to
-            // close the loop. Its end point coincides with the outer arc's start point.
-            arcTo(
-                rect = Rect(
-                    center = center + polarToCartesian(
-                        radius = innerCircleCenterRadius,
-                        angle = startAngle.deg,
+                // Concave cap at the start angle, traversed backwards (inner -> outer) to
+                // close the loop. Its end point coincides with the outer arc's start point.
+                arcTo(
+                    rect = Rect(
+                        center = center + polarToCartesian(
+                            radius = innerCircleCenterRadius,
+                            angle = startAngle.deg,
+                        ),
+                        radius = innerCircleRadius,
                     ),
-                    radius = innerCircleRadius,
-                ),
-                startAngleDegrees = startAngle + InnerCircleSweepAngleDegrees,
-                sweepAngleDegrees = -InnerCircleSweepAngleDegrees,
-                forceMoveTo = false,
-            )
+                    startAngleDegrees = startAngle + InnerCircleSweepAngleDegrees,
+                    sweepAngleDegrees = -InnerCircleSweepAngleDegrees,
+                    forceMoveTo = false,
+                )
 
-            // Seal the contour. The end already meets the start, so this adds at most a
-            // zero-length line, but it marks the seam as a join (not two-stroke caps) and
-            // guarantees a watertight region for fill and clip().
-            close()
-        }.let(Outline::Generic)
+                // Seal the contour. The end already meets the start, so this adds at most a
+                // zero-length line, but it marks the seam as a join (not two-stroke caps) and
+                // guarantees a watertight region for fill and clip().
+                close()
+            }.let(Outline::Generic)
     }
 }
 
