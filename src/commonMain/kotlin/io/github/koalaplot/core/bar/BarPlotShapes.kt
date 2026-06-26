@@ -302,8 +302,7 @@ public class VerticalPlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
                     if (isInverted) {
                         inverted(pivotX = shapeWidth / 2F, pivotY = shapeHeight / 2F)
                     }
-                }
-                .let(Outline::Generic)
+                }.let(Outline::Generic)
         }
     }
 }
@@ -422,8 +421,7 @@ public class HorizontalPlanoConvexShape<X, E : HorizontalBarPlotEntry<Float, X>>
                     if (isInverted) {
                         inverted(pivotX = shapeWidth / 2F, pivotY = shapeHeight / 2F)
                     }
-                }
-                .let(Outline::Generic)
+                }.let(Outline::Generic)
         }
     }
 }
