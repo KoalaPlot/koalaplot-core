@@ -9,7 +9,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Updated dependencies: Compose 1.10.3, Kotlin 2.3.20.
+- Updated dependencies: Compose 1.11.1, Kotlin 2.4.10, Coroutines 1.11.0.
 - Restored original names for several components by updating their signatures to match their "v2" (
   or "v3") counterparts and deprecating the numbered versions. This includes `AreaPlot`,
   `ColumnLegend`, `FlowLegend`, `LinePlot`, `PolarPlotSeries`, `StairstepPlot`, and
