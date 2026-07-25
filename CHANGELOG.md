@@ -15,6 +15,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `ColumnLegend`, `FlowLegend`, `LinePlot`, `PolarPlotSeries`, `StairstepPlot`, and
   `VerticalBarPlot`.
 - `BarScope` and `PieSliceScope` interfaces no longer extend `HoverableElementAreaScope`.
+- Build the plano-convex bar shapes as a single continuous Path instead of several independent subpaths (#153).
 
 ### Removed
 
