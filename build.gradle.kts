@@ -18,7 +18,7 @@ repositories {
 }
 
 group = "io.github.koalaplot"
-version = "0.12.0-dev1"
+version = "0.12.0"
 
 kotlin {
     explicitApi()
