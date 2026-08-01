@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Pie and donut charts collapsing to their minimum diameter, and being placed outside of their own
+  bounds, when measured with tight constraints such as `Modifier.fillMaxSize()` or `Modifier.size()`.
+
 ## [0.12.0]
 
 ### Changed
