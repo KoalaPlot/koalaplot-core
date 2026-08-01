@@ -128,10 +128,16 @@ internal class PieMeasurePolicy(
         minPieDiameterPx: Float,
         maxPieDiameterPx: Float,
     ): Pair<Float, List<Placeable>> {
-        val labelConstraint = constraints.copy(
-            maxWidth = ((constraints.maxWidth - minPieDiameterPx) / 2)
-                .toInt()
-                .coerceAtLeast(constraints.minWidth),
+        // The incoming minimums size the chart as a whole, so they must not be forwarded to the labels:
+        // under tight constraints they would inflate every label to the full size of the chart, leaving no
+        // room for the pie and collapsing it to its minimum diameter.
+        val labelConstraint = Constraints(
+            maxWidth = if (constraints.hasBoundedWidth) {
+                ((constraints.maxWidth - minPieDiameterPx) / 2).toInt().coerceAtLeast(0)
+            } else {
+                Constraints.Infinity
+            },
+            maxHeight = constraints.maxHeight,
         )
 
         val labelPlaceables = labels.map {
