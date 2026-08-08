@@ -303,6 +303,8 @@ public fun PieChart(
 ) {
     require(holeSize in 0f..1f) { "holeSize must be between 0 and 1" }
     require(maxPieDiameter != Dp.Unspecified) { "maxPieDiameter cannot be Unspecified" }
+    require(minPieDiameter > 0.dp) { "minPieDiameter must be greater than 0.dp" }
+    require(maxPieDiameter > minPieDiameter) { "maxPieDiameter must be greater than minPieDiameter" }
     require(pieExtendAngle.toDegrees().value > 0f && pieExtendAngle.toDegrees().value <= DegreesFullCircle) {
         "pieExtendAngle must be between 0 and 360, exclusive of 0"
     }

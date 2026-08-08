@@ -137,6 +137,8 @@ public fun PieChart(
 ) {
     require(holeSize in (0f..1f)) { "holeSize must be between 0 and 1" }
     require(maxPieDiameter != Dp.Unspecified) { "maxPieDiameter cannot be Unspecified" }
+    require(minPieDiameter > 0.dp) { "minPieDiameter must be greater than 0.dp" }
+    require(maxPieDiameter > minPieDiameter) { "maxPieDiameter must be greater than minPieDiameter" }
 
     val pieItems = PieChartScopeImpl().apply(content).items
     val colors = remember(pieItems.size) { generateHueColorPalette(pieItems.size) }

@@ -18,7 +18,7 @@ repositories {
 }
 
 group = "io.github.koalaplot"
-version = "0.12.0"
+version = "0.12.1"
 
 kotlin {
     explicitApi()
@@ -36,7 +36,7 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
-    js(IR) {
+    js {
         browser()
     }
 
