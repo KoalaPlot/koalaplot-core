@@ -1,14 +1,11 @@
 package io.github.koalaplot.core.bar
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,6 +14,7 @@ import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeMeasureScope
 import androidx.compose.ui.unit.Constraints
+import io.github.koalaplot.core.animation.rememberChartRevealAnimation
 import io.github.koalaplot.core.bar.BulletBuilderScope.FeaturedMeasureType
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.Axis
@@ -288,10 +286,7 @@ internal class BulletGraphItemImpl<T>
 
         val measurable = scope.subcompose(this to Slots.FEATURE) {
             // Animation scale factor
-            val beta = remember(featuredMeasure) { Animatable(0f) }
-            LaunchedEffect(featuredMeasure) {
-                beta.animateTo(1f, animationSpec = animationSpec)
-            }
+            val beta = rememberChartRevealAnimation(animationSpec, key = featuredMeasure)
 
             with(scope) {
                 val sizeModifier =
