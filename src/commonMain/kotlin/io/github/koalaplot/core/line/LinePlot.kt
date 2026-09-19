@@ -2,13 +2,10 @@
 
 package io.github.koalaplot.core.line
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -23,6 +20,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.unit.Constraints
+import io.github.koalaplot.core.animation.rememberChartRevealAnimation
 import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
@@ -304,8 +302,7 @@ public fun <X, Y> XYGraphScope<X, Y>.StairstepPlot(
     }
 
     // Animation scale factor
-    val beta = remember { Animatable(0f) }
-    LaunchedEffect(null) { beta.animateTo(1f, animationSpec = animationSpec) }
+    val beta = rememberChartRevealAnimation(animationSpec)
 
     Layout(
         modifier = modifier.drawWithContent {
@@ -434,8 +431,7 @@ internal fun <X, Y> XYGraphScope<X, Y>.GeneralLinePlot(
     if (data.isEmpty()) return
 
     // Animation scale factor
-    val beta = remember { Animatable(0f) }
-    LaunchedEffect(null) { beta.animateTo(1f, animationSpec = animationSpec) }
+    val beta = rememberChartRevealAnimation(animationSpec)
 
     Layout(
         modifier = modifier.drawWithContent {

@@ -1,13 +1,10 @@
 package io.github.koalaplot.core.polar
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -16,6 +13,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.unit.Constraints
+import io.github.koalaplot.core.animation.rememberChartRevealAnimation
 import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
@@ -70,8 +68,7 @@ public fun <T> PolarGraphScope<T>.PolarPlotSeries(
     if (data.isEmpty()) return
 
     // Animation scale factor
-    val beta = remember(data) { Animatable(0f) }
-    LaunchedEffect(data) { beta.animateTo(1f, animationSpec = animationSpec) }
+    val beta = rememberChartRevealAnimation(animationSpec, key = data)
 
     Layout(modifier = modifier, content = {
         Canvas(modifier = Modifier.fillMaxSize()) {
