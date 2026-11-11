@@ -14,6 +14,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   geometry of the bar plot. The bar factory functions such as `verticalPlanoConvexBar` pass it
   automatically. Without it, the shapes estimate the geometry from the bar size as before.
 
+### Changed
+- update AGP to 9.5.1, Kotlin to 2.4.21, and bump compileSdk to 37
+
 ### Fixed
 
 - Gaps and overlaps of one pixel between the bars of stacked bar plots, at rest and during the start

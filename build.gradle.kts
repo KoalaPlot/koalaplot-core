@@ -18,14 +18,14 @@ repositories {
 }
 
 group = "io.github.koalaplot"
-version = "0.12.1"
+version = "0.13.0-dev1"
 
 kotlin {
     explicitApi()
 
     androidLibrary {
         namespace = "io.github.koalaplot"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 24
 
         compilerOptions {
@@ -38,6 +38,7 @@ kotlin {
 
     js {
         browser()
+        binaries.executable() // See https://youtrack.jetbrains.com/issue/CMP-4906
     }
 
     jvm("desktop") {

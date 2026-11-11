@@ -3,6 +3,7 @@
 package io.github.koalaplot.core.heatmap
 
 import org.junit.Test
+import kotlin.test.ExperimentalKotlinTestApi
 import kotlin.test.assertEquals
 
 /** Test helper class for 2D points */
@@ -32,6 +33,7 @@ inline fun <T> assertEquals(
  * @param expected Expected 2D histogram array
  * @param message Optional assertion message describing the test scenario
  */
+@OptIn(ExperimentalKotlinTestApi::class)
 private fun assertHistogram2D(
     samples: List<Pair<Double, Double>>,
     nBinsX: Int = 2,
