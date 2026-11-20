@@ -138,7 +138,7 @@ public fun <X, Y, E : VerticalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.VerticalBar
         dataAdapter,
         modifier = modifier,
         bar = { series, index, value ->
-            bar(series, index, GroupedEntryToVerticalEntryAdapter(value))
+            bar(series, index, GroupedEntryToVerticalEntryAdapter(value, index))
         },
         maxBarGroupWidth = barWidth,
         startAnimationUseCase = startAnimationUseCase,
@@ -166,13 +166,17 @@ private class VerticalEntryToGroupedEntryAdapter<X, Y>(
         }
 }
 
+/**
+ * Adapts the bar at [seriesIndex] within the group [entry] to a [VerticalBarPlotEntry].
+ */
 internal class GroupedEntryToVerticalEntryAdapter<X, Y>(
     private val entry: BarPlotGroupedPointEntry<X, Y>,
+    private val seriesIndex: Int,
 ) : VerticalBarPlotEntry<X, Y> {
     override val x: X
         get() = entry.i
     override val y: BarPosition<Y>
-        get() = entry.d.first()
+        get() = entry.d[seriesIndex]
 }
 
 /**

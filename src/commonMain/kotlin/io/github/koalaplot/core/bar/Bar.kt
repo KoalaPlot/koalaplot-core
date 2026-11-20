@@ -81,7 +81,7 @@ public fun <X> XYGraphScope<X, Float>.verticalPlanoConvexBar(
 ): DefaultVerticalBarComposable<X, Float> = { _, index, value ->
     DefaultBar(
         brush = SolidColor(color),
-        shape = VerticalPlanoConvexShape(this@verticalPlanoConvexBar, index, value),
+        shape = VerticalPlanoConvexShape(this@verticalPlanoConvexBar, index, value, this),
         border = border,
     )
 }
@@ -97,7 +97,7 @@ public fun <X> XYGraphScope<X, Float>.verticalBiConvexBar(
 ): DefaultVerticalBarComposable<X, Float> = { _, index, value ->
     DefaultBar(
         brush = SolidColor(color),
-        shape = VerticalBiConvexShape(this@verticalBiConvexBar, index, value),
+        shape = VerticalBiConvexShape(this@verticalBiConvexBar, index, value, this),
         border = border,
     )
 }
@@ -112,7 +112,7 @@ public fun <X> XYGraphScope<Float, X>.horizontalPlanoConvexBar(
 ): DefaultHorizontalBarComposable<Float, X> = { _, index, value ->
     DefaultBar(
         brush = SolidColor(color),
-        shape = HorizontalPlanoConvexShape(this@horizontalPlanoConvexBar, index, value),
+        shape = HorizontalPlanoConvexShape(this@horizontalPlanoConvexBar, index, value, this),
         border = border,
     )
 }
@@ -128,7 +128,7 @@ public fun <X> XYGraphScope<Float, X>.horizontalBiConvexBar(
 ): DefaultHorizontalBarComposable<Float, X> = { _, index, value ->
     DefaultBar(
         brush = SolidColor(color),
-        shape = HorizontalBiConvexShape(this@horizontalBiConvexBar, index, value),
+        shape = HorizontalBiConvexShape(this@horizontalBiConvexBar, index, value, this),
         border = border,
     )
 }

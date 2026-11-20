@@ -25,12 +25,16 @@ internal class BarPlotMeasurePolicyVertical<X, Y, E : BarPlotGroupedPointEntry<X
     private val data: List<E>,
     private val maxBarGroupWidth: Float = 0.9f,
     private val beta: Animatable<Float, AnimationVector1D>,
+    private val barScope: BarScopeImpl,
 ) : MultiContentMeasurePolicy {
     override fun MeasureScope.measure(
         measurables: List<List<Measurable>>,
         constraints: Constraints,
     ): MeasureResult {
         val barGroupInfos: MutableList<BarGroupInfo> = mutableListOf()
+        val pixelScale = BarPixelScale(constraints.maxHeight, beta.value)
+        // Bar shapes read the scale while drawing. Lookahead passes are skipped since they may use other constraints.
+        if (!isLookingAhead) barScope.pixelScale = pixelScale
 
         data.forEachIndexed { index, element ->
             val barInfos = mutableListOf<BarInfo>()
@@ -42,23 +46,12 @@ internal class BarPlotMeasurePolicyVertical<X, Y, E : BarPlotGroupedPointEntry<X
                 ).toInt()
 
             element.d.forEachIndexed { i, verticalBarPosition ->
-                val barMin = (
-                    xyGraphScope.yAxisModel
-                        .computeOffset(verticalBarPosition.start)
-                        .coerceIn(0f, 1f) * constraints.maxHeight
-                ).roundToInt()
-                val barMax = (
-                    xyGraphScope.yAxisModel
-                        .computeOffset(verticalBarPosition.end)
-                        .coerceIn(0f, 1f) * constraints.maxHeight
-                ).roundToInt()
-
-                val height = abs(barMax - barMin) * beta.value
+                val range = pixelScale.pixelRange(xyGraphScope.yAxisModel, verticalBarPosition)
 
                 val p = measurables[index][i].measure(
-                    Constraints(minWidth = 0, maxWidth = scaledBarWidth).fixedHeight(height.roundToInt()),
+                    Constraints(minWidth = 0, maxWidth = scaledBarWidth).fixedHeight(range.length),
                 )
-                barInfos.add(BarInfo(p, barMin..barMax))
+                barInfos.add(BarInfo(p, range))
             }
             barGroupInfos.add(BarGroupInfo(scaledBarWidth, barInfos))
         }
@@ -72,17 +65,10 @@ internal class BarPlotMeasurePolicyVertical<X, Y, E : BarPlotGroupedPointEntry<X
                 // Compute x-axis position for the bar to be centered within its allocated fraction of the
                 // overall bar group width
                 var xPos = (barGroupCenter - barGroupWidth / 2).toInt()
-                barGroupInfo.bars.forEachIndexed { index, barInfo ->
+                barGroupInfo.bars.forEach { barInfo ->
                     if (barInfo.placeable.height > 0) {
-                        barInfo.placeable.place(
-                            xPos,
-                            constraints.maxHeight - (
-                                max(
-                                    barGroupInfo.bars[index].range.start,
-                                    barGroupInfo.bars[index].range.endInclusive,
-                                ) * beta.value
-                            ).roundToInt(),
-                        )
+                        // Pixel ranges are measured upward from the bottom of the plot area
+                        barInfo.placeable.place(xPos, constraints.maxHeight - barInfo.range.endInclusive)
                     }
                     xPos += barGroupInfo.thickness
                 }
@@ -99,12 +85,16 @@ internal class BarPlotMeasurePolicyHorizontal<X, Y, E : BarPlotGroupedPointEntry
     private val data: List<E>,
     private val maxBarGroupWidth: Float = 0.9f,
     private val beta: Animatable<Float, AnimationVector1D>,
+    private val barScope: BarScopeImpl,
 ) : MultiContentMeasurePolicy {
     override fun MeasureScope.measure(
         measurables: List<List<Measurable>>,
         constraints: Constraints,
     ): MeasureResult {
         val barGroupInfos: MutableList<BarGroupInfo> = mutableListOf()
+        val pixelScale = BarPixelScale(constraints.maxWidth, beta.value)
+        // Bar shapes read the scale while drawing. Lookahead passes are skipped since they may use other constraints.
+        if (!isLookingAhead) barScope.pixelScale = pixelScale
 
         data.forEachIndexed { index, element ->
             val barInfos = mutableListOf<BarInfo>()
@@ -116,23 +106,12 @@ internal class BarPlotMeasurePolicyHorizontal<X, Y, E : BarPlotGroupedPointEntry
                 ).toInt()
 
             element.d.forEachIndexed { i, barPosition ->
-                val barMin = (
-                    xyGraphScope.xAxisModel
-                        .computeOffset(barPosition.start)
-                        .coerceIn(0f, 1f) * constraints.maxWidth
-                ).roundToInt()
-                val barMax = (
-                    xyGraphScope.xAxisModel
-                        .computeOffset(barPosition.end)
-                        .coerceIn(0f, 1f) * constraints.maxWidth
-                ).roundToInt()
-
-                val length = abs(barMax - barMin) * beta.value
+                val range = pixelScale.pixelRange(xyGraphScope.xAxisModel, barPosition)
 
                 val p = measurables[index][i].measure(
-                    Constraints(minHeight = 0, maxHeight = scaledBarThickness).fixedWidth(length.roundToInt()),
+                    Constraints(minHeight = 0, maxHeight = scaledBarThickness).fixedWidth(range.length),
                 )
-                barInfos.add(BarInfo(p, barMin..barMax))
+                barInfos.add(BarInfo(p, range))
             }
             barGroupInfos.add(BarGroupInfo(scaledBarThickness, barInfos))
         }
@@ -147,17 +126,10 @@ internal class BarPlotMeasurePolicyHorizontal<X, Y, E : BarPlotGroupedPointEntry
                 // Compute y-axis position for the bar to be centered within its allocated fraction of the
                 // overall bar group thickness
                 var yPos = (barGroupCenter + barGroupThickness / 2).toInt() - barGroupInfo.thickness
-                barGroupInfo.bars.forEachIndexed { index, barInfo ->
+                barGroupInfo.bars.forEach { barInfo ->
                     if (barInfo.placeable.width > 0) {
-                        barInfo.placeable.place(
-                            (
-                                min(
-                                    barGroupInfo.bars[index].range.start,
-                                    barGroupInfo.bars[index].range.endInclusive,
-                                ) * beta.value
-                            ).roundToInt(),
-                            yPos,
-                        )
+                        // Pixel ranges are measured rightward from the left edge of the plot area
+                        barInfo.placeable.place(barInfo.range.start, yPos)
                     }
                     yPos -= barGroupInfo.thickness
                 }
@@ -183,7 +155,8 @@ private sealed interface BarOrientation {
 
 /**
  * @param placeable The placeable representing a single bar.
- * @param range The range of the bar in pixel coordinates.
+ * @param range The edges of the bar along the dependent axis in pixels, measured from the start of the axis (bottom
+ * for vertical bars, left for horizontal bars).
  */
 private data class BarInfo(
     val placeable: Placeable,
@@ -198,6 +171,48 @@ private data class BarGroupInfo(
     val thickness: Int,
     val bars: List<BarInfo>,
 )
+
+/**
+ * Maps dependent-axis values of bars onto the integer pixel grid of a plot.
+ *
+ * Every bar edge is computed from exactly one axis value with [edge], and the size of a bar is the distance between
+ * its two edges. Rounding the position and the size of a bar independently instead lets the rounding errors of
+ * adjacent bars add up, so that stacked bars sharing an axis value can end up one pixel apart (a visible gap) or
+ * overlap. Deriving both from the same edges guarantees that bars sharing an axis value also share their pixel edge,
+ * for any axis length and at every step of the start animation. Bar shapes use the same edges to cut bars off exactly
+ * at the zero line, see [BarScopeImpl.pixelScale].
+ *
+ * @param axisLength Length of the dependent axis in pixels.
+ * @param progress Current value of the start animation, scaling all bars toward the start of the axis.
+ */
+internal data class BarPixelScale(
+    private val axisLength: Int,
+    private val progress: Float,
+) {
+    /**
+     * Returns the position of the bar edge located at the relative axis [offset], in pixels measured from the start
+     * of the axis (bottom for vertical bars, left for horizontal bars).
+     */
+    fun edge(offset: Float): Int = (offset.coerceIn(0f, 1f) * axisLength * progress).roundToInt()
+}
+
+/**
+ * Returns the edges, in pixels, of a bar at [position] along the axis described by [axisModel].
+ */
+private fun <T> BarPixelScale.pixelRange(
+    axisModel: AxisModel<T>,
+    position: BarPosition<T>,
+): ClosedRange<Int> {
+    val startEdge = edge(axisModel.computeOffset(position.start))
+    val endEdge = edge(axisModel.computeOffset(position.end))
+    return min(startEdge, endEdge)..max(startEdge, endEdge)
+}
+
+/**
+ * Distance in pixels between the two edges of a bar.
+ */
+private val ClosedRange<Int>.length: Int
+    get() = endInclusive - start
 
 /**
  * Computes the minimum x-axis distance to the data point neighbors to the data point at [index].

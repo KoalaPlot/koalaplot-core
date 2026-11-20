@@ -138,7 +138,7 @@ public fun <X, Y, E : HorizontalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.Horizonta
         dataAdapter,
         modifier = modifier,
         bar = { series, index, value ->
-            bar(series, index, GroupedEntryToHorizontalEntryAdapter(value))
+            bar(series, index, GroupedEntryToHorizontalEntryAdapter(value, index))
         },
         maxBarGroupWidth = barWidth,
         startAnimationUseCase = startAnimationUseCase,
@@ -166,13 +166,17 @@ private class HorizontalEntryToGroupedEntryAdapter<X, Y>(
         }
 }
 
+/**
+ * Adapts the bar at [seriesIndex] within the group [entry] to a [HorizontalBarPlotEntry].
+ */
 internal class GroupedEntryToHorizontalEntryAdapter<X, Y>(
     private val entry: BarPlotGroupedPointEntry<Y, X>,
+    private val seriesIndex: Int,
 ) : HorizontalBarPlotEntry<X, Y> {
     override val y: Y
         get() = entry.i
     override val x: BarPosition<X>
-        get() = entry.d.first()
+        get() = entry.d[seriesIndex]
 }
 
 /**
