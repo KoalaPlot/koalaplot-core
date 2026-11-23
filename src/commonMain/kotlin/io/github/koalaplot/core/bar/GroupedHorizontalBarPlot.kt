@@ -21,7 +21,7 @@ import io.github.koalaplot.core.xygraph.XYGraphScope
  * @param Y The type of the y-axis values
  * @param E The type of the data element holding the values for each bar
  * @param data Coordinate data for the bars to be plotted.
- * @param bar Composable function to emit a bar for each data element, see [VerticalBarComposable].
+ * @param bar Composable function to emit a bar for each data element, see [HorizontalBarComposable].
  * @param maxBarGroupWidth The fraction of space between adjacent y-axis bars or bar groups that
  * may be used. Must be between 0 and 1, defaults to 0.9.
  * @param startAnimationUseCase Controls the animation.
@@ -134,10 +134,10 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedHorizontalBarPlot(
     GroupedHorizontalBarPlot(
         data,
         modifier,
-        { xIndex, seriesIndex, value ->
-            data.data[xIndex].xb[seriesIndex].second.invoke(
+        { yIndex, seriesIndex, value ->
+            data.data[yIndex].xb[seriesIndex].second.invoke(
                 this,
-                xIndex,
+                yIndex,
                 seriesIndex,
                 GroupedEntryToHorizontalEntryAdapter(value, seriesIndex),
             )

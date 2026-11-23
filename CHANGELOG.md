@@ -14,6 +14,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   geometry of the bar plot. The bar factory functions such as `verticalPlanoConvexBar` pass it
   automatically. Without it, the shapes estimate the geometry from the bar size as before.
 
+### Changed
+
+- The parameters of `VerticalBarComposable` and `HorizontalBarComposable` are named and documented in the
+  order in which the bar plots pass them: the index of the data point, then the index of the bar within its
+  group or stack.
+
 ### Fixed
 
 - Gaps and overlaps of one pixel between the bars of stacked bar plots, at rest and during the start
@@ -24,6 +30,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   than the arc radius.
 - Plano-convex and bi-convex bars of grouped bar plots being drawn the wrong way round when their sign
   differs from the first bar in their group, whose position was used for all bars of the group.
+- Bars set for a single item with `item(…, bar)` in the DSLs of `VerticalBarPlot`, `HorizontalBarPlot`,
+  `StackedVerticalBarPlot`, and `StackedHorizontalBarPlot` being ignored, while the bar of the first item
+  was used for all items of its series.
+- The `bar` of `StackedVerticalBarPlot` and `StackedHorizontalBarPlot` receiving 0 instead of the index of
+  the data point.
+- `StackedVerticalBarPlot` and `StackedHorizontalBarPlot` built with the DSL crashing with an
+  `IndexOutOfBoundsException` when the first stack holds fewer items than another stack.
 
 ## [0.12.1]
 

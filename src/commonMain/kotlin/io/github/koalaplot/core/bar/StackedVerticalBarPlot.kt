@@ -64,8 +64,8 @@ public fun <X, Y, E : VerticalBarPlotStackedPointEntry<X, Y>> XYGraphScope<X, Y>
         VerticalBarPlot(
             layerData,
             modifier,
-            { series, index, value ->
-                bar(index, barIndex, value)
+            { xIndex, _, value ->
+                bar(xIndex, barIndex, value)
             },
             barWidth,
             startAnimationUseCase,
@@ -168,10 +168,12 @@ public fun <X> XYGraphScope<X, Float>.StackedVerticalBarPlot(
         data,
         modifier,
         { xIndex, seriesIndex, value ->
+            // Stacks with fewer items than the highest stack have no bar for the layers above their last item
             data.data[xIndex]
-                .yb[seriesIndex]
-                .second
-                .invoke(this, xIndex, seriesIndex, value)
+                .yb
+                .getOrNull(seriesIndex)
+                ?.second
+                ?.invoke(this, xIndex, seriesIndex, value)
         },
         barWidth,
         startAnimationUseCase,

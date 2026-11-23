@@ -55,11 +55,11 @@ public fun <X, Y> horizontalBarPlotEntry(
 
 /**
  * Defines a Composable function used to emit a horizontal bar.
- * The parameter series is the chart data series index.
- * The parameter index is the element index within the series.
+ * The parameter yIndex is the index of the data point the bar belongs to.
+ * The parameter seriesIndex is the index of the bar within its group or stack, 0 for plots with a single series.
  * The parameter value is the value of the element.
  */
-public typealias HorizontalBarComposable<E> = @Composable BarScope.(series: Int, index: Int, value: E) -> Unit
+public typealias HorizontalBarComposable<E> = @Composable BarScope.(yIndex: Int, seriesIndex: Int, value: E) -> Unit
 
 /**
  * Defines a Composable function used to emit a horizontal bar for [HorizontalBarPlotEntry] values.
@@ -137,8 +137,8 @@ public fun <X, Y, E : HorizontalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.Horizonta
     GroupedHorizontalBarPlot(
         dataAdapter,
         modifier = modifier,
-        bar = { series, index, value ->
-            bar(series, index, GroupedEntryToHorizontalEntryAdapter(value, index))
+        bar = { yIndex, seriesIndex, value ->
+            bar(yIndex, seriesIndex, GroupedEntryToHorizontalEntryAdapter(value, seriesIndex))
         },
         maxBarGroupWidth = barWidth,
         startAnimationUseCase = startAnimationUseCase,
@@ -209,8 +209,8 @@ public fun <X, Y> XYGraphScope<X, Y>.HorizontalBarPlot(
     HorizontalBarPlot(
         data.map { it.first },
         modifier,
-        { series, index, value ->
-            data[index].second.invoke(this, series, index, value)
+        { yIndex, seriesIndex, value ->
+            data[yIndex].second.invoke(this, yIndex, seriesIndex, value)
         },
         barWidth,
         startAnimationUseCase,
