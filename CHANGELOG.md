@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `VerticalPlanoConvexShape`, `VerticalBiConvexShape`, `HorizontalPlanoConvexShape`, and
+  `HorizontalBiConvexShape` accept the `BarScope` of the bar composable, which provides the exact pixel
+  geometry of the bar plot. The bar factory functions such as `verticalPlanoConvexBar` pass it
+  automatically. Without it, the shapes estimate the geometry from the bar size as before.
+
+### Fixed
+
+- Gaps and overlaps of one pixel between the bars of stacked bar plots, at rest and during the start
+  animation. The position and the size of each bar are now derived from the same pixel edges.
+- Plano-convex and bi-convex bars close to the zero line extending beyond it or ending short of it,
+  because their distance to the zero line was estimated from the bar size.
+- Horizontal bi-convex bars losing most of their area when the bars before them in the stack are shorter
+  than the arc radius.
+- Plano-convex and bi-convex bars of grouped bar plots being drawn the wrong way round when their sign
+  differs from the first bar in their group, whose position was used for all bars of the group.
+
 ## [0.12.1]
 
 ### Changed

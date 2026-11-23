@@ -68,7 +68,7 @@ public fun <X, Y, E : BarPlotGroupedPointEntry<X, Y>> XYGraphScope<X, Y>.Grouped
                 }
             }
         },
-        measurePolicy = BarPlotMeasurePolicyVertical(this, data, maxBarGroupWidth, beta),
+        measurePolicy = BarPlotMeasurePolicyVertical(this, data, maxBarGroupWidth, beta, barScope),
     )
 }
 
@@ -139,7 +139,7 @@ public fun <X, Y> XYGraphScope<X, Y>.GroupedVerticalBarPlot(
                 this,
                 xIndex,
                 seriesIndex,
-                GroupedEntryToVerticalEntryAdapter(value),
+                GroupedEntryToVerticalEntryAdapter(value, seriesIndex),
             )
         },
         maxBarGroupWidth,

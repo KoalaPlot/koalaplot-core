@@ -194,14 +194,28 @@ private val DefaultHorizontalBiConvexShape: Shape = object : Shape {
  * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
  * @param index Represents the element index within the series.
  * @param value The [VerticalBarPlotEntry] that defines the cutouts for the [VerticalPlanoConvexShape].
+ * @param barScope The [BarScope] of the composable emitting the bar. It provides the exact pixel geometry of the bar
+ * plot, which is needed to cut the shape off at the zero line. If null, the geometry is estimated from the size of the
+ * bar, which can be off by a few pixels for short bars close to the zero line.
  */
 @Stable
 public class VerticalPlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
     private val xyGraphScope: XYGraphScope<X, Float>,
     private val index: Int,
     private val value: E,
+    private val barScope: BarScope?,
 ) : Shape,
     XYGraphScope<X, Float> by xyGraphScope {
+    /**
+     * Creates the shape without a [BarScope], so the pixel geometry of the bar plot is estimated from the size of the
+     * bar.
+     */
+    public constructor(
+        xyGraphScope: XYGraphScope<X, Float>,
+        index: Int,
+        value: E,
+    ) : this(xyGraphScope, index, value, null)
+
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
@@ -233,19 +247,11 @@ public class VerticalPlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
         return if (yMaxOffset == yMinOffset) {
             Path().let(Outline::Generic)
         } else {
-            // AxisModel's `computeOffset` method provides relative values between 0 and 1
-            // Mapping offset values to pixel values
-            val heightOffsetRatio = size.height / (yMaxOffset - yMinOffset)
-            val offsetToHeight = { offset: Float -> offset * heightOffsetRatio }
-
             // Bars start with a concave path which might go below zero; the respective shape must be cut appropriately
-            // Calculating aforementioned offset values for a bar's max and min value relative to the axis zero line
-            val yMinZeroOffset = yMinOffset - yZeroOffset
-            val yMaxZeroOffset = yMaxOffset - yZeroOffset
-
-            // Getting screen's height pixel values from offsets
-            val yMinZeroHeight = offsetToHeight(yMinZeroOffset)
-            val yMaxZeroHeight = offsetToHeight(yMaxZeroOffset)
+            // Getting the pixel distances of a bar's min and max value from the axis zero line
+            val zeroLineDistances = barScope.zeroLineDistances(yZeroOffset, yMinOffset, yMaxOffset, size.height)
+            val yMinZeroHeight = zeroLineDistances.start
+            val yMaxZeroHeight = zeroLineDistances.end
 
             // If min and max values are greater than arcRadius, aforementioned below zero compensation is not required
             // and therefore becomes ineffective
@@ -314,14 +320,28 @@ public class VerticalPlanoConvexShape<X, E : VerticalBarPlotEntry<X, Float>>(
  * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
  * @param index Represents the element index within the series.
  * @param value The [HorizontalBarPlotEntry] that defines the cutouts for the [HorizontalPlanoConvexShape].
+ * @param barScope The [BarScope] of the composable emitting the bar. It provides the exact pixel geometry of the bar
+ * plot, which is needed to cut the shape off at the zero line. If null, the geometry is estimated from the size of the
+ * bar, which can be off by a few pixels for short bars close to the zero line.
  */
 @Stable
 public class HorizontalPlanoConvexShape<X, E : HorizontalBarPlotEntry<Float, X>>(
     private val xyGraphScope: XYGraphScope<Float, X>,
     private val index: Int,
     private val value: E,
+    private val barScope: BarScope?,
 ) : Shape,
     XYGraphScope<Float, X> by xyGraphScope {
+    /**
+     * Creates the shape without a [BarScope], so the pixel geometry of the bar plot is estimated from the size of the
+     * bar.
+     */
+    public constructor(
+        xyGraphScope: XYGraphScope<Float, X>,
+        index: Int,
+        value: E,
+    ) : this(xyGraphScope, index, value, null)
+
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
@@ -353,19 +373,11 @@ public class HorizontalPlanoConvexShape<X, E : HorizontalBarPlotEntry<Float, X>>
         return if (xMaxOffset == xMinOffset) {
             Path().let(Outline::Generic)
         } else {
-            // AxisModel's `computeOffset` method provides relative values between 0 and 1
-            // Mapping offset values to pixel values
-            val widthOffsetRatio = size.width / (xMaxOffset - xMinOffset)
-            val offsetToWidth = { offset: Float -> offset * widthOffsetRatio }
-
             // Bars start with a concave path which might go below zero; the respective shape must be cut appropriately
-            // Calculating aforementioned offset values for a bar's max and min value relative to the axis zero line
-            val xMinZeroOffset = xMinOffset - xZeroOffset
-            val xMaxZeroOffset = xMaxOffset - xZeroOffset
-
-            // Getting screen's width pixel values from offsets
-            val xMinZeroWidth = offsetToWidth(xMinZeroOffset)
-            val xMaxZeroWidth = offsetToWidth(xMaxZeroOffset)
+            // Getting the pixel distances of a bar's min and max value from the axis zero line
+            val zeroLineDistances = barScope.zeroLineDistances(xZeroOffset, xMinOffset, xMaxOffset, size.width)
+            val xMinZeroWidth = zeroLineDistances.start
+            val xMaxZeroWidth = zeroLineDistances.end
 
             // If min and max values are greater than arcRadius, aforementioned below zero compensation is not required
             // and therefore becomes ineffective
@@ -434,28 +446,45 @@ public class HorizontalPlanoConvexShape<X, E : HorizontalBarPlotEntry<Float, X>>
  * @param planoConvexShape The internal shape logic used for rendering.
  * @param index Represents the element index within the series.
  * @param value The [VerticalBarPlotEntry] that defines the cutouts for the [VerticalPlanoConvexShape].
+ * @param barScope The [BarScope] of the composable emitting the bar, or null.
  *
- * Secondary constructor:
+ * Secondary constructors:
  * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
  * @param index Represents the element index within the series.
  * @param value The [VerticalBarPlotEntry] used to construct the internal shape as well as the additional convex cutout.
+ * @param barScope The [BarScope] of the composable emitting the bar. It provides the exact pixel geometry of the bar
+ * plot, which is needed to cut the shape off at the zero line. If null, the geometry is estimated from the size of the
+ * bar, which can be off by a few pixels for short bars close to the zero line.
  */
 @Stable
 public class VerticalBiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> private constructor(
     private val planoConvexShape: VerticalPlanoConvexShape<X, E>,
     private val index: Int,
     private val value: E,
+    private val barScope: BarScope?,
 ) : Shape,
     XYGraphScope<X, Float> by planoConvexShape {
     public constructor(
         xyGraphScope: XYGraphScope<X, Float>,
         index: Int,
         value: E,
+        barScope: BarScope?,
     ) : this(
-        VerticalPlanoConvexShape(xyGraphScope, index, value),
+        VerticalPlanoConvexShape(xyGraphScope, index, value, barScope),
         index,
         value,
+        barScope,
     )
+
+    /**
+     * Creates the shape without a [BarScope], so the pixel geometry of the bar plot is estimated from the size of the
+     * bar.
+     */
+    public constructor(
+        xyGraphScope: XYGraphScope<X, Float>,
+        index: Int,
+        value: E,
+    ) : this(xyGraphScope, index, value, null)
 
     override fun createOutline(
         size: Size,
@@ -488,16 +517,9 @@ public class VerticalBiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> privat
         return if (yMaxOffset == yMinOffset) {
             Path().let(Outline::Generic)
         } else {
-            // AxisModel's `computeOffset` method provides relative values between 0 and 1
-            // Mapping offset values to pixel values
-            val heightOffsetRatio = size.height / (yMaxOffset - yMinOffset)
-            val offsetToHeight = { offset: Float -> offset * heightOffsetRatio }
-
             // Bars start with a concave path which might go below zero; the respective shape must be cut appropriately
-            // Calculating aforementioned offset values for a bar's max and min value relative to the axis zero line
-            val yMaxZeroOffset = yMaxOffset - yZeroOffset
-            // Getting screen's height pixel values from offsets
-            val yMaxZeroHeight = offsetToHeight(yMaxZeroOffset)
+            // Getting the pixel distance of a bar's max value from the axis zero line
+            val yMaxZeroHeight = barScope.zeroLineDistances(yZeroOffset, yMinOffset, yMaxOffset, size.height).end
 
             val outline = planoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
 
@@ -538,29 +560,46 @@ public class VerticalBiConvexShape<X, E : VerticalBarPlotEntry<X, Float>> privat
  * @param planoConvexShape The internal shape logic used for rendering.
  * @param index Represents the element index within the series.
  * @param value The [HorizontalBarPlotEntry] that defines the cutouts for the [HorizontalPlanoConvexShape].
+ * @param barScope The [BarScope] of the composable emitting the bar, or null.
  *
- * Secondary constructor:
+ * Secondary constructors:
  * @param xyGraphScope Provides access to [yAxisModel] and acts as an implementation of [XYGraphScope].
  * @param index Represents the element index within the series.
  * @param value The [HorizontalBarPlotEntry] used to construct the internal shape
  * as well as the additional convex cutout.
+ * @param barScope The [BarScope] of the composable emitting the bar. It provides the exact pixel geometry of the bar
+ * plot, which is needed to cut the shape off at the zero line. If null, the geometry is estimated from the size of the
+ * bar, which can be off by a few pixels for short bars close to the zero line.
  */
 @Stable
 public class HorizontalBiConvexShape<X, E : HorizontalBarPlotEntry<Float, X>> private constructor(
     private val planoConvexShape: HorizontalPlanoConvexShape<X, E>,
     private val index: Int,
     private val value: E,
+    private val barScope: BarScope?,
 ) : Shape,
     XYGraphScope<Float, X> by planoConvexShape {
     public constructor(
         xyGraphScope: XYGraphScope<Float, X>,
         index: Int,
         value: E,
+        barScope: BarScope?,
     ) : this(
-        HorizontalPlanoConvexShape(xyGraphScope, index, value),
+        HorizontalPlanoConvexShape(xyGraphScope, index, value, barScope),
         index,
         value,
+        barScope,
     )
+
+    /**
+     * Creates the shape without a [BarScope], so the pixel geometry of the bar plot is estimated from the size of the
+     * bar.
+     */
+    public constructor(
+        xyGraphScope: XYGraphScope<Float, X>,
+        index: Int,
+        value: E,
+    ) : this(xyGraphScope, index, value, null)
 
     override fun createOutline(
         size: Size,
@@ -593,24 +632,19 @@ public class HorizontalBiConvexShape<X, E : HorizontalBarPlotEntry<Float, X>> pr
         return if (xMaxOffset == xMinOffset) {
             Path().let(Outline::Generic)
         } else {
-            // AxisModel's `computeOffset` method provides relative values between 0 and 1
-            // Mapping offset values to pixel values
-            val widthOffsetRatio = size.width / (xMaxOffset - xMinOffset)
-            val offsetToWidth = { offset: Float -> offset * widthOffsetRatio }
-
             // Bars start with a concave path which might go below zero; the respective shape must be cut appropriately
-            // Calculating aforementioned offset values for a bar's max and min value relative to the axis zero line
-            val xMinZeroOffset = xMinOffset - xZeroOffset
-            // Getting screen's width pixel values from offsets
-            val xMinZeroWidth = offsetToWidth(xMinZeroOffset)
+            // Getting the pixel distance of a bar's min value from the axis zero line
+            val xMinZeroWidth = barScope.zeroLineDistances(xZeroOffset, xMinOffset, xMaxOffset, size.width).start
 
             val outline = planoConvexShape.createOutline(size, layoutDirection, density) as Outline.Generic
 
+            // Like the vertical variant, the cutout extends beyond the zero line. Ending it exactly at the zero
+            // line would make its edge coincide with the cap's chord there, which can break the path difference.
             val cutoutRect = Path().apply {
                 addRect(
                     rect = Rect(
-                        offset = Offset(-xMinZeroWidth, 0F),
-                        size = Size(arcRadius, shapeHeight),
+                        offset = Offset(-xMinZeroWidth - arcRadius, 0F),
+                        size = Size(shapeHeight, shapeHeight),
                     ),
                 )
             }
@@ -676,6 +710,47 @@ private fun AxisModel<Float>.yOffsets(
         yMinOffset = yMinOffset,
         yMaxOffset = yMaxOffset,
     )
+}
+
+/**
+ * Signed distances in pixels from the zero line of the dependent axis to the start and to the end of a bar, measured
+ * in the direction in which the bar grows.
+ */
+private class ZeroLineDistances(
+    val start: Float,
+    val end: Float,
+)
+
+/**
+ * Computes the [ZeroLineDistances] of a bar from the relative axis offsets of the zero line and of the bar's start and
+ * end.
+ *
+ * Inside a bar plot, the distances are derived from the same pixel edges as used by its layout, so they are exact.
+ * Without the pixel scale of a bar plot it is estimated from the [barLength] in pixels instead, which can be off by a
+ * few pixels for bars that are only a few pixels long.
+ */
+private fun BarScope?.zeroLineDistances(
+    zeroOffset: Float,
+    startOffset: Float,
+    endOffset: Float,
+    barLength: Float,
+): ZeroLineDistances {
+    val pixelScale = (this as? BarScopeImpl)?.pixelScale
+    return if (pixelScale != null) {
+        // Pixel edges are measured from the start of the axis, so they are mirrored for bars growing toward it
+        val direction = if (endOffset >= startOffset) 1 else -1
+        val zeroEdge = pixelScale.edge(zeroOffset)
+        ZeroLineDistances(
+            start = ((pixelScale.edge(startOffset) - zeroEdge) * direction).toFloat(),
+            end = ((pixelScale.edge(endOffset) - zeroEdge) * direction).toFloat(),
+        )
+    } else {
+        val pixelsPerOffset = barLength / (endOffset - startOffset)
+        ZeroLineDistances(
+            start = (startOffset - zeroOffset) * pixelsPerOffset,
+            end = (endOffset - zeroOffset) * pixelsPerOffset,
+        )
+    }
 }
 
 private data class XOffsets(
