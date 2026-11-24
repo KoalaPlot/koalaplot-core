@@ -54,11 +54,11 @@ public fun <X, Y> verticalBarPlotEntry(
 
 /**
  * Defines a Composable function used to emit a vertical bar.
- * The parameter series is the chart data series index.
- * The parameter index is the element index within the series.
+ * The parameter xIndex is the index of the data point the bar belongs to.
+ * The parameter seriesIndex is the index of the bar within its group or stack, 0 for plots with a single series.
  * The parameter value is the value of the element.
  */
-public typealias VerticalBarComposable<E> = @Composable BarScope.(series: Int, index: Int, value: E) -> Unit
+public typealias VerticalBarComposable<E> = @Composable BarScope.(xIndex: Int, seriesIndex: Int, value: E) -> Unit
 
 /**
  * Defines a Composable function used to emit a vertical bar for [VerticalBarPlotEntry] values.
@@ -137,8 +137,8 @@ public fun <X, Y, E : VerticalBarPlotEntry<X, Y>> XYGraphScope<X, Y>.VerticalBar
     GroupedVerticalBarPlot(
         dataAdapter,
         modifier = modifier,
-        bar = { series, index, value ->
-            bar(series, index, GroupedEntryToVerticalEntryAdapter(value, index))
+        bar = { xIndex, seriesIndex, value ->
+            bar(xIndex, seriesIndex, GroupedEntryToVerticalEntryAdapter(value, seriesIndex))
         },
         maxBarGroupWidth = barWidth,
         startAnimationUseCase = startAnimationUseCase,
@@ -238,8 +238,8 @@ public fun <X, Y> XYGraphScope<X, Y>.VerticalBarPlot(
     VerticalBarPlot(
         data.map { it.first },
         modifier,
-        { series, index, value ->
-            data[index].second.invoke(this, series, index, value)
+        { xIndex, seriesIndex, value ->
+            data[xIndex].second.invoke(this, xIndex, seriesIndex, value)
         },
         barWidth,
         startAnimationUseCase,
