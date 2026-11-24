@@ -1,6 +1,6 @@
 package io.github.koalaplot.core.bar
 
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.AxisContent
 import io.github.koalaplot.core.xygraph.XYGraph

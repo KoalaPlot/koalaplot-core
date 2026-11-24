@@ -1,6 +1,6 @@
 package io.github.koalaplot.core.xygraph
 
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import org.junit.Rule
 import org.junit.Test

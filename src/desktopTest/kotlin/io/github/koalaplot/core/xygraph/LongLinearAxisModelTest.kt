@@ -1,6 +1,6 @@
 package io.github.koalaplot.core.xygraph
 
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import org.junit.Rule
 import kotlin.test.Test
 import kotlin.test.assertEquals
