@@ -64,8 +64,8 @@ public fun <X, Y, E : HorizontalBarPlotStackedPointEntry<X, Y>> XYGraphScope<X, 
         HorizontalBarPlot(
             layerData,
             modifier,
-            { series, index, value ->
-                bar(index, barIndex, value)
+            { yIndex, _, value ->
+                bar(yIndex, barIndex, value)
             },
             barWidth,
             startAnimationUseCase,
@@ -168,10 +168,12 @@ public fun <Y> XYGraphScope<Float, Y>.StackedHorizontalBarPlot(
         data,
         modifier,
         { yIndex, seriesIndex, value ->
+            // Stacks with fewer items than the highest stack have no bar for the layers above their last item
             data.data[yIndex]
-                .xb[seriesIndex]
-                .second
-                .invoke(this, yIndex, seriesIndex, value)
+                .xb
+                .getOrNull(seriesIndex)
+                ?.second
+                ?.invoke(this, yIndex, seriesIndex, value)
         },
         barWidth,
         startAnimationUseCase,
