@@ -51,6 +51,7 @@ kotlin {
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
         browser()
+        binaries.executable() // See https://youtrack.jetbrains.com/issue/CMP-4906
     }
 
     sourceSets {
