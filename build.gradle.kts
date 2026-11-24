@@ -23,10 +23,12 @@ version = "0.13.0-dev1"
 kotlin {
     explicitApi()
 
-    androidLibrary {
+    android {
         namespace = "io.github.koalaplot"
         compileSdk = 37
         minSdk = 24
+
+        withHostTest {}
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
